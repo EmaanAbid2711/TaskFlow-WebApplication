@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Mail } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 import {Button, Input, Logo, PasswordInput, Footer} from "../../components";
 
@@ -10,7 +11,7 @@ function Login() {
   const [password, setPassword] = useState("");
 
   const handleSubmit = (
-    event: React.FormEvent<HTMLFormElement>
+    event: React.SubmitEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
@@ -62,12 +63,12 @@ function Login() {
                   Password
                 </label>
 
-                <button
-                  type="button"
+                <Link
+                  to="/forgot-password"
                   className="text-sm font-medium text-[#0052cc] transition-colors hover:underline"
                 >
                   Forgot Password?
-                </button>
+                </Link>
               </div>
 
               <PasswordInput
