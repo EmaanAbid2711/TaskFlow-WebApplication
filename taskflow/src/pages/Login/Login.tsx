@@ -120,12 +120,12 @@ function Login() {
         {/* Sign Up */}
         <p className="mt-6 text-sm text-slate-600">
           Don't have an account?{" "}
-          <button
-            type="button"
-            className="font-medium text-[#0052cc] hover:underline"
+          <Link
+           to="/signup"
+           className="font-medium text-[#0052cc] hover:underline"
           >
-            Sign up for free
-          </button>
+           Sign up for free
+          </Link>
         </p>
       </div>
 
