@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Mail, ShieldCheck } from "lucide-react";
+import { Mail } from "lucide-react";
 
-import {Button, Input, PasswordInput} from "../../components";
+import {Button, Input, PasswordInput, Logo} from "../../components";
 
 function Login() {
   // React State
@@ -14,19 +14,7 @@ function Login() {
       <div className="flex min-h-screen flex-col items-center justify-center px-4">
 
         {/* Logo Section */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#0052cc] text-white shadow-sm">
-            <ShieldCheck size={24} />
-          </div>
-
-          <h1 className="mb-2 text-3xl font-bold tracking-tight text-slate-900">
-            TaskFlow
-          </h1>
-
-          <p className="text-sm text-slate-500">
-            Precision engineering for high-performance teams.
-          </p>
-        </div>
+        <Logo />
 
         {/* Login Card */}
         <div className="w-full max-w-[440px] rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
