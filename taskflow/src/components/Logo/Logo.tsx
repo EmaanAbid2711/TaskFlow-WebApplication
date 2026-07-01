@@ -1,10 +1,14 @@
-import { ShieldCheck } from "lucide-react";
+import logo from "../../assets/images/logo.png";
 
 function Logo() {
   return (
     <div className="mb-8 text-center">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#0052cc] text-white shadow-sm">
-        <ShieldCheck size={24} />
+      <div className="mb-4 flex justify-center">
+        <img
+          src={logo}
+          alt="TaskFlow Logo"
+          className="h-16 w-16 object-contain"
+        />
       </div>
 
       <h1 className="mb-2 text-3xl font-bold tracking-tight text-slate-900">

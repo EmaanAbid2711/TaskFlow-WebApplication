@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Eye, EyeOff, Lock } from "lucide-react";
 
 type PasswordInputProps = {
-  label: string;
   id: string;
   placeholder: string;
 
@@ -18,7 +17,6 @@ type PasswordInputProps = {
 };
 
 function PasswordInput({
-  label,
   id,
   placeholder,
   value,
@@ -29,14 +27,7 @@ function PasswordInput({
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="mb-5">
-      <label
-        htmlFor={id}
-        className="mb-2 block text-sm font-medium text-slate-700"
-      >
-        {label}
-      </label>
-
+    <div>
       <div className="relative">
         <Lock
           size={18}
@@ -57,9 +48,13 @@ function PasswordInput({
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
         >
-          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          {showPassword ? (
+            <EyeOff size={18} />
+          ) : (
+            <Eye size={18} />
+          )}
         </button>
       </div>
     </div>
