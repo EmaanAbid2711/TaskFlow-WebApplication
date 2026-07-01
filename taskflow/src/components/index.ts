@@ -1,5 +1,5 @@
-export { default as Input } from "./Input/Input";
-export { default as Button } from "./Button/Button";
-export { default as PasswordInput } from "./PasswordInput/PasswordInput";
-export { default as Logo } from "./Logo/Logo";
-export { default as Footer } from "./Footer/Footer";
+export { default as Input } from "./common/Input/Input";
+export { default as Button } from "./common/Button/Button";
+export { default as PasswordInput } from "./common/PasswordInput/PasswordInput";
+export { default as Logo } from "./common/Logo/Logo";
+export { default as Footer } from "./common/Footer/Footer";
