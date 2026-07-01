@@ -16,17 +16,16 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col justify-between bg-gradient-to-tr from-[#f3f6ff] via-[#f8fafc] to-[#f1f5f9]">
+    <div className="flex min-h-screen flex-col justify-between bg-gradient-to-tr from-[#FAF8FF] via-[#f8fafc] to-[#FAF8FF]">
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
         <Logo />
 
-        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
+        <div className="w-full max-w-md w-[440] h-[367] rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
 
           <div className="mb-6 text-center">
             <h2 className="mb-2 text-2xl font-semibold text-slate-900">
               Forgot Password?
             </h2>
-
             <p className="text-sm text-slate-500">
               No worries, we'll send you reset instructions.
             </p>

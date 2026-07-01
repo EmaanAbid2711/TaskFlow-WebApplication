@@ -15,20 +15,25 @@ function Signup() {
     useState("");
 
   const handleSubmit = (
-    event: SubmitEvent<HTMLFormElement>
-  ) => {
-    event.preventDefault();
-    console.log({
-      name,
-      email,
-      password,
-      confirmPassword
-    });
-  };
+      event: SubmitEvent<HTMLFormElement>
+    ) => {
+      event.preventDefault();
+
+      if (password !== confirmPassword) {
+        alert("Passwords do not match.");
+        return;
+      }
+      console.log({
+        name,
+        email,
+        password,
+        confirmPassword,
+      });
+    };
 
 
   return (
-    <div className="flex min-h-screen flex-col justify-between bg-[#f8f9fc]">
+    <div className="flex min-h-screen flex-col justify-between bg-gradient-to-tr from-[#FAF8FF] via-[#f8fafc] to-[#FAF8FF]">
       <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-12 px-6 py-12 lg:flex-row lg:justify-between">
         {/* Left Section */}
         <div className="w-full max-w-lg space-y-6">
@@ -64,7 +69,7 @@ function Signup() {
         </div>
 
         {/* Signup Card */}
-        <div className="w-full max-w-[480px] rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
+        <div className="w-full max-w-[480px] h-[780px] rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
           <div className="mb-6">
             <h2 className="text-2xl font-semibold text-slate-900">
               Create an account
@@ -129,15 +134,31 @@ function Signup() {
             />
 
             {/* Terms */}
-            <div className="flex gap-2 text-sm">
+            <label className="flex cursor-pointer items-start gap-2 text-sm">
+
               <input
                 type="checkbox"
                 required
+                className="mt-1"
               />
-              <p className="text-slate-500">
-                I agree to Terms of Service and Privacy Policy
-              </p>
-            </div>
+              <span className="text-slate-500">
+                I agree to the{" "}
+                <button
+                  type="button"
+                  className="font-medium text-[#0052cc] hover:underline"
+                >
+                  Terms of Service
+                </button>{" "}
+                and{" "}
+                <button
+                  type="button"
+                  className="font-medium text-[#0052cc] hover:underline"
+                >
+                  Privacy Policy
+                </button>.
+              </span>
+
+            </label>
 
             <Button type="submit">
               Create Account

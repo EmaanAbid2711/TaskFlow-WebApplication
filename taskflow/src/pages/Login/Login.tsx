@@ -22,13 +22,13 @@ function Login() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col justify-between bg-gradient-to-tr from-[#f3f6ff] via-[#f8fafc] to-[#f1f5f9]">
+    <div className="flex min-h-screen flex-col justify-between bg-gradient-to-tr from-[#FAF8FF] via-[#f8fafc] to-[#FAF8FF]">
       {/* Main Content */}
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
         <Logo />
 
         {/* Login Card */}
-        <div className="w-full max-w-[440px] rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
+        <div className="w-full max-w-[440px] h-[402px] rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
           <form
             onSubmit={handleSubmit}
             className="space-y-5"
