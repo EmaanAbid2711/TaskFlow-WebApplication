@@ -1,16 +1,154 @@
-import { Header, Sidebar } from "../../components";
+import { useState } from "react";
+
+import {DashboardLayout, MetricCard, ProgressCard, ActivityCard, DeadlineCard, TeamMemberCard } from "../../components";
+import {metrics, projectProgress, activities, deadlines, teamMembers} from "../../data/dashboarddata.ts";
 
 function Dashboard() {
+  const [timeframe, setTimeframe] = useState<
+    "weekly" | "monthly"
+  >("weekly");
+
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      <div className="flex flex-1 flex-col">
-        <Header />
-        <main className="flex-1 p-8">
-          Dashboard Content
-        </main>
+    <DashboardLayout>
+
+      {/* Metrics */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {metrics.map((metric) => (
+          <MetricCard
+            key={metric.id}
+            metric={metric}
+          />
+        ))}
       </div>
-    </div>
+
+      {/* Main Content */}
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+
+        {/* Left Side */}
+        <div className="space-y-6 xl:col-span-2">
+
+          {/* Chart */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-10 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900">
+                Task Completion Trend
+              </h2>
+
+              <div className="flex rounded-lg bg-slate-100 p-1">
+                <button
+                  onClick={() => setTimeframe("weekly")}
+                  className={`rounded-md px-4 py-1 text-sm transition ${
+                    timeframe === "weekly"
+                      ? "bg-white shadow text-slate-900"
+                      : "text-slate-500"
+                  }`}
+                >
+                  Weekly
+                </button>
+
+                <button
+                  onClick={() => setTimeframe("monthly")}
+                  className={`rounded-md px-4 py-1 text-sm transition ${
+                    timeframe === "monthly"
+                      ? "bg-white shadow text-slate-900"
+                      : "text-slate-500"
+                  }`}
+                >
+                  Monthly
+                </button>
+              </div>
+            </div>
+
+            {/* Chart Placeholder */}
+            <div className="flex h-56 items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50">
+              <p className="text-sm text-slate-400">
+                Chart will be added later using Recharts
+              </p>
+            </div>
+
+          </div>
+
+          {/* Bottom Cards */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+            {/* Project Progress */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="mb-5 text-lg font-semibold text-slate-900">
+                Project Progress
+              </h2>
+              <div className="space-y-5">
+                {projectProgress.map((project) => (
+                  <ProgressCard
+                    key={project.id}
+                    project={project}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+              <h2 className="mb-5 text-lg font-semibold text-slate-900">
+                Recent Activity
+              </h2>
+
+              <div className="space-y-5">
+                {activities.map((activity) => (
+                  <ActivityCard
+                    key={activity.id}
+                    activity={activity}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side */}
+        <div className="space-y-6">
+
+          {/* Deadlines */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900">
+                Upcoming Deadlines
+              </h2>
+              <button className="text-sm font-medium text-[#0052cc] hover:underline">
+                View All
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {deadlines.map((deadline) => (
+                <DeadlineCard
+                  key={deadline.id}
+                  deadline={deadline}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Team */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+            <h2 className="mb-5 text-lg font-semibold text-slate-900">
+              Team Members
+            </h2>
+
+            <div className="space-y-4">
+              {teamMembers.map((member) => (
+                <TeamMemberCard
+                  key={member.id}
+                  member={member}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </DashboardLayout>
   );
 }
 

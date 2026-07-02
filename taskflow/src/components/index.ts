@@ -8,3 +8,6 @@ export { default as Sidebar } from "./layout/Sidebar/Sidebar";
 export { default as DashboardLayout } from "./layout/DashboardLayout/DashboardLayout";
 export { default as MetricCard } from "./dashboard/MetricCard/MetricCard";
 export { default as ProgressCard } from "./dashboard/ProgressCard/ProgressCard";
+export { default as ActivityCard } from "./dashboard/ActivityCard/ActivityCard";
+export { default as DeadlineCard } from "./dashboard/DeadlineCard/DeadlineCard";
+export { default as TeamMemberCard } from "./dashboard/TeamMember/TeamMember";

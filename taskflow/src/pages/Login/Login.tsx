@@ -2,37 +2,41 @@ import { useState } from "react";
 import { Mail } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import {Button, Input, Logo, PasswordInput, Footer} from "../../components";
+import { Button, Input, Logo, PasswordInput, Footer } from "../../components";
 
 function Login() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (
-    event: React.SubmitEvent<HTMLFormElement>
-  ) => {
+  const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     console.log({
       email,
       password,
     });
+
+    // ✅ Redirect to Dashboard after login
+    navigate("/dashboard");
   };
 
   return (
     <div className="flex min-h-screen flex-col justify-between bg-gradient-to-tr from-[#FAF8FF] via-[#f8fafc] to-[#FAF8FF]">
+
       {/* Main Content */}
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
+
         <Logo />
 
         {/* Login Card */}
         <div className="w-full max-w-[440px] h-[402px] rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-5"
-          >
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+
             {/* Email */}
             <div>
               <label
@@ -88,16 +92,15 @@ function Login() {
             {/* Divider */}
             <div className="flex items-center">
               <div className="h-px flex-1 bg-slate-200" />
-
               <span className="mx-4 text-xs text-slate-400">
                 Or continue with
               </span>
-
               <div className="h-px flex-1 bg-slate-200" />
             </div>
 
             {/* Social Login */}
             <div className="grid grid-cols-2 gap-3">
+
               <button
                 type="button"
                 className="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-slate-50 py-3 text-sm font-medium transition-colors hover:bg-slate-100"
@@ -113,24 +116,29 @@ function Login() {
                 <FaGithub size={18} />
                 GitHub
               </button>
+
             </div>
+
           </form>
+
         </div>
 
         {/* Sign Up */}
         <p className="mt-6 text-sm text-slate-600">
           Don't have an account?{" "}
           <Link
-           to="/signup"
-           className="font-medium text-[#0052cc] hover:underline"
+            to="/signup"
+            className="font-medium text-[#0052cc] hover:underline"
           >
-           Sign up for free
+            Sign up for free
           </Link>
         </p>
+
       </div>
 
       {/* Footer */}
       <Footer />
+
     </div>
   );
 }

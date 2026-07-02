@@ -35,7 +35,7 @@ export interface Deadline {
   title: string;
   project: string;
   due: string;
-  badgeColor: string;
+  badgeColor: "red" | "orange" | "green" | "gray";
 }
 
 export interface TeamMember {

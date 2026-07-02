@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import {Login, ForgotPassword, Signup} from "./pages";
+import {Login, ForgotPassword, Signup, Dashboard} from "./pages";
 
 function App() {
   return (
@@ -19,6 +19,11 @@ function App() {
         <Route
          path="/signup"
          element={<Signup />}
+        />
+
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
         />
       </Routes>
     </BrowserRouter>
