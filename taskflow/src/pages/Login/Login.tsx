@@ -20,8 +20,8 @@ function Login() {
       password,
     });
 
-    // ✅ Redirect to Dashboard after login
-    navigate("/dashboard");
+    localStorage.setItem("isLoggedIn", "true");
+    navigate("/dashboard");;
   };
 
   return (
@@ -29,12 +29,9 @@ function Login() {
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
-
         <Logo />
-
         {/* Login Card */}
         <div className="w-full max-w-[440px] h-[402px] rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
-
           <form onSubmit={handleSubmit} className="space-y-5">
 
             {/* Email */}

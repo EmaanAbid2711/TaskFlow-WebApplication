@@ -1,19 +1,42 @@
-import { LayoutDashboard, FolderKanban, Users, Activity, Settings, HelpCircle, LogOut, Plus} from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import {LayoutDashboard, FolderKanban, Users, Activity, Settings, HelpCircle, LogOut, Plus} from "lucide-react";
 
 import Logo from "../../common/Logo/Logo";
 
 function Sidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    navigate("/");
+  };
+
   return (
-    <aside className="hidden h-screen w-64 shrink-0 flex-col justify-between border-r border-slate-200 bg-white lg:flex">
+    <aside className="hidden h-[1129px] w-[240px] shrink-0 flex-col justify-between border-r border-slate-200 bg-white lg:flex">
       <div className="p-6">
         <Logo />
         <nav className="mt-8 space-y-1">
-          <button className="flex w-full items-center gap-3 rounded-lg bg-[#0052cc] px-3 py-3 text-sm font-medium text-white">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className={`flex w-full items-center gap-3 px-3 py-3 rounded-lg ${
+              location.pathname === "/dashboard"
+                ? "bg-[#0052cc] text-white"
+                : "text-slate-600 hover:bg-slate-100"
+            }`}
+          >
             <LayoutDashboard size={18} />
             Dashboard
           </button>
 
-          <button className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-slate-600 transition hover:bg-slate-100">
+          <button
+            onClick={() => navigate("/projects")}
+            className={`flex w-full items-center gap-3 px-3 py-3 rounded-lg ${
+              location.pathname === "/projects"
+                ? "bg-[#0052cc] text-white"
+                : "text-slate-600 hover:bg-slate-100"
+            }`}
+          >
             <FolderKanban size={18} />
             Projects
           </button>
@@ -46,7 +69,12 @@ function Sidebar() {
           Help
         </button>
 
-        <button className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100">
+        {/* Logout */}
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-red-600"
+        >
           <LogOut size={18} />
           Logout
         </button>

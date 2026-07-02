@@ -14,7 +14,6 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // ✅ NEW: error state
   const [error, setError] = useState<string>("");
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -35,7 +34,7 @@ function Signup() {
       confirmPassword,
     });
 
-    // move to dashboard after successful signup
+    localStorage.setItem("isLoggedIn", "true");
     navigate("/dashboard");
   };
 

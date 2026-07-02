@@ -11,3 +11,8 @@ export { default as ProgressCard } from "./dashboard/ProgressCard/ProgressCard";
 export { default as ActivityCard } from "./dashboard/ActivityCard/ActivityCard";
 export { default as DeadlineCard } from "./dashboard/DeadlineCard/DeadlineCard";
 export { default as TeamMemberCard } from "./dashboard/TeamMember/TeamMember";
+export { default as AppLayout } from "./layout/AppLayout/AppLayout";
+export { default as KanbanColumn } from "./projects/KanbanColumn/KanbanColumn";
+export { default as TaskCard } from "./projects/TaskCard/TaskCard";
+export { default as KanbanBoard } from "./projects/KanabanBoard/KanbanBoard";
+export { default as ProjectHeader } from "./projects/ProjectsHeader/ProjectsHeader";
