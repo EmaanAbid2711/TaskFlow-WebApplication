@@ -1,4 +1,37 @@
-import type {Activity, ChartPoint, Deadline, Metric, ProjectProgress, TeamMember} from "../interfaces/dashboard";
+import type {SidebarItem, Activity, ChartPoint, Deadline, Metric, ProjectProgress, TeamMember} from "../interfaces/dashboard";
+
+export const sidebarItems: SidebarItem[] = [
+  {
+    id: 1,
+    title: "Dashboard",
+    icon: "dashboard",
+    route: "/dashboard",
+  },
+  {
+    id: 2,
+    title: "Projects",
+    icon: "projects",
+    route: "/projects",
+  },
+  {
+    id: 3,
+    title: "Team",
+    icon: "team",
+    route: "/team",
+  },
+  {
+    id: 4,
+    title: "Activity",
+    icon: "activity",
+    route: "/activity",
+  },
+  {
+    id: 5,
+    title: "Settings",
+    icon: "settings",
+    route: "/settings",
+  },
+];
 
 export const metrics: Metric[] = [
   {

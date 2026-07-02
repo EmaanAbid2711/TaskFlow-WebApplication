@@ -3,3 +3,8 @@ export { default as Button } from "./common/Button/Button";
 export { default as PasswordInput } from "./common/PasswordInput/PasswordInput";
 export { default as Logo } from "./common/Logo/Logo";
 export { default as Footer } from "./common/Footer/Footer";
+export { default as Header } from "./layout/Header/Header";
+export { default as Sidebar } from "./layout/Sidebar/Sidebar";
+export { default as DashboardLayout } from "./layout/DashboardLayout/DashboardLayout";
+export { default as MetricCard } from "./dashboard/MetricCard/MetricCard";
+export { default as ProgressCard } from "./dashboard/ProgressCard/ProgressCard";

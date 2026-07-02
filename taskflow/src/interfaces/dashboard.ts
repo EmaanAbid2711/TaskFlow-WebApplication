@@ -1,3 +1,10 @@
+export interface SidebarItem {
+  id: number;
+  title: string;
+  icon: string;
+  route: string;
+}
+
 export interface Metric {
   id: number;
   title: string;
