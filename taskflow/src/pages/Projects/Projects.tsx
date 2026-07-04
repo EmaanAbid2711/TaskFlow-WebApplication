@@ -1,19 +1,30 @@
+import { useState } from "react";
 import { Plus } from "lucide-react";
 
-import { ProjectHeader, KanbanBoard } from "../../components";
+import {ProjectHeader, KanbanBoard, TaskDrawer} from "../../components";
 
 function Projects() {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
   return (
-    <div className="relative flex min-h-screen flex-1 flex-col bg-white">
+    <div className="flex min-h-screen flex-1 flex-col bg-white">
       <ProjectHeader />
       <KanbanBoard />
 
       {/* Floating Action Button */}
       <button
-        className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-xl bg-[#0052cc] text-white shadow-lg hover:bg-[#0043a4]"
+        onClick={() => setDrawerOpen(true)}
+        className={`fixed bottom-8 right-8 flex h-14 w-14 items-center justify-center rounded-xl bg-[#0052cc] text-white shadow-lg transition hover:scale-105 hover:bg-[#0043a4] ${
+          drawerOpen ? "z-30" : "z-[60]"
+        }`}
       >
-        <Plus className="h-5 w-5" strokeWidth={2.5} />
+        <Plus size={24} strokeWidth={2.5} />
       </button>
+
+      <TaskDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
     </div>
   );
 }
