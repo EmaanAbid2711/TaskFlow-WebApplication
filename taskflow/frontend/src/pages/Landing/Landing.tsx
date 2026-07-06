@@ -1,4 +1,4 @@
-import {Navbar, Hero, Features, Showcase, Pricing, FAQ, Footer} from "../../components";
+import {Navbar, Hero, Features, Showcase, Pricing, FAQ, LandingFooter} from "../../components";
 
 function Landing() {
   return (
@@ -13,7 +13,7 @@ function Landing() {
         <FAQ />
       </main>
 
-      <Footer />
+      <LandingFooter />
     </div>
   );
 }
