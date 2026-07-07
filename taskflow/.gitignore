@@ -17,9 +17,3 @@ backend/.env
 # OS files
 .DS_Store
 Thumbs.db
-
-postman
-.postman
-
-Postman
-.Postman
