@@ -63,7 +63,7 @@ function ForgotPassword() {
 
           <div className="text-center">
             <Link
-              to="/"
+              to="/login"
               className="text-sm font-medium text-slate-600 hover:text-slate-900"
             >
               ← Back to Login

@@ -1,6 +1,8 @@
 import { PlayCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+import dashboardImg from "../../../assets/images/TaskFlow_Dashboard.svg";
+
 function Hero() {
   const navigate = useNavigate();
 
@@ -50,59 +52,13 @@ function Hero() {
       </div>
 
       {/* Dashboard Mockup */}
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="rounded-t-3xl bg-[#1E5D75] px-6 pt-10 shadow-2xl md:px-20">
-          <div className="rounded-t-2xl border border-white/20 bg-[#F0F4F8] p-4 shadow-inner">
-            <div className="flex aspect-[16/10] flex-col gap-4 rounded-xl bg-white p-5 shadow">
-
-              {/* Top */}
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-3 w-3 rounded-full bg-sky-400" />
-                  <div className="h-3 w-28 rounded bg-slate-200" />
-                </div>
-                <div className="h-3 w-16 rounded bg-slate-100" />
-              </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-4 gap-3">
-                {[1, 2, 3, 4].map((item) => (
-                  <div
-                    key={item}
-                    className="h-20 rounded-xl border border-sky-100 bg-sky-50"
-                  />
-                ))}
-              </div>
-
-              {/* Bottom */}
-              <div className="grid flex-1 grid-cols-3 gap-4">
-
-                {/* Analytics */}
-                <div className="col-span-2 rounded-xl bg-slate-50 p-4">
-                  <div className="flex h-full items-end justify-between gap-2">
-                    {[30, 45, 60, 90, 50, 75].map((height) => (
-                      <div
-                        key={height}
-                        className="w-full rounded-t bg-sky-500"
-                        style={{
-                          height: `${height}%`,
-                        }}
-                      />
-                    ))}
-
-                  </div>
-                </div>
-
-                {/* Activity */}
-                <div className="rounded-xl bg-slate-50 p-4">
-                  <div className="mb-3 h-3 w-3/4 rounded bg-slate-200" />
-                  <div className="mb-2 h-3 w-1/2 rounded bg-slate-100" />
-                  <div className="mb-2 h-3 w-5/6 rounded bg-slate-100" />
-                  <div className="h-3 w-2/3 rounded bg-slate-100" />
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="mx-auto max-w-5xl px-4">
+        <div className="relative rounded-t-2xl bg-[#1E5D75] p-3 shadow-2xl md:p-4">
+          <img 
+            src={dashboardImg} 
+            alt="TaskFlow Dashboard Mockup" 
+            className="w-full rounded-xl object-cover shadow-md"
+          />
         </div>
       </div>
     </section>

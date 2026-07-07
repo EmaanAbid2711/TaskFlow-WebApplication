@@ -14,7 +14,7 @@ function Sidebar({ open, onClose }: SidebarProps) {
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
-    navigate("/");
+    navigate("/login");
   };
 
   const goTo = (path: string) => {
