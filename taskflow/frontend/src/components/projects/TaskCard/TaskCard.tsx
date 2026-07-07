@@ -2,18 +2,17 @@ import {Calendar, RefreshCw, Eye, CircleCheck} from "lucide-react";
 
 import type { TaskCardProps } from "../../../interfaces/projectProps";
 
-function TaskCard({ task, type }: TaskCardProps) {
+function TaskCard({task, type}: TaskCardProps) {
   return (
     <div
-      className={`rounded-lg border border-slate-200 bg-white p-4 shadow-sm ${
+      className={`rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md ${
         type === "completed" ? "bg-slate-50" : ""
       }`}
     >
-      {/* Badge */}
+      {/* Priority Badge */}
       {task.priority && (
         <span
-          className={`inline-block rounded px-2 py-1 text-[10px] font-bold uppercase tracking-wide
-          ${
+          className={`inline-flex rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${
             task.priority === "High"
               ? "bg-rose-100 text-rose-700"
               : task.priority === "Medium"
@@ -27,49 +26,60 @@ function TaskCard({ task, type }: TaskCardProps) {
 
       {/* Title */}
       <h4
-        className={`mt-2 text-sm font-semibold leading-5 ${
+        className={`mt-3 break-words text-sm font-semibold leading-6 ${
           type === "completed"
-            ? "line-through text-slate-400"
+            ? "text-slate-400 line-through"
             : "text-slate-800"
         }`}
       >
         {task.title}
       </h4>
 
-      {/* Progress */}
+      {/* Progress Bar */}
       {type === "progress" && (
-        <div className="mt-4 h-1 overflow-hidden rounded-full bg-slate-200">
-          <div
-            className="h-full bg-blue-600"
-            style={{ width: `${task.progress}%` }}
-          />
+        <div className="mt-4">
+          <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+            <div
+              className="h-full rounded-full bg-[#0052cc] transition-all"
+              style={{
+                width: `${task.progress}%`,
+              }}
+            />
+          </div>
+
+          <p className="mt-2 text-xs text-slate-500">
+            {task.progress}% Complete
+          </p>
         </div>
       )}
 
       {/* Footer */}
-      <div className="mt-4 flex items-center justify-between">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
 
-        {/* Todo */}
+        {/* TODO */}
         {type === "todo" && (
           <>
             <div className="flex items-center gap-1 text-xs text-slate-500">
               <Calendar size={13} />
-              {task.date}
+              <span>{task.date}</span>
             </div>
 
             <img
               src={task.assignee}
-              alt=""
-              className="h-5 w-5 rounded-full object-cover"
+              alt="Assignee"
+              className="h-7 w-7 rounded-full object-cover"
             />
           </>
         )}
 
-        {/* Progress */}
+        {/* IN PROGRESS */}
         {type === "progress" && (
           <>
-            <div className="flex items-center gap-1 text-xs font-semibold text-blue-600">
-              <RefreshCw size={12} className="animate-spin" />
+            <div className="flex items-center gap-1 text-xs font-semibold text-[#0052cc]">
+              <RefreshCw
+                size={12}
+                className="animate-spin"
+              />
               Active
             </div>
 
@@ -78,31 +88,31 @@ function TaskCard({ task, type }: TaskCardProps) {
                 <img
                   key={index}
                   src={img}
-                  alt=""
-                  className="h-5 w-5 rounded-full border-2 border-white object-cover"
+                  alt={`Member ${index + 1}`}
+                  className="h-7 w-7 rounded-full border-2 border-white object-cover"
                 />
               ))}
             </div>
           </>
         )}
 
-        {/* Review */}
+        {/* REVIEW */}
         {type === "review" && (
           <>
             <div className="flex items-center gap-1 text-xs text-slate-500">
               <Eye size={13} />
-              {task.status}
+              <span>{task.status}</span>
             </div>
 
             <img
               src={task.assignee}
-              alt=""
-              className="h-5 w-5 rounded-full object-cover"
+              alt="Reviewer"
+              className="h-7 w-7 rounded-full object-cover"
             />
           </>
         )}
 
-        {/* Completed */}
+        {/* COMPLETED */}
         {type === "completed" && (
           <>
             <div className="flex items-center gap-1 text-xs font-semibold text-emerald-600">
@@ -112,8 +122,8 @@ function TaskCard({ task, type }: TaskCardProps) {
 
             <img
               src={task.assignee}
-              alt=""
-              className="h-5 w-5 rounded-full object-cover opacity-60"
+              alt="Completed"
+              className="h-7 w-7 rounded-full object-cover opacity-60"
             />
           </>
         )}

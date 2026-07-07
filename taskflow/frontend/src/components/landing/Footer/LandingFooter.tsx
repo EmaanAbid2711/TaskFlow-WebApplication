@@ -17,33 +17,33 @@ function Footer() {
 
         {/* Footer Links */}
         <nav className="flex flex-wrap items-center justify-center gap-6 text-sm font-medium text-slate-500">
-          <Link
-            to="/privacy"
+          <button
+            
             className="transition hover:text-[#0052CC]"
           >
             Privacy Policy
-          </Link>
+          </button>
 
-          <Link
-            to="/terms"
+          <button
+            
             className="transition hover:text-[#0052CC]"
           >
             Terms of Service
-          </Link>
+          </button>
 
-          <Link
-            to="/security"
+          <button
+            
             className="transition hover:text-[#0052CC]"
           >
             Security
-          </Link>
+          </button>
 
-          <Link
-            to="/status"
+          <button
+            
             className="transition hover:text-[#0052CC]"
           >
             Status
-          </Link>
+          </button>
         </nav>
       </div>
     </footer>
