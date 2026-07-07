@@ -1,4 +1,3 @@
-
 import LandingLogo from "../Logo/LandingLogo";
 
 function Footer() {
@@ -17,28 +16,24 @@ function Footer() {
         {/* Footer Links */}
         <nav className="flex flex-wrap items-center justify-center gap-6 text-sm font-medium text-slate-500">
           <button
-            
             className="transition hover:text-[#0052CC]"
           >
             Privacy Policy
           </button>
 
           <button
-            
             className="transition hover:text-[#0052CC]"
           >
             Terms of Service
           </button>
 
           <button
-            
             className="transition hover:text-[#0052CC]"
           >
             Security
           </button>
 
           <button
-            
             className="transition hover:text-[#0052CC]"
           >
             Status
