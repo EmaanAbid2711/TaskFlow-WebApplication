@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from "react";
-import { Mail } from "lucide-react";
-import {Link, useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import {Button, Footer, Input, Logo} from "../../components";
+import {Button, Footer, Logo, PasswordInput} from "../../components";
 
-function ForgotPassword() {
+function ResetPassword() {
   const navigate = useNavigate();
-  const [email, setEmail] =
+  const [password, setPassword] =
+    useState("");
+  const [confirmPassword, setConfirmPassword] =
     useState("");
   const [error, setError] =
     useState("");
@@ -17,33 +18,56 @@ function ForgotPassword() {
 
     setError("");
 
-    if (!email.trim()) {
+    if (
+      !password.trim() ||
+      !confirmPassword.trim()
+    ) {
       setError(
-        "Please enter your email address."
+        "Please fill in all fields."
       );
       return;
     }
 
-    // Temporary navigation
-    // Backend integration will be added later
-    navigate("/reset-password");
+    if (password.length < 8) {
+      setError(
+        "Password must be at least 8 characters."
+      );
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError(
+        "Passwords do not match."
+      );
+      return;
+    }
+
+    // Temporary frontend-only flow
+    console.log({
+      password,
+      confirmPassword,
+    });
+
+    navigate("/login");
   };
 
   return (
     <div className="flex min-h-screen flex-col justify-between bg-gradient-to-tr from-[#FAF8FF] via-[#f8fafc] to-[#FAF8FF]">
+
       <main className="flex flex-1 flex-col items-center justify-center px-6 py-12">
 
         <Logo />
 
         <div className="mt-8 w-full max-w-[440px] rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
+
           <div className="mb-6 text-center">
             <h2 className="mb-2 text-2xl font-semibold text-slate-900">
-              Forgot Password?
+              Reset Password
             </h2>
 
             <p className="text-sm text-slate-500">
-              No worries, we'll send you reset
-              instructions.
+              Create a new password for your
+              account.
             </p>
           </div>
 
@@ -59,31 +83,53 @@ function ForgotPassword() {
           >
             <div>
               <label
-                htmlFor="email"
+                htmlFor="password"
                 className="mb-2 block text-sm font-medium text-slate-700"
               >
-                Email Address
+                New Password
               </label>
 
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your work email"
-                icon={<Mail size={18} />}
-                value={email}
+              <PasswordInput
+                id="password"
+                placeholder="Enter new password"
+                value={password}
                 onChange={(e) =>
-                  setEmail(e.target.value)
+                  setPassword(
+                    e.target.value
+                  )
+                }
+                required
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="mb-2 block text-sm font-medium text-slate-700"
+              >
+                Confirm Password
+              </label>
+
+              <PasswordInput
+                id="confirmPassword"
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) =>
+                  setConfirmPassword(
+                    e.target.value
+                  )
                 }
                 required
               />
             </div>
 
             <Button type="submit">
-              Send Reset Link
+              Reset Password
             </Button>
           </form>
 
           <div className="my-6 border-t border-slate-200" />
+
           <div className="text-center">
             <Link
               to="/login"
@@ -92,24 +138,13 @@ function ForgotPassword() {
               ← Back to Login
             </Link>
           </div>
+
         </div>
-
-        <p className="mt-6 text-center text-sm text-slate-500">
-          Having trouble?{" "}
-          <button
-            type="button"
-            className="underline transition hover:text-[#0052cc]"
-          >
-            Contact Support
-          </button>
-        </p>
-
       </main>
 
       <Footer />
-
     </div>
   );
 }
 
-export default ForgotPassword;
+export default ResetPassword;

@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import {Login, ForgotPassword, Signup, Dashboard, Projects, Landing} from "./pages";
+import {Login, ForgotPassword, ResetPassword, Signup, Dashboard, Projects, Landing} from "./pages";
 import { AppLayout } from "./components";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -29,6 +29,11 @@ function App() {
           <Route
             path="/forgot-password"
             element={<ForgotPassword />}
+          />
+
+          <Route
+            path="/reset-password"
+            element={<ResetPassword />}
           />
 
           {/* Protected Dashboard */}
