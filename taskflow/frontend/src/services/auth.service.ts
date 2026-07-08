@@ -1,31 +1,77 @@
-import {loginApi, signupApi, type LoginData, type SignupData} from "../api/auth.api";
+import {loginApi, signupApi, forgotPasswordApi, resetPasswordApi, type LoginData, type SignupData, type ForgotPasswordData, type ResetPasswordData} from "../api/auth.api";
 
+/* Signup */
 export const signupService = async (
   data: SignupData
 ) => {
-  const result = await signupApi(data);
+  const result =
+    await signupApi(data);
 
-  localStorage.setItem(
-    "token",
-    result.data.token
-  );
+  const token =
+    result.data.token;
+
+  if (token) {
+    localStorage.setItem(
+      "token",
+      token
+    );
+  }
 
   return result;
 };
 
+/* Login */
 export const loginService = async (
   data: LoginData
 ) => {
-  const result = await loginApi(data);
+  const result =
+    await loginApi(data);
 
-  localStorage.setItem(
-    "token",
-    result.data.token
-  );
+  const token =
+    result.data.token;
+
+  if (token) {
+    localStorage.setItem(
+      "token",
+      token
+    );
+  }
 
   return result;
 };
 
-export const logoutService = () => {
-  localStorage.removeItem("token");
-};
+/*  Forgot Password  */
+export const forgotPasswordService =
+  async (
+    data: ForgotPasswordData
+  ) => {
+    const result =
+      await forgotPasswordApi(
+        data
+      );
+
+    return result;
+  };
+
+/*  Reset Password  */
+export const resetPasswordService =
+  async (
+    token: string,
+    data: ResetPasswordData
+  ) => {
+    const result =
+      await resetPasswordApi(
+        token,
+        data
+      );
+
+    return result;
+  };
+
+/* Logout  */
+export const logoutService =
+  (): void => {
+    localStorage.removeItem(
+      "token"
+    );
+  };

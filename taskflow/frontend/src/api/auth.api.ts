@@ -11,6 +11,14 @@ export interface LoginData {
   password: string;
 }
 
+export interface ForgotPasswordData {
+  email: string;
+}
+
+export interface ResetPasswordData {
+  password: string;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -27,24 +35,73 @@ export interface AuthResponse {
   };
 }
 
+export interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+  data: {
+    token: string;
+    expiresAt: string;
+  };
+}
+
+export interface SimpleResponse {
+  success: boolean;
+  message: string;
+}
+
+/* Signup */
+
 export const signupApi = async (
   data: SignupData
 ): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>(
-    "/auth/signup",
-    data
-  );
+  const response =
+    await api.post<AuthResponse>(
+      "/auth/signup",
+      data
+    );
 
   return response.data;
 };
 
+/* Login */
+
 export const loginApi = async (
   data: LoginData
 ): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>(
-    "/auth/login",
-    data
-  );
+  const response =
+    await api.post<AuthResponse>(
+      "/auth/login",
+      data
+    );
+
+  return response.data;
+};
+
+/*  Forgot Password  */
+
+export const forgotPasswordApi = async (
+  data: ForgotPasswordData
+): Promise<ForgotPasswordResponse> => {
+  const response =
+    await api.post<ForgotPasswordResponse>(
+      "/auth/forgot-password",
+      data
+    );
+
+  return response.data;
+};
+
+/* Reset Password */
+
+export const resetPasswordApi = async (
+  token: string,
+  data: ResetPasswordData
+): Promise<SimpleResponse> => {
+  const response =
+    await api.post<SimpleResponse>(
+      `/auth/reset-password/${token}`,
+      data
+    );
 
   return response.data;
 };
