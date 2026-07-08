@@ -1,4 +1,6 @@
 import bcrypt from "bcrypt";
+import crypto from "crypto";
+import { addMinutes } from "date-fns";
 
 import prisma from "../config/prisma";
 import AppError from "../utils/AppError";
@@ -69,4 +71,89 @@ export async function loginUser(data: LoginData) {
   }
 
   return user;
+}
+
+export async function forgotPassword(
+  email: string
+) {
+  const user = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  if (!user) {
+    throw new AppError(
+      "No account found with this email.",
+      404
+    );
+  }
+
+  const token =
+    crypto.randomBytes(32).toString("hex");
+
+  const expiry = addMinutes(
+    new Date(),
+    15
+  );
+
+  await prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      resetPasswordToken: token,
+      resetPasswordExpiry: expiry,
+    },
+  });
+
+  return {
+    token,
+    expiry,
+  };
+}
+
+export async function resetPassword(
+  token: string,
+  newPassword: string
+) {
+  const user = await prisma.user.findFirst({
+    where: {
+      resetPasswordToken: token,
+    },
+  });
+
+  if (!user) {
+    throw new AppError(
+      "Invalid reset token.",
+      400
+    );
+  }
+
+  if (
+    !user.resetPasswordExpiry ||
+    user.resetPasswordExpiry < new Date()
+  ) {
+    throw new AppError(
+      "Reset token has expired.",
+      400
+    );
+  }
+
+  const hashedPassword =
+    await hashPassword(newPassword);
+
+  const updatedUser =
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        password: hashedPassword,
+        resetPasswordToken: null,
+        resetPasswordExpiry: null,
+      },
+    });
+
+  return updatedUser;
 }

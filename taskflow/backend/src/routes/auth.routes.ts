@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { signup, login } from "../controllers/auth.controller";
+import { signup, login, forgotPasswordController, resetPasswordController } from "../controllers/auth.controller";
 
 const router = Router();
 
@@ -77,5 +77,63 @@ router.post("/signup", signup);
  */
 router.post("/login", login);
 
+
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Generate password reset token
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@gmail.com
+ *     responses:
+ *       200:
+ *         description: Reset token generated
+ *       404:
+ *         description: User not found
+ */
+router.post("/forgot-password", forgotPasswordController);
+
+/**
+ * @swagger
+ * /api/auth/reset-password/{token}:
+ *   post:
+ *     summary: Reset user password
+ *     tags:
+ *       - Authentication
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 example: password123
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Invalid token or expired token
+ */
+router.post("/reset-password/:token", resetPasswordController);
 
 export default router;
