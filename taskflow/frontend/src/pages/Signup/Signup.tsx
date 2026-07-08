@@ -3,46 +3,91 @@ import { Mail, User } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
-import { Button, Footer, Input, Logo, PasswordInput } from "../../components";
+import {Button, Footer, Input, Logo, PasswordInput} from "../../components";
+
+import { signupService } from "../../services/auth.service";
+import { useAuth } from "../../context/AuthContext";
 
 function Signup() {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] =
+    useState("");
 
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
 
-    // reset error
     setError("");
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match. Please try again.");
+    if (
+      !name.trim() ||
+      !email.trim() ||
+      !password.trim() ||
+      !confirmPassword.trim()
+    ) {
+      setError("Please fill in all fields.");
       return;
     }
 
-    console.log({
-      name,
-      email,
-      password,
-      confirmPassword,
-    });
+    if (password.length < 8) {
+      setError(
+        "Password must be at least 8 characters."
+      );
+      return;
+    }
 
-    localStorage.setItem("isLoggedIn", "true");
-    navigate("/dashboard");
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const result = await signupService({
+        name,
+        email,
+        password,
+      });
+
+      setUser(result.data.user);
+
+      toast.success(
+        "🎉 Account created successfully!"
+      );
+
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
+    } catch (err: any) {
+      const message =
+        err.response?.data?.message ||
+        "Signup failed.";
+
+      setError(message);
+
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="flex min-h-screen flex-col justify-between bg-gradient-to-tr from-[#FAF8FF] via-[#f8fafc] to-[#FAF8FF]">
       <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-12 px-6 py-12 lg:flex-row lg:justify-between">
 
-        {/* LEFT SIDE */}
+        {/* Left Section */}
         <div className="w-full max-w-lg space-y-6">
           <Logo />
 
@@ -52,12 +97,13 @@ function Signup() {
             </h1>
 
             <p className="text-base leading-relaxed text-slate-500">
-              Join teams building the future with TaskFlow productivity tools.
+              Join teams building the future with
+              TaskFlow productivity tools.
             </p>
           </div>
         </div>
 
-        {/* SIGNUP CARD */}
+        {/* Signup Card */}
         <div className="w-full max-w-[480px] rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
 
           <h2 className="text-2xl font-semibold text-slate-900">
@@ -68,22 +114,25 @@ function Signup() {
             Enter your details to get started.
           </p>
 
-          {/* 🔥 ERROR MESSAGE (NEW) */}
           {error && (
             <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4"
+          >
             <Input
               id="name"
               type="text"
               placeholder="Name"
               icon={<User size={18} />}
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) =>
+                setName(e.target.value)
+              }
               required
             />
 
@@ -93,7 +142,9 @@ function Signup() {
               placeholder="name@company.com"
               icon={<Mail size={18} />}
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
               required
             />
 
@@ -101,7 +152,9 @@ function Signup() {
               id="password"
               placeholder="Enter password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
               required
             />
 
@@ -109,30 +162,43 @@ function Signup() {
               id="confirm-password"
               placeholder="Confirm password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) =>
+                setConfirmPassword(
+                  e.target.value
+                )
+              }
               required
             />
 
             <label className="flex items-start gap-2 text-sm">
-              <input type="checkbox" required className="mt-1" />
+              <input
+                type="checkbox"
+                required
+                className="mt-1"
+              />
+
               <span className="text-slate-500">
                 I agree to the{" "}
-                <span className="font-medium text-[#0052cc] hover:underline cursor-pointer">
+                <span className="cursor-pointer font-medium text-[#0052cc] hover:underline">
                   Terms of Service
                 </span>{" "}
                 and{" "}
-                <span className="font-medium text-[#0052cc] hover:underline cursor-pointer">
+                <span className="cursor-pointer font-medium text-[#0052cc] hover:underline">
                   Privacy Policy
-                </span>.
+                </span>
+                .
               </span>
             </label>
 
-            <Button type="submit">
+            <Button
+              type="submit"
+              loading={loading}
+            >
               Create Account
             </Button>
           </form>
 
-          {/* SOCIAL */}
+          {/* Social */}
           <div className="my-6 flex items-center">
             <div className="h-px flex-1 bg-slate-200" />
             <span className="mx-4 text-xs text-slate-400">
@@ -155,7 +221,10 @@ function Signup() {
 
           <p className="mt-6 text-center text-sm text-slate-500">
             Already have an account?{" "}
-            <Link to="/login" className="font-medium text-blue-600 hover:underline">
+            <Link
+              to="/login"
+              className="font-medium text-blue-600 hover:underline"
+            >
               Login
             </Link>
           </p>

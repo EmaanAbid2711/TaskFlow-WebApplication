@@ -1,38 +1,62 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import {Login, ForgotPassword, Signup, Dashboard, Projects, Landing} from "./pages";
-import {AppLayout} from "./components";
+import { AppLayout } from "./components";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
+  return ( 
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public Routes */}
+          <Route
+            path="/"
+            element={<Landing />}
+          />
 
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route
+            path="/login"
+            element={<Login />}
+          />
 
-        <Route
-          path="/dashboard"
-          element={
-            <AppLayout>
-              <Dashboard />
-            </AppLayout>
-          }
-        />
+          <Route
+            path="/signup"
+            element={<Signup />}
+          />
 
-        <Route
-          path="/projects"
-          element={
-            <AppLayout>
-              <Projects />
-            </AppLayout>
-          }
-        />
+          <Route
+            path="/forgot-password"
+            element={<ForgotPassword />}
+          />
 
-      </Routes>
-    </BrowserRouter>
+          {/* Protected Dashboard */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Dashboard />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected Projects */}
+          <Route
+            path="/projects"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Projects />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
