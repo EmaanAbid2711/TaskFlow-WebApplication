@@ -1,23 +1,37 @@
-import { useRef } from "react";
-import { Camera } from "lucide-react";
+import { useRef, useState } from "react";
+import {Camera, Upload, Eye, Trash2} from "lucide-react";
 
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 
 interface ProfileAvatarProps {
-  image: string;
+  image?: string;
   name: string;
   onChange: (file: File) => void;
+  onRemove?: () => void;
 }
 
 function ProfileAvatar({
   image,
   name,
   onChange,
+  onRemove,
 }: ProfileAvatarProps) {
   const fileInputRef =
     useRef<HTMLInputElement>(null);
 
-  const handleImageChange = (
+  const [previewOpen, setPreviewOpen] =
+    useState(false);
+
+  const initials = name
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  const handleUpload = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file =
@@ -26,83 +40,107 @@ function ProfileAvatar({
     if (!file) return;
 
     onChange(file);
+
+    event.target.value = "";
   };
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() =>
-          fileInputRef.current?.click()
-        }
-        className="
-          group
-          relative
-          cursor-pointer
-        "
-      >
-        <Avatar className="h-20 w-20">
-          <AvatarImage
-            src={image}
-            alt={name}
-          />
-
-          <AvatarFallback>
-            {name
-              ?.split(" ")
-              .map((word) => word[0])
-              .join("")
-              .slice(0, 2)
-              .toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-
-        {/* Hover overlay */}
-        <div
-          className="
-            absolute inset-0
-            flex items-center justify-center
-            rounded-full
-            bg-black/0
-            transition-all
-            duration-200
-            group-hover:bg-black/40
-          "
-        >
-          <Camera
-            size={20}
-            className="
-              text-white
-              opacity-0
-              transition
-              duration-200
-              group-hover:opacity-100
-            "
-          />
-        </div>
-
-        {/* Camera badge */}
-        <div
-          className="
-            absolute bottom-0 right-0
-            rounded-full
-            bg-[#0052cc]
-            p-1
-            text-white
-            shadow-md
-          "
-        >
-          <Camera size={12} />
-        </div>
-      </button>
-
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        hidden
-        onChange={handleImageChange}
+        className="hidden"
+        onChange={handleUpload}
       />
+
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          type="button"
+          className="group relative outline-none"
+        >
+          <Avatar className="h-20 w-20 cursor-pointer ring-2 ring-slate-200 transition-all duration-200 group-hover:ring-[#0052cc]">
+            <AvatarImage
+              src={image}
+              alt={name}
+            />
+
+            <AvatarFallback className="bg-[#0052cc] text-lg font-semibold text-white">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="absolute right-0 bottom-0 rounded-full bg-[#0052cc] p-1.5 text-white shadow-lg transition group-hover:scale-110">
+            <Camera size={14} />
+          </div>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent
+          align="start"
+          className="w-56"
+        >
+          <DropdownMenuItem
+            onClick={() =>
+              fileInputRef.current?.click()
+            }
+            className="cursor-pointer"
+          >
+            <Upload
+              size={16}
+              className="mr-2"
+            />
+            Upload New Photo
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            disabled={!image}
+            onClick={() =>
+              setPreviewOpen(true)
+            }
+            className="cursor-pointer"
+          >
+            <Eye
+              size={16}
+              className="mr-2"
+            />
+            View Photo
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            disabled={!image}
+            onClick={onRemove}
+            variant="destructive"
+            className="cursor-pointer"
+          >
+            <Trash2
+              size={16}
+              className="mr-2"
+            />
+            Remove Photo
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Dialog
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              Profile Photo
+            </DialogTitle>
+          </DialogHeader>
+
+          {image && (
+            <img
+              src={image}
+              alt={name}
+              className="mx-auto max-h-[420px] w-full rounded-2xl object-cover"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

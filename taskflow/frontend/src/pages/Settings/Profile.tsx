@@ -33,7 +33,7 @@ function Profile() {
     useState("Pacific Time (PT)");
 
   const [avatar, setAvatar] =
-    useState(defaultAvatar);
+    useState<string>(defaultAvatar);
 
   const handleImageChange = (
     file: File
@@ -115,7 +115,13 @@ function Profile() {
             <ProfileAvatar
               image={avatar}
               name={fullName}
-              onChange={handleImageChange}
+              onChange={(file) => {
+                const imageUrl =
+                  URL.createObjectURL(file);
+              
+                setAvatar(imageUrl);
+              }}
+              onRemove={() => setAvatar("")}
             />
 
             <div>
