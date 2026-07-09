@@ -132,9 +132,8 @@ function ForgotPassword() {
 
             <Button
               type="submit"
-              loading={
-                loading
-              }
+              loading={loading}
+              loadingText="Sending Reset Link..."
             >
               Send Reset Link
             </Button>

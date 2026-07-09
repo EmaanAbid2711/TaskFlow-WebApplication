@@ -150,6 +150,7 @@ function ResetPassword() {
             <Button
               type="submit"
               loading={loading}
+              loadingText="Resetting Password..."
             >
               Reset Password
             </Button>

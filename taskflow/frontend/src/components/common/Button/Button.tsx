@@ -8,6 +8,7 @@ interface ButtonProps {
   loading?: boolean;
   disabled?: boolean;
   className?: string;
+  loadingText?: string;
 }
 
 function Button({
@@ -17,6 +18,7 @@ function Button({
   loading = false,
   disabled = false,
   className = "",
+  loadingText = "Please wait...",
 }: ButtonProps) {
   return (
     <button
@@ -31,7 +33,7 @@ function Button({
             size={18}
             className="animate-spin"
           />
-          Please wait...
+          {loadingText}
         </>
       ) : (
         <>

@@ -21,6 +21,7 @@ function Signup() {
     useState("");
 
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (
@@ -40,9 +41,11 @@ function Signup() {
       return;
     }
 
-    if (password.length < 8) {
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+      
+    if (!passwordRegex.test(password)) {
       setError(
-        "Password must be at least 8 characters."
+        "Password must be at least 8 characters and include one uppercase letter, one number, and one special character."
       );
       return;
     }
@@ -63,13 +66,13 @@ function Signup() {
 
       setUser(result.data.user);
 
-      toast.success(
-        "🎉 Account created successfully!"
+      setSuccess(
+        "Account created successfully."
       );
 
       setTimeout(() => {
         navigate("/dashboard");
-      }, 1000);
+      }, 1500);
     } catch (err: any) {
       const message =
         err.response?.data?.message ||
@@ -117,6 +120,12 @@ function Signup() {
           {error && (
             <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-600">
+              {success}
             </div>
           )}
 
@@ -193,6 +202,7 @@ function Signup() {
             <Button
               type="submit"
               loading={loading}
+              loadingText="Creating Account..."
             >
               Create Account
             </Button>

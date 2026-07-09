@@ -17,40 +17,49 @@ function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
+    event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
     setError("");
+    setSuccess("");
 
-    if (!email.trim() || !password.trim()) {
-      setError("Please fill in all fields.");
+    if (
+      !email.trim() ||
+      !password.trim()
+    ) {
+      setError(
+        "Please fill in all fields."
+      );
       return;
     }
 
     try {
       setLoading(true);
 
-      const result = await loginService({
-        email,
-        password,
-      });
+      const result =
+        await loginService({
+          email,
+          password,
+        });
 
       setUser(result.data.user);
 
-      toast.success("Login successful!");
+      setSuccess(
+        "Login successful."
+      );
 
-      navigate("/dashboard");
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1500);
     } catch (err: any) {
-      const message =
+      setError(
         err.response?.data?.message ||
-        "Login failed.";
-
-      setError(message);
-
-      toast.error(message);
+          "Login failed."
+      );
     } finally {
       setLoading(false);
     }
@@ -76,8 +85,14 @@ function Login() {
           </p>
 
           {error && (
-            <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {error}
+            </div>
+          )}
+          
+          {success && (
+            <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-600">
+              {success}
             </div>
           )}
 
@@ -142,6 +157,7 @@ function Login() {
             <Button
               type="submit"
               loading={loading}
+              loadingText="Logging In..."
             >
               Login to Dashboard
             </Button>
