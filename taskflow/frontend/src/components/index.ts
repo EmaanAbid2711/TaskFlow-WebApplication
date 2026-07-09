@@ -33,3 +33,4 @@ export { default as Pricing } from "./landing/Pricing/PricingSection";
 export { default as PricingCard } from "./landing/Pricing/PricingCard";
 export { default as LandingLogo } from "./landing/Logo/LandingLogo";
 export { default as LandingFooter } from "./landing/Footer/LandingFooter";
+export { default as ProfileAvatar } from "./common/ProfileAvatar/ProfileAvatar"
