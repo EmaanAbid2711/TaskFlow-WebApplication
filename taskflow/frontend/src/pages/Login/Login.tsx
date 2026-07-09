@@ -1,9 +1,8 @@
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import { Mail } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 
 import {Button, Input, Logo, PasswordInput, Footer} from "../../components";
 import { loginService } from "../../services/auth.service";
