@@ -1,5 +1,6 @@
-import {LayoutDashboard, FolderKanban, Users, Activity, Settings, HelpCircle, LogOut, Plus, X} from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
+import {LayoutDashboard, FolderKanban, Users, Activity, Settings, HelpCircle, LogOut, Plus, X, User, Bell, CreditCard, ChevronDown, ChevronRight} from "lucide-react";
+import {useNavigate, useLocation} from "react-router-dom";
 
 import Logo from "../../common/Logo/Logo";
 
@@ -8,9 +9,15 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-function Sidebar({ open, onClose }: SidebarProps) {
+function Sidebar({
+  open,
+  onClose,
+}: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [settingsOpen, setSettingsOpen] =
+    useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
@@ -24,7 +31,7 @@ function Sidebar({ open, onClose }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile Dark Overlay */}
+      {/* Mobile Overlay */}
       {open && (
         <div
           className="fixed inset-0 z-30 bg-black/40 lg:hidden"
@@ -55,21 +62,25 @@ function Sidebar({ open, onClose }: SidebarProps) {
       >
         {/* TOP */}
         <div className="p-6">
-
           {/* Mobile Close */}
           <div className="mb-4 flex justify-end lg:hidden">
             <button onClick={onClose}>
               <X size={22} />
             </button>
           </div>
-          <Logo />
-          <nav className="mt-8 space-y-1">
 
+          <Logo />
+
+          <nav className="mt-8 space-y-1">
+            {/* Dashboard */}
             <button
-              onClick={() => goTo("/dashboard")}
+              onClick={() =>
+                goTo("/dashboard")
+              }
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 transition
                 ${
-                  location.pathname === "/dashboard"
+                  location.pathname ===
+                  "/dashboard"
                     ? "bg-[#0052cc] text-white"
                     : "text-slate-600 hover:bg-slate-100"
                 }`}
@@ -78,11 +89,15 @@ function Sidebar({ open, onClose }: SidebarProps) {
               Dashboard
             </button>
 
+            {/* Projects */}
             <button
-              onClick={() => goTo("/projects")}
+              onClick={() =>
+                goTo("/projects")
+              }
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 transition
                 ${
-                  location.pathname === "/projects"
+                  location.pathname ===
+                  "/projects"
                     ? "bg-[#0052cc] text-white"
                     : "text-slate-600 hover:bg-slate-100"
                 }`}
@@ -91,31 +106,135 @@ function Sidebar({ open, onClose }: SidebarProps) {
               Projects
             </button>
 
+            {/* Team */}
             <button className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-slate-600 transition hover:bg-slate-100">
               <Users size={18} />
               Team
             </button>
 
+            {/* Activity */}
             <button className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-slate-600 transition hover:bg-slate-100">
               <Activity size={18} />
               Activity
             </button>
 
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-slate-600 transition hover:bg-slate-100">
-              <Settings size={18} />
-              Settings
-            </button>
+            {/* Settings Dropdown */}
+            <div>
+              <button
+                onClick={() =>
+                  setSettingsOpen(
+                    !settingsOpen
+                  )
+                }
+                className="flex w-full items-center justify-between rounded-lg px-3 py-3 text-slate-600 transition hover:bg-slate-100"
+              >
+                <div className="flex items-center gap-3">
+                  <Settings size={18} />
+                  Settings
+                </div>
 
+                {settingsOpen ? (
+                  <ChevronDown size={18} />
+                ) : (
+                  <ChevronRight
+                    size={18}
+                  />
+                )}
+              </button>
+
+              {settingsOpen && (
+                <div className="mt-1 ml-4 space-y-1 border-l border-slate-200 pl-4">
+                  {/* Profile */}
+                  <button
+                    onClick={() =>
+                      goTo(
+                        "/settings/profile"
+                      )
+                    }
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition
+                      ${
+                        location.pathname ===
+                        "/settings/profile"
+                          ? "bg-[#0052cc] text-white"
+                          : "text-slate-600 hover:bg-slate-100"
+                      }`}
+                  >
+                    <User size={16} />
+                    Profile
+                  </button>
+
+                  {/* Account */}
+                  <button
+                    onClick={() =>
+                      goTo(
+                        "/settings/account"
+                      )
+                    }
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition
+                      ${
+                        location.pathname ===
+                        "/settings/account"
+                          ? "bg-[#0052cc] text-white"
+                          : "text-slate-600 hover:bg-slate-100"
+                      }`}
+                  >
+                    <Users size={16} />
+                    Account
+                  </button>
+
+                  {/* Notifications */}
+                  <button
+                    onClick={() =>
+                      goTo(
+                        "/settings/notifications"
+                      )
+                    }
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition
+                      ${
+                        location.pathname ===
+                        "/settings/notifications"
+                          ? "bg-[#0052cc] text-white"
+                          : "text-slate-600 hover:bg-slate-100"
+                      }`}
+                  >
+                    <Bell size={16} />
+                    Notifications
+                  </button>
+
+                  {/* Billing */}
+                  <button
+                    onClick={() =>
+                      goTo(
+                        "/settings/billing"
+                      )
+                    }
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition
+                      ${
+                        location.pathname ===
+                        "/settings/billing"
+                          ? "bg-[#0052cc] text-white"
+                          : "text-slate-600 hover:bg-slate-100"
+                      }`}
+                  >
+                    <CreditCard
+                      size={16}
+                    />
+                    Billing
+                  </button>
+                </div>
+              )}
+            </div>
           </nav>
 
+          {/* New Project */}
           <button className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0052cc] py-3 text-sm font-medium text-white transition hover:bg-[#0043a4]">
             <Plus size={18} />
             New Project
           </button>
         </div>
 
+        {/* Bottom */}
         <div className="mt-auto border-t border-slate-200 p-4">
-
           <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-100">
             <HelpCircle size={18} />
             Help
@@ -128,7 +247,6 @@ function Sidebar({ open, onClose }: SidebarProps) {
             <LogOut size={18} />
             Logout
           </button>
-
         </div>
       </aside>
     </>

@@ -4,7 +4,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 
-import {Button, Input, Logo, PasswordInput, Footer} from "../../components";
+import {Button, Input, Logo, PasswordInput, Footer} from "@/components";
 import { loginService } from "../../services/auth.service";
 import { useAuth } from "../../context/AuthContext";
 
