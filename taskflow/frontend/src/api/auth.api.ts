@@ -56,7 +56,7 @@ export const signupApi = async (
 ): Promise<AuthResponse> => {
   const response =
     await api.post<AuthResponse>(
-      "/auth/signup",
+      "/api/auth/signup",
       data
     );
 
@@ -70,7 +70,7 @@ export const loginApi = async (
 ): Promise<AuthResponse> => {
   const response =
     await api.post<AuthResponse>(
-      "/auth/login",
+      "/api/auth/login",
       data
     );
 
@@ -84,7 +84,7 @@ export const forgotPasswordApi = async (
 ): Promise<ForgotPasswordResponse> => {
   const response =
     await api.post<ForgotPasswordResponse>(
-      "/auth/forgot-password",
+      "/api/auth/forgot-password",
       data
     );
 
@@ -99,7 +99,7 @@ export const resetPasswordApi = async (
 ): Promise<SimpleResponse> => {
   const response =
     await api.post<SimpleResponse>(
-      `/auth/reset-password/${token}`,
+      `/api/auth/reset-password/${token}`,
       data
     );
 
