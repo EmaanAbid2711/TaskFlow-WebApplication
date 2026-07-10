@@ -9,7 +9,12 @@ import errorHandler from "./middleware/ErrorHandler";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: [
+      "http://taskflow-backend-production-df3c.up.railway.app",
+    ],
+    credentials: true,
+  }));
 app.use(express.json());
 
 app.get("/", (_, res) => {

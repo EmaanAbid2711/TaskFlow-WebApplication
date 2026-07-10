@@ -13,7 +13,7 @@ const swaggerOptions = {
 
     servers: [
       {
-        url: "http://localhost:5000",
+        url: "taskflow-backend-production-df3c.up.railway.app",
       },
     ],
 
