@@ -8,6 +8,7 @@ import accountRoutes from "./routes/account.routes";
 import notificationRoutes from "./routes/notification.routes";
 import swaggerSpec from "./config/swagger";
 import errorHandler from "./middleware/ErrorHandler";
+import path from "path";
 
 const app = express();
 
@@ -35,6 +36,16 @@ app.use(
   "/api-docs",
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec)
+);
+
+app.use(
+  "/uploads",
+  express.static(
+    path.join(
+      __dirname,
+      "../uploads"
+    )
+  )
 );
 
 app.use("/api/auth", authRoutes);

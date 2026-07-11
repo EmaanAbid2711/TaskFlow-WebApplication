@@ -1,5 +1,4 @@
 import api from "./axios";
-import type {UpdateProfileData} from "../interfaces/user";
 
 export const getProfileApi =
   async () => {
@@ -13,12 +12,18 @@ export const getProfileApi =
 
 export const updateProfileApi =
   async (
-    data: UpdateProfileData
+    formData: FormData
   ) => {
     const response =
-      await api.put(
+      await api.patch(
         "/api/users/profile",
-        data
+        formData,
+        {
+          headers: {
+            "Content-Type":
+              "multipart/form-data",
+          },
+        }
       );
 
     return response.data;

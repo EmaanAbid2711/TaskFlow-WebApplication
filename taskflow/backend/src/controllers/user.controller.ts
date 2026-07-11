@@ -36,33 +36,77 @@ export const updateProfile =
       req: Request,
       res: Response
     ): Promise<void> => {
-
+    
+    
       if (!req.user) {
         res.status(401).json({
           success: false,
-          message: "Unauthorized",
+          message:
+            "Unauthorized",
         });
+      
         return;
       }
-
-      const userId = req.user.id;
-
-      const data =
-        updateProfileSchema.parse(
-          req.body
-        );
-
-      const user =
+    
+    
+      const userId =
+        req.user.id;
+    
+    
+      const avatar =
+        req.file
+          ? `/uploads/profile-images/${req.file.filename}`
+          : undefined;
+    
+    
+    
+      const data = {
+      
+        name:
+          req.body.name,
+      
+        username:
+          req.body.username,
+      
+        bio:
+          req.body.bio,
+      
+        location:
+          req.body.location,
+      
+        website:
+          req.body.website,
+      
+        role:
+          req.body.role,
+      
+        timezone:
+          req.body.timezone,
+      
+      
+        ...(avatar && {
+          avatar,
+        }),
+      
+      };
+    
+    
+    
+      const updatedUser =
         await updateUserProfile(
           userId,
           data
         );
-
+      
+      
+      
       res.status(200).json({
-        success: true,
-        message:
-          "Profile updated successfully.",
-        data: user,
+      
+        success:true,
+      
+        data:updatedUser,
+      
       });
+    
     }
   );

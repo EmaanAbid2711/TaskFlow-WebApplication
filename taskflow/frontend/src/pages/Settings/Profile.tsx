@@ -43,6 +43,9 @@ function Profile() {
   const [avatar, setAvatar] =
     useState("");
 
+  const [avatarFile, setAvatarFile] =
+    useState<File | null>(null);
+
   const [initialProfile, setInitialProfile] =
   useState<UserProfile | null>(
     null
@@ -59,9 +62,13 @@ function Profile() {
       website !== (initialProfile.website ?? "") ||
       role !== (initialProfile.role ?? "") ||
       timezone !== (initialProfile.timezone ?? "") ||
-      avatar !==
-        (initialProfile.avatar ??
-          defaultAvatar)
+      avatarFile !== null ||
+        avatar !==
+          (
+            initialProfile.avatar
+              ? `${import.meta.env.VITE_API_URL}${initialProfile.avatar}`
+              : defaultAvatar
+          )
     );
   }, [fullName, username, bio, location, website, role, timezone, avatar, initialProfile, defaultAvatar  ]);
 
@@ -86,7 +93,15 @@ function Profile() {
         setWebsite(user.website ?? "");
         setRole(user.role ?? "");
         setTimezone(user.timezone ?? "");
-        setAvatar(user.avatar ?? defaultAvatar);
+        setInitialProfile(user);
+
+        const avatarUrl =
+          user.avatar
+            ? `${import.meta.env.VITE_API_URL}${user.avatar}`
+            : defaultAvatar;
+
+        setAvatar(avatarUrl);
+        setAvatarFile(null);
       } catch (error) {
         console.error(
           "Failed to load profile:",
@@ -101,62 +116,110 @@ function Profile() {
       }
     };
 
-  const handleImageChange = (
-    file: File
-  ) => {
-    const imageUrl =
-      URL.createObjectURL(file);
-
-    setAvatar(imageUrl);
-  };
+  const handleImageChange =
+    (
+      file: File
+    ) => {
+      const imageUrl =
+        URL.createObjectURL(file);
+    
+      setAvatar(imageUrl);
+    
+      setAvatarFile(file);
+    };
   const handleRemoveAvatar =
     () => {
       setAvatar(defaultAvatar);
+      setAvatarFile(null);
     };
+
   const handleSave =
     async (
       event: React.FormEvent
     ) => {
       event.preventDefault();
-
+    
       if (!hasChanges) {
         return;
       }
-
+    
       try {
         setSaving(true);
-
-        await updateProfileService({
-          name: fullName,
-          username,
-          bio,
-          location,
-          website,
-          role,
-          timezone,
-          avatar,
-        });
-
+      
+        const formData =
+          new FormData();
+      
+        formData.append(
+          "name",
+          fullName
+        );
+      
+        formData.append(
+          "username",
+          username
+        );
+      
+        formData.append(
+          "bio",
+          bio
+        );
+      
+        formData.append(
+          "location",
+          location
+        );
+      
+        formData.append(
+          "website",
+          website
+        );
+      
+        formData.append(
+          "role",
+          role
+        );
+      
+        formData.append(
+          "timezone",
+          timezone
+        );
+      
+        if (avatarFile) {
+          formData.append(
+            "avatar",
+            avatarFile
+          );
+        }
+      
+        const response =
+          await updateProfileService(
+            formData
+          );
+        
+        const updatedUser =
+          response.data;
+        
+        const avatarUrl =
+          updatedUser.avatar
+            ? `${import.meta.env.VITE_API_URL}${updatedUser.avatar}`
+            : defaultAvatar;
+        
+        setAvatar(avatarUrl);
+        setAvatarFile(null);
+        
+        setInitialProfile(
+          updatedUser
+        );
+      
         toast.success(
           "Profile updated successfully!"
         );
-
-        setInitialProfile({
-          name: fullName,
-          username,
-          bio,
-          location,
-          website,
-          role,
-          timezone,
-          avatar,
-        } as UserProfile);
       } catch (error) {
         console.error(
           "Failed to update profile:",
           error
         );
-
+      
         toast.error(
           "Failed to update profile."
         );
@@ -330,14 +393,7 @@ function Profile() {
             </div>
 
             <div className="md:col-span-2">
-              <div className="
-                flex
-                rounded-xl
-                border border-slate-200
-                bg-slate-50
-                focus-within:border-[#0052cc]
-                focus-within:bg-white
-              ">
+              <div className="    flex    rounded-xl    border border-slate-200    bg-slate-50    focus-within:border-[#0052cc]    focus-within:bg-white">
                 <span className="flex items-center px-4 text-slate-400">
                   @
                 </span>
@@ -349,12 +405,7 @@ function Profile() {
                       e.target.value
                     )
                   }
-                  className="
-                    w-full
-                    bg-transparent
-                    py-3 pr-4
-                    outline-none
-                  "
+                  className="    w-full    bg-transparent    py-3 pr-4    outline-none"
                 />
               </div>
             </div>
@@ -382,18 +433,7 @@ function Profile() {
                     e.target.value
                   )
                 }
-                className="
-                  w-full
-                  rounded-xl
-                  border border-slate-200
-                  bg-slate-50
-                  px-4 py-3
-                  text-sm
-                  outline-none
-                  transition
-                  focus:border-[#0052cc]
-                  focus:bg-white
-                "
+                className="   w-full    rounded-xl    border border-slate-200    bg-slate-50    px-4 py-3    text-sm    outline-none    transition    focus:border-[#0052cc]    focus:bg-white"
               />
             </div>
           </div>
@@ -405,14 +445,7 @@ function Profile() {
             </label>
 
             <div className="md:col-span-2">
-              <div className="
-                flex
-                rounded-xl
-                border border-slate-200
-                bg-slate-50
-                focus-within:border-[#0052cc]
-                focus-within:bg-white
-              ">
+              <div className="    flex    rounded-xl    border border-slate-200    bg-slate-50    focus-within:border-[#0052cc]    focus-within:bg-white">
                 <span className="flex items-center pl-4 text-slate-400">
                   <MapPin
                     size={18}
@@ -426,12 +459,7 @@ function Profile() {
                       e.target.value
                     )
                   }
-                  className="
-                    w-full
-                    bg-transparent
-                    px-4 py-3
-                    outline-none
-                  "
+                  className="    w-full    bg-transparent    px-4 py-3    outline-none"
                 />
               </div>
             </div>
@@ -444,20 +472,8 @@ function Profile() {
             </label>
 
             <div className="md:col-span-2">
-              <div className="
-                flex
-                rounded-xl
-                border border-slate-200
-                bg-slate-50
-                focus-within:border-[#0052cc]
-                focus-within:bg-white
-              ">
-                <span className="
-                  flex items-center
-                  border-r border-slate-200
-                  px-4
-                  text-sm text-slate-400
-                ">
+              <div className="    flex    rounded-xl    border border-slate-200    bg-slate-50    focus-within:border-[#0052cc]    focus-within:bg-white">
+                <span className="  flex items-center  border-r border-slate-200  px-4   text-sm text-slate-400 ">
                   https://
                 </span>
 
@@ -488,17 +504,7 @@ function Profile() {
                     e.target.value
                   )
                 }
-                className="
-                  w-full
-                  rounded-xl
-                  border border-slate-200
-                  bg-slate-50
-                  px-4 py-3
-                  outline-none
-                  transition
-                  focus:border-[#0052cc]
-                  focus:bg-white
-                "
+                className="  w-full  rounded-xl  border border-slate-200  bg-slate-50  px-4 py-3  outline-none  transition  focus:border-[#0052cc]  focus:bg-white "
               />
             </div>
           </div>
@@ -566,5 +572,4 @@ function Profile() {
     </div>
   );
 }
-
 export default Profile;

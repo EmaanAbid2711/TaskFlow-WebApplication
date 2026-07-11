@@ -13,7 +13,7 @@ export interface UserProfile {
 
 export interface UpdateProfileData {
   name?: string;
-  avatar?: string;
+  avatar?: File | string;
   username?: string;
   bio?: string;
   location?: string;

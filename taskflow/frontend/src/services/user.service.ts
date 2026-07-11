@@ -1,6 +1,7 @@
-import {getProfileApi, updateProfileApi} from "../api/user.api";
-
-import type {UpdateProfileData} from "../interfaces/user";
+import {
+  getProfileApi,
+  updateProfileApi,
+} from "../api/user.api";
 
 export const getProfileService =
   async () => {
@@ -9,7 +10,7 @@ export const getProfileService =
 
 export const updateProfileService =
   async (
-    data: UpdateProfileData
+    data: FormData
   ) => {
     return await updateProfileApi(
       data
