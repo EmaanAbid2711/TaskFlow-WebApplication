@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import {Login, ForgotPassword, ResetPassword, Signup, Dashboard, Projects, Landing, Profile, Account, Notifications, Billing} from "./pages";
 import { AppLayout } from "./components";
+import { Toaster } from "./components/ui/sonner";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
@@ -9,6 +10,7 @@ function App() {
   return ( 
     <AuthProvider>
       <BrowserRouter>
+        <Toaster richColors />
         <Routes>
           {/* Public Routes */}
           <Route

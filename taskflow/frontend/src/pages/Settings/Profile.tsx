@@ -1,7 +1,10 @@
-import { useRef, useState } from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import { MapPin } from "lucide-react";
 
-import { Button, ProfileAvatar } from "@/components";
+import { toast } from "sonner";
+import {Button, ProfileAvatar} from "@/components";
+import {getProfileService, updateProfileService} from "@/services/user.service";
+import type { UserProfile } from "@/interfaces/user";
 
 function Profile() {
   const fileInputRef =
@@ -10,30 +13,93 @@ function Profile() {
   const defaultAvatar =
     "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200&h=200";
 
+  const [loading, setLoading] =
+    useState(true);
+
+  const [saving, setSaving] =
+    useState(false);
+
   const [fullName, setFullName] =
-    useState("Alex Morgan");
+    useState("");
 
   const [username, setUsername] =
-    useState("alexmorgan");
+    useState("");
 
-  const [bio, setBio] = useState(
-    "Product designer & developer. Building tools that help teams move faster."
-  );
+  const [bio, setBio] =
+    useState("");
 
   const [location, setLocation] =
-    useState("San Francisco, CA");
+    useState("");
 
   const [website, setWebsite] =
-    useState("alexmorgan.dev");
+    useState("");
 
   const [role, setRole] =
-    useState("Designer");
+    useState("");
 
   const [timezone, setTimezone] =
-    useState("Pacific Time (PT)");
+    useState("");
 
   const [avatar, setAvatar] =
-    useState<string>(defaultAvatar);
+    useState("");
+
+  const [initialProfile, setInitialProfile] =
+  useState<UserProfile | null>(
+    null
+  );
+  const hasChanges = useMemo(() => {
+    if (!initialProfile) {
+      return false;
+    }
+    return (
+      fullName !== (initialProfile.name ?? "") ||
+      username !== (initialProfile.username ?? "") ||
+      bio !== (initialProfile.bio ?? "") ||
+      location !== (initialProfile.location ?? "") ||
+      website !== (initialProfile.website ?? "") ||
+      role !== (initialProfile.role ?? "") ||
+      timezone !== (initialProfile.timezone ?? "") ||
+      avatar !==
+        (initialProfile.avatar ??
+          defaultAvatar)
+    );
+  }, [fullName, username, bio, location, website, role, timezone, avatar, initialProfile, defaultAvatar  ]);
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile =
+    async () => {
+      try {
+        setLoading(true);
+        const response =
+          await getProfileService();
+        const user: UserProfile =
+          response.data;
+          setInitialProfile(user);
+
+        setFullName(user.name ?? "");
+        setUsername(user.username ?? "");
+        setBio(user.bio ?? "");
+        setLocation(user.location ?? "");
+        setWebsite(user.website ?? "");
+        setRole(user.role ?? "");
+        setTimezone(user.timezone ?? "");
+        setAvatar(user.avatar ?? defaultAvatar);
+      } catch (error) {
+        console.error(
+          "Failed to load profile:",
+          error
+        );
+      
+        toast.error(
+          "Failed to load profile."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
 
   const handleImageChange = (
     file: File
@@ -43,52 +109,76 @@ function Profile() {
 
     setAvatar(imageUrl);
   };
+  const handleRemoveAvatar =
+    () => {
+      setAvatar(defaultAvatar);
+    };
+  const handleSave =
+    async (
+      event: React.FormEvent
+    ) => {
+      event.preventDefault();
 
-  const handleRemoveAvatar = () => {
-    setAvatar(defaultAvatar);
-  };
+      if (!hasChanges) {
+        return;
+      }
 
-  const handleSave = (
-    event: React.FormEvent
-  ) => {
-    event.preventDefault();
+      try {
+        setSaving(true);
 
-    console.log({
-      fullName,
-      username,
-      bio,
-      location,
-      website,
-      role,
-      timezone,
-      avatar,
-    });
-  };
+        await updateProfileService({
+          name: fullName,
+          username,
+          bio,
+          location,
+          website,
+          role,
+          timezone,
+          avatar,
+        });
 
-  const handleDiscard = () => {
-    setFullName("Alex Morgan");
-    setUsername("alexmorgan");
+        toast.success(
+          "Profile updated successfully!"
+        );
 
-    setBio(
-      "Product designer & developer. Building tools that help teams move faster."
+        setInitialProfile({
+          name: fullName,
+          username,
+          bio,
+          location,
+          website,
+          role,
+          timezone,
+          avatar,
+        } as UserProfile);
+      } catch (error) {
+        console.error(
+          "Failed to update profile:",
+          error
+        );
+
+        toast.error(
+          "Failed to update profile."
+        );
+      } finally {
+        setSaving(false);
+      }
+    };
+
+  const handleDiscard =
+    async () => {
+      await loadProfile();
+    };
+
+  if (loading) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <p className="text-slate-500">
+          Loading profile...
+        </p>
+      </div>
     );
-
-    setLocation(
-      "San Francisco, CA"
-    );
-
-    setWebsite(
-      "alexmorgan.dev"
-    );
-
-    setRole("Designer");
-
-    setTimezone(
-      "Pacific Time (PT)"
-    );
-
-    setAvatar(defaultAvatar);
-  };
+  }
 
   return (
     <div className="flex-1 overflow-y-auto p-6 md:p-10">
@@ -113,15 +203,17 @@ function Profile() {
           {/* Avatar */}
           <div className="flex flex-col gap-5 md:flex-row md:items-start">
             <ProfileAvatar
-              image={avatar}
+              image={
+                avatar ||
+                defaultAvatar
+              }
               name={fullName}
-              onChange={(file) => {
-                const imageUrl =
-                  URL.createObjectURL(file);
-              
-                setAvatar(imageUrl);
-              }}
-              onRemove={() => setAvatar("")}
+              onChange={
+                handleImageChange
+              }
+              onRemove={
+                handleRemoveAvatar
+              }
             />
 
             <div>
@@ -130,16 +222,16 @@ function Profile() {
               </h3>
 
               <p className="mt-1 text-xs text-slate-400">
-                JPG, PNG or GIF · Max
-                5MB
+                JPG, PNG or GIF ·
+                Max 5MB
               </p>
 
               <div className="mt-4 flex flex-wrap gap-3">
                 <button
                   type="button"
-                  onClick={() =>
-                    fileInputRef.current?.click()
-                  }
+                  onClick={() => {
+                    fileInputRef.current?.click();
+                  }}
                   className="
                     rounded-lg
                     border border-slate-200
@@ -174,7 +266,6 @@ function Profile() {
                 </button>
               </div>
 
-              {/* Hidden input for Upload button */}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -183,12 +274,14 @@ function Profile() {
                 onChange={(e) => {
                   const file =
                     e.target.files?.[0];
-
-                  if (!file) return;
-
-                  handleImageChange(
-                    file
-                  );
+                                
+                  if (!file) {
+                    return;
+                  }
+                
+                  handleImageChange(file);
+                
+                  e.target.value = "";
                 }}
               />
             </div>
@@ -238,7 +331,8 @@ function Profile() {
 
             <div className="md:col-span-2">
               <div className="
-                flex rounded-xl
+                flex
+                rounded-xl
                 border border-slate-200
                 bg-slate-50
                 focus-within:border-[#0052cc]
@@ -312,14 +406,17 @@ function Profile() {
 
             <div className="md:col-span-2">
               <div className="
-                flex rounded-xl
+                flex
+                rounded-xl
                 border border-slate-200
                 bg-slate-50
                 focus-within:border-[#0052cc]
                 focus-within:bg-white
               ">
                 <span className="flex items-center pl-4 text-slate-400">
-                  <MapPin size={18} />
+                  <MapPin
+                    size={18}
+                  />
                 </span>
 
                 <input
@@ -348,7 +445,8 @@ function Profile() {
 
             <div className="md:col-span-2">
               <div className="
-                flex rounded-xl
+                flex
+                rounded-xl
                 border border-slate-200
                 bg-slate-50
                 focus-within:border-[#0052cc]
@@ -370,12 +468,7 @@ function Profile() {
                       e.target.value
                     )
                   }
-                  className="
-                    w-full
-                    bg-transparent
-                    px-4 py-3
-                    outline-none
-                  "
+                  className=" w-full bg-transparent px-4 py-3 outline-none"
                 />
               </div>
             </div>
@@ -424,17 +517,7 @@ function Profile() {
                     e.target.value
                   )
                 }
-                className="
-                  w-full
-                  rounded-xl
-                  border border-slate-200
-                  bg-slate-50
-                  px-4 py-3
-                  outline-none
-                  transition
-                  focus:border-[#0052cc]
-                  focus:bg-white
-                "
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#0052cc] focus:bg-white "
               >
                 <option>
                   Pacific Time (PT)
@@ -443,12 +526,10 @@ function Profile() {
                   Eastern Time (ET)
                 </option>
                 <option>
-                  Central Europe Time
-                  (CET)
+                  Central Europe Time (CET)
                 </option>
                 <option>
-                  Pakistan Standard Time
-                  (PKT)
+                  Pakistan Standard Time (PKT)
                 </option>
               </select>
             </div>
@@ -457,23 +538,25 @@ function Profile() {
           {/* Buttons */}
           <div className="flex flex-wrap gap-4 border-t border-slate-100 pt-8">
             <div className="w-[220px]">
-              <Button type="submit">
-                Save Changes
+              <Button
+                type="submit"
+                loading={saving}
+                disabled={
+                  saving || !hasChanges
+                }
+              >
+                {saving
+                  ? "Saving..."
+                  : "Save Changes"}
               </Button>
             </div>
 
             <button
               type="button"
-              onClick={handleDiscard}
-              className="
-                rounded-xl
-                px-5 py-3
-                text-sm font-medium
-                text-slate-500
-                transition
-                hover:bg-red-50
-                hover:text-red-600
-              "
+              onClick={
+                handleDiscard
+              }
+              className="rounded-xl  px-5 py-3  text-sm font-medium  text-slate-500  transition  hover:bg-red-50  hover:text-red-600"
             >
               Discard
             </button>
