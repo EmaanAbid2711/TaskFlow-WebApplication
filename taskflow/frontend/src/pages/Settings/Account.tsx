@@ -1,13 +1,15 @@
+import {AccountSection, SecuritySection, DangerZone} from "@/components";
+
 function Account() {
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-slate-900">
-        Account Settings
-      </h1>
+    <div className="flex-1 overflow-y-auto p-6 md:p-10">
+      <div className="mx-auto max-w-4xl space-y-12">
+        <AccountSection />
 
-      <p className="mt-2 text-slate-500">
-        Manage your account preferences.
-      </p>
+        <SecuritySection />
+
+        <DangerZone />
+      </div>
     </div>
   );
 }

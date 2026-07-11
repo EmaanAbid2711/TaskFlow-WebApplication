@@ -34,3 +34,6 @@ export { default as PricingCard } from "./landing/Pricing/PricingCard";
 export { default as LandingLogo } from "./landing/Logo/LandingLogo";
 export { default as LandingFooter } from "./landing/Footer/LandingFooter";
 export { default as ProfileAvatar } from "./common/ProfileAvatar/ProfileAvatar"
+export { default as AccountSection } from "./settings/AccountSection"
+export { default as SecuritySection } from "./settings/SecuritySection"
+export { default as DangerZone } from "./settings/DangerZone"
