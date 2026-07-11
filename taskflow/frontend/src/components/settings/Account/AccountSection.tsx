@@ -108,10 +108,10 @@ function AccountSection() {
 
         valid = false;
       } else if (
-        newPassword.length < 12
+        newPassword.length < 8
       ) {
         newErrors.newPassword =
-          "Password must contain at least 12 characters.";
+          "Password must contain at least 8 characters.";
 
         valid = false;
       }

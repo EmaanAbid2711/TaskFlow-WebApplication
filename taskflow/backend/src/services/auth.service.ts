@@ -38,6 +38,11 @@ export async function signupUser(data: SignupData) {
       name: data.name,
       email: data.email,
       password: hashedPassword,
+
+      notificationSettings: {
+        create: {},
+      },
+
     },
   });
 

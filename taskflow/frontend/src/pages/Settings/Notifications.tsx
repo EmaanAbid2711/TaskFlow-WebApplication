@@ -1,15 +1,33 @@
-function Notifications() {
-  return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-slate-900">
-        Notifications
-      </h1>
+import { toast } from "sonner";
 
-      <p className="mt-2 text-slate-500">
-        Configure your notification preferences.
-      </p>
+import {NotificationSection} from "@/components";
+import {NotificationActions} from "@/components";
+
+function Notification() {
+  const handleSave = () => {
+    toast.success(
+      "Notification settings saved."
+    );
+  };
+
+  const handleDiscard = () => {
+    toast.success(
+      "Changes discarded."
+    );
+  };
+
+  return (
+    <div className="flex-1 overflow-y-auto p-6 md:p-10">
+      <div className="mx-auto max-w-4xl space-y-8">
+        <NotificationSection />
+
+        <NotificationActions
+          onSave={handleSave}
+          onDiscard={handleDiscard}
+        />
+      </div>
     </div>
   );
 }
 
-export default Notifications;
+export default Notification;

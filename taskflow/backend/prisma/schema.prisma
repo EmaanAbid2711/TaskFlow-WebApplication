@@ -27,6 +27,51 @@ model User {
   timezone              String?
   resetPasswordToken    String?
   resetPasswordExpiry   DateTime?
+
+  notificationSettings NotificationSettings?
+
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+}
+
+
+model NotificationSettings {
+  id String @id @default(uuid())
+
+  userId String @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Activity
+  taskAssignedEmail Boolean @default(true)
+  taskAssignedPush  Boolean @default(true)
+
+  commentsEmail Boolean @default(true)
+  commentsPush  Boolean @default(true)
+
+  remindersEmail Boolean @default(true)
+  remindersPush  Boolean @default(false)
+
+  completedEmail Boolean @default(false)
+  completedPush  Boolean @default(false)
+
+  // Projects
+  invitationEmail Boolean @default(true)
+  invitationPush  Boolean @default(true)
+
+  statusEmail Boolean @default(true)
+  statusPush  Boolean @default(false)
+
+  memberEmail Boolean @default(false)
+  memberPush  Boolean @default(false)
+
+  // System
+  securityEmail Boolean @default(true)
+  securityPush  Boolean @default(true)
+
+  productEmail Boolean @default(true)
+  productPush  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
