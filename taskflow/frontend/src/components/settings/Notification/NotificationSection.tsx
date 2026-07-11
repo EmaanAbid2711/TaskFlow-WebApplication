@@ -1,47 +1,146 @@
-import { useState } from "react";
-import {Bell, Mail} from "lucide-react";
+import {useEffect, useMemo, useState} from "react";
+import {Bell, Mail,} from "lucide-react";
+import { toast } from "sonner";
 
 import NotificationToggle from "./NotificationToggle";
+import type {NotificationSettings} from "@/interfaces/notification";
+
+import {getNotificationsService, updateNotificationsService} from "@/services/notification.service";
 
 function NotificationSection() {
-  const [notifications, setNotifications] =
-    useState({
-      taskAssignedEmail: false,
-      taskAssignedPush: false,
+  const [loading, setLoading] =
+    useState(true);
 
-      commentsEmail: false,
-      commentsPush: false,
+  const [saving, setSaving] =
+    useState(false);
 
-      remindersEmail: false,
-      remindersPush: false,
+  const [
+    notifications,
+    setNotifications,
+  ] =
+    useState<NotificationSettings | null>(
+      null
+    );
 
-      completedEmail: false,
-      completedPush: false,
+  const [
+    initialNotifications,
+    setInitialNotifications,
+  ] =
+    useState<NotificationSettings | null>(
+      null
+    );
 
-      invitationEmail: false,
-      invitationPush: false,
+  useEffect(() => {
+    loadNotifications();
+  }, []);
 
-      statusEmail: false,
-      statusPush: false,
+  const loadNotifications =
+    async () => {
+      try {
+        setLoading(true);
 
-      memberEmail: false,
-      memberPush: false,
+        const response =
+          await getNotificationsService();
 
-      securityEmail: false,
-      securityPush: false,
+        setNotifications(
+          response.data
+        );
 
-      productEmail: false,
-      productPush: false,
-    });
+        setInitialNotifications(
+          response.data
+        );
+      } catch (error) {
+        console.error(error);
 
-  const toggle = (
-    key: keyof typeof notifications
+        toast.error(
+          "Failed to load notification settings."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  const handleToggle = (
+    key: keyof NotificationSettings
   ) => {
-    setNotifications((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+    if (!notifications) {
+      return;
+    }
+
+    setNotifications({
+      ...notifications,
+      [key]:
+        !notifications[key],
+    });
   };
+
+  const handleSave =
+    async () => {
+      if (!notifications) {
+        return;
+      }
+
+      try {
+        setSaving(true);
+
+        const response =
+          await updateNotificationsService(
+            notifications
+          );
+
+        setNotifications(
+          response.data.data
+        );
+
+        setInitialNotifications(
+          response.data.data
+        );
+
+        toast.success(
+          "Notification settings updated."
+        );
+      } catch (error) {
+        console.error(error);
+
+        toast.error(
+          "Failed to update notification settings."
+        );
+      } finally {
+        setSaving(false);
+      }
+    };
+
+  const handleDiscard =
+    () => {
+      if (
+        !initialNotifications
+      ) {
+        return;
+      }
+
+      setNotifications(
+        initialNotifications
+      );
+
+      toast.success(
+        "Changes discarded."
+      );
+    };
+
+  const hasChanges =
+    useMemo(() => {
+      return (
+        JSON.stringify(
+          notifications
+        ) !==
+        JSON.stringify(
+          initialNotifications
+        )
+      );
+    }, [
+      notifications,
+      initialNotifications,
+    ]);
 
   const rows = [
     {
@@ -153,6 +252,19 @@ function NotificationSection() {
     },
   ];
 
+  if (
+    loading ||
+    !notifications
+  ) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <p className="text-slate-500">
+          Loading notification settings...
+        </p>
+      </div>
+    );
+  }
+
   return (
     <section className="rounded-3xl border border-slate-100 bg-white p-8 shadow-sm">
       <div className="border-b border-slate-100 pb-6">
@@ -215,12 +327,12 @@ function NotificationSection() {
                       <NotificationToggle
                         enabled={
                           notifications[
-                            item.email as keyof typeof notifications
+                            item.email as keyof NotificationSettings
                           ]
                         }
                         onToggle={() =>
-                          toggle(
-                            item.email as keyof typeof notifications
+                          handleToggle(
+                            item.email as keyof NotificationSettings
                           )
                         }
                       />
@@ -230,12 +342,12 @@ function NotificationSection() {
                       <NotificationToggle
                         enabled={
                           notifications[
-                            item.push as keyof typeof notifications
+                            item.push as keyof NotificationSettings
                           ]
                         }
                         onToggle={() =>
-                          toggle(
-                            item.push as keyof typeof notifications
+                          handleToggle(
+                            item.push as keyof NotificationSettings
                           )
                         }
                       />
@@ -246,6 +358,63 @@ function NotificationSection() {
             </div>
           </div>
         ))}
+
+        {/* Buttons */}
+        <div className="flex flex-wrap gap-4 border-t border-slate-100 pt-8">
+          <button
+            type="button"
+            onClick={
+              handleSave
+            }
+            disabled={
+              !hasChanges ||
+              saving
+            }
+            className="
+              rounded-xl
+              bg-[#0052cc]
+              px-5
+              py-3
+              text-sm
+              font-medium
+              text-white
+              shadow-sm
+              transition
+              hover:bg-[#0047b3]
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+            "
+          >
+            {saving
+              ? "Saving..."
+              : "Save Changes"}
+          </button>
+
+          <button
+            type="button"
+            onClick={
+              handleDiscard
+            }
+            disabled={
+              !hasChanges
+            }
+            className="
+              rounded-xl
+              px-5
+              py-3
+              text-sm
+              font-medium
+              text-slate-500
+              transition
+              hover:bg-red-50
+              hover:text-red-600
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+            "
+          >
+            Discard
+          </button>
+        </div>
       </div>
     </section>
   );
