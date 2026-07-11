@@ -4,6 +4,7 @@ import swaggerUi from "swagger-ui-express";
 
 import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
+import accountRoutes from "./routes/account.routes";
 import swaggerSpec from "./config/swagger";
 import errorHandler from "./middleware/ErrorHandler";
 
@@ -37,6 +38,7 @@ app.use(
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/account", accountRoutes);
 
 app.use(errorHandler);
 
