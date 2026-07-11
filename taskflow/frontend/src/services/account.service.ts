@@ -1,14 +1,14 @@
 import api from "@/api/axios";
 
 export const getAccountService = () => {
-  return api.get("/account");
+  return api.get("/api/account");
 };
 
 export const updateEmailService = (
   email: string
 ) => {
   return api.patch(
-    "/account/email",
+    "/api/account/email",
     {
       email,
     }
@@ -20,7 +20,7 @@ export const updatePasswordService = (
   newPassword: string
 ) => {
   return api.patch(
-    "/account/password",
+    "/api/account/password",
     {
       currentPassword,
       newPassword,
