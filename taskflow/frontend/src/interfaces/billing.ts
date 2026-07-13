@@ -19,5 +19,6 @@ export interface BillingInfo {
     expiry: string;
   };
 
+  features: string[];
   invoices: Invoice[];
 }

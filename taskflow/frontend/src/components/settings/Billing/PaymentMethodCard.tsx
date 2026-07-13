@@ -2,12 +2,15 @@ interface Props {
   brand: string;
   last4: string;
   expiry: string;
+
+  onUpdate: () => void;
 }
 
 function PaymentMethodCard({
   brand,
   last4,
   expiry,
+  onUpdate,
 }: Props) {
   return (
     <div
@@ -52,10 +55,13 @@ function PaymentMethodCard({
       </div>
 
       <button
+        type="button"
+        onClick={onUpdate}
         className="
           rounded-xl
           border border-slate-200
-          px-4 py-2
+          px-4
+          py-2
           text-sm
           font-medium
           text-slate-700
