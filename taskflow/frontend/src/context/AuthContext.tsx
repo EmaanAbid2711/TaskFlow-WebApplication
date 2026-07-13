@@ -30,32 +30,38 @@ export function AuthProvider({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadUser = async () => {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-      try {
-        const response = await getProfileApi();
-        // Backend returns:
-        // {
-        //   success: true,
-        //   data: {
-        //     user: {...}
-        //   }
-        // }
-        setUser(response.data.data.user);
-      } catch (error) {
-        console.error(error);
-        localStorage.removeItem("token");
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+    const loadUser =
+      async () => {
+        const token =
+          localStorage.getItem(
+            "token"
+          );
+        
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+      
+        try {
+          const response =
+            await getProfileApi();
+        
+          setUser(
+            response.data
+          );
+        } catch (error) {
+          console.error(error);
+        
+          localStorage.removeItem(
+            "token"
+          );
+        
+          setUser(null);
+        } finally {
+          setLoading(false);
+        }
+      };
+    
     loadUser();
   }, []);
   const logout = () => {
