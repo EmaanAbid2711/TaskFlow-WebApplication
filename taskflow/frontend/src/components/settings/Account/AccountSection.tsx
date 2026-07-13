@@ -273,16 +273,7 @@ function AccountSection() {
               type="email"
               value={email}
               readOnly
-              className="
-                w-full
-                rounded-xl
-                border border-slate-200
-                bg-slate-100
-                px-4 py-3
-                text-sm
-                text-slate-500
-                outline-none
-              "
+              className="  w-full  rounded-xl  border border-slate-200  bg-slate-100  px-4 py-3  text-sm  text-slate-500  outline-none"
             />
           </div>
         </div>
@@ -313,20 +304,8 @@ function AccountSection() {
                   e.target.value
                 )
               }
-              className="
-                w-full
-                rounded-xl
-                border border-slate-200
-                bg-slate-50
-                px-4 py-3
-                text-sm
-                outline-none
-                transition
-                focus:border-[#0052cc]
-                focus:bg-white
-              "
+              className="  w-full  rounded-xl  border border-slate-200  bg-slate-50  px-4 py-3  text-sm  outline-none  transition  focus:border-[#0052cc]  focus:bg-white"
             />
-
             {errors.newEmail && (
               <p className="mt-2 text-sm text-red-500">
                 {
@@ -434,16 +413,7 @@ function AccountSection() {
             onClick={
               handleDiscard
             }
-            className="
-              rounded-xl
-              px-5 py-3
-              text-sm
-              font-medium
-              text-slate-500
-              transition
-              hover:bg-red-50
-              hover:text-red-600
-            "
+            className="  rounded-xl px-5 py-3  text-sm  font-medium  text-slate-500  transition  hover:bg-red-50  hover:text-red-600"
           >
             Discard
           </button>
