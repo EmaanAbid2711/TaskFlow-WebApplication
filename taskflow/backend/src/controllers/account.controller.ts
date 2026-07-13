@@ -183,3 +183,69 @@ export const updatePassword =
       });
     }
   };
+
+  export const getSecurity = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const userId = req.user?.id;
+
+    const user =
+      await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          twoFactorEnabled: true,
+        },
+      });
+
+    return res.status(200).json(user);
+  } catch {
+    return res.status(500).json({
+      message:
+        "Failed to fetch security settings.",
+    });
+  }
+};
+
+export const updateSecurity =
+  async (
+    req: Request,
+    res: Response
+  ) => {
+    try {
+      const userId =
+        req.user?.id;
+
+      const {
+        twoFactorEnabled,
+      } = req.body;
+
+      const user =
+        await prisma.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            twoFactorEnabled,
+          },
+          select: {
+            twoFactorEnabled:
+              true,
+          },
+        });
+
+      return res.status(200).json({
+        message:
+          "Security settings updated.",
+        data: user,
+      });
+    } catch {
+      return res.status(500).json({
+        message:
+          "Failed to update security settings.",
+      });
+    }
+  };

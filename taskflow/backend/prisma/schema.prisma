@@ -27,6 +27,8 @@ model User {
   timezone              String?
   resetPasswordToken    String?
   resetPasswordExpiry   DateTime?
+  
+  twoFactorEnabled      Boolean  @default(false)
 
   notificationSettings NotificationSettings?
 
