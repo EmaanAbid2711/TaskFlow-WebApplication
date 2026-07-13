@@ -280,8 +280,9 @@ function NotificationSection() {
       </div>
 
       <div className="mt-8">
-        {/* Header */}
-        <div className="mb-6 grid grid-cols-12 text-xs font-semibold uppercase tracking-wider text-slate-400">
+        
+        {/* Desktop Header */}
+        <div className="mb-6 hidden grid-cols-12 text-xs font-semibold uppercase tracking-wider text-slate-400 md:grid">
           <div className="col-span-8" />
 
           <div className="col-span-2 flex items-center justify-center gap-1">
@@ -309,48 +310,68 @@ function NotificationSection() {
                 (item) => (
                   <div
                     key={item.title}
-                    className="grid grid-cols-12 items-center py-5"
+                    className="
+                      flex flex-col gap-4 py-5
+                      md:grid md:grid-cols-12 md:items-center md:gap-0
+                    "
                   >
-                    <div className="col-span-8">
+                    {/* Text */}
+                    <div className="md:col-span-8">
                       <h3 className="text-sm font-semibold text-slate-900">
                         {item.title}
                       </h3>
-
+                                  
                       <p className="mt-1 text-xs text-slate-400">
-                        {
-                          item.description
-                        }
+                        {item.description}
                       </p>
                     </div>
-
-                    <div className="col-span-2 flex justify-center">
-                      <NotificationToggle
-                        enabled={
-                          notifications[
-                            item.email as keyof NotificationSettings
-                          ]
-                        }
-                        onToggle={() =>
-                          handleToggle(
-                            item.email as keyof NotificationSettings
-                          )
-                        }
-                      />
-                    </div>
-
-                    <div className="col-span-2 flex justify-center">
-                      <NotificationToggle
-                        enabled={
-                          notifications[
-                            item.push as keyof NotificationSettings
-                          ]
-                        }
-                        onToggle={() =>
-                          handleToggle(
-                            item.push as keyof NotificationSettings
-                          )
-                        }
-                      />
+                                  
+                    {/* Mobile + Desktop Toggles */}
+                    <div
+                      className="
+                        flex items-center justify-between gap-6
+                        md:col-span-4 md:justify-around
+                      "
+                    >
+                      {/* Email */}
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-medium text-slate-500 md:hidden">
+                          Email
+                        </span>
+                                  
+                        <NotificationToggle
+                          enabled={
+                            notifications[
+                              item.email as keyof NotificationSettings
+                            ]
+                          }
+                          onToggle={() =>
+                            handleToggle(
+                              item.email as keyof NotificationSettings
+                            )
+                          }
+                        />
+                      </div>
+                        
+                      {/* Push */}
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-medium text-slate-500 md:hidden">
+                          Push
+                        </span>
+                        
+                        <NotificationToggle
+                          enabled={
+                            notifications[
+                              item.push as keyof NotificationSettings
+                            ]
+                          }
+                          onToggle={() =>
+                            handleToggle(
+                              item.push as keyof NotificationSettings
+                            )
+                          }
+                        />
+                      </div>
                     </div>
                   </div>
                 )

@@ -14,8 +14,8 @@ function NotificationToggle({
       className={`
         relative
         inline-flex
-        h-6
-        w-11
+        h-5
+        w-10
         shrink-0
         cursor-pointer
         rounded-full
@@ -23,6 +23,8 @@ function NotificationToggle({
         border-transparent
         transition-colors
         duration-200
+        md:h-6
+        md:w-11
         ${
           enabled
             ? "bg-[#0052cc]"
@@ -34,16 +36,18 @@ function NotificationToggle({
         className={`
           pointer-events-none
           inline-block
-          h-5
-          w-5
+          h-4
+          w-4
           rounded-full
           bg-white
           shadow-sm
           transition
           duration-200
+          md:h-5
+          md:w-5
           ${
             enabled
-              ? "translate-x-5"
+              ? "translate-x-5 md:translate-x-5"
               : "translate-x-0"
           }
         `}
