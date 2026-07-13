@@ -39,3 +39,22 @@ export const deleteAccountService =
       "/api/account"
     );
   };
+
+  export const getSecurityService =
+  () => {
+    return api.get(
+      "/api/account/security"
+    );
+  };
+
+export const updateSecurityService =
+  (
+    twoFactorEnabled: boolean
+  ) => {
+    return api.patch(
+      "/api/account/security",
+      {
+        twoFactorEnabled,
+      }
+    );
+  };
