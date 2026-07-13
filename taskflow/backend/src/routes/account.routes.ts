@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import {getAccount, updateEmail, updatePassword} from "../controllers/account.controller";
+import {getAccount, updateEmail, updatePassword, deleteAccount} from "../controllers/account.controller";
 import authMiddleware from "../middleware/auth.middleware";
 
 const router = Router();
@@ -43,5 +43,20 @@ router.patch("/email", updateEmail);
  *       - bearerAuth: []
  */
 router.patch("/password", updatePassword);
+
+
+/**
+ * @swagger
+ * /api/account:
+ *   delete:
+ *     summary: Delete logged-in account
+ *     tags: [Account]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Account deleted successfully
+ */
+router.delete("/", deleteAccount);
 
 export default router;

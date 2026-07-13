@@ -61,6 +61,21 @@ function AccountSection() {
       }
     };
 
+
+  const resetForm = () => {
+    setNewEmail("");
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+
+    setErrors({
+      newEmail: "",
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+  };
+
   const validate = () => {
     const newErrors = {
       newEmail: "",
@@ -188,7 +203,7 @@ function AccountSection() {
           "Account updated successfully."
         );
 
-        handleDiscard();
+        resetForm();
 
         await loadAccount();
       } catch (
@@ -202,23 +217,13 @@ function AccountSection() {
       }
     };
 
-  const handleDiscard =
-    () => {
-      setNewEmail("");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      setErrors({
-        newEmail: "",
-        currentPassword:  "",
-        newPassword: "",
-        confirmPassword:  "",
-      });
+  const handleDiscard = () => {
+    resetForm();
 
-      toast.success(
-        "Changes discarded."
-      );
-    };
+    toast.success(
+      "Changes discarded."
+    );
+  };
 
   if (loading) {
     return (
