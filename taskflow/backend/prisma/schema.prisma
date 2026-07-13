@@ -31,6 +31,7 @@ model User {
   twoFactorEnabled      Boolean  @default(false)
 
   notificationSettings NotificationSettings?
+  billing Billing?
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -76,4 +77,50 @@ model NotificationSettings {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum PlanType {
+  FREE
+  PRO
+}
+
+enum InvoiceStatus {
+  PAID
+  PENDING
+}
+
+model Billing {
+  id String @id @default(cuid())
+
+  userId String @unique
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  plan PlanType @default(FREE)
+  monthlyPrice Float @default(0)
+  billingCycle String @default("Monthly")
+  renewalDate DateTime?
+
+  cardBrand String?
+  cardLast4 String?
+  cardExpiry String?
+
+  invoices Invoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Invoice {
+  id String @id @default(cuid())
+
+  billingId String
+  billing Billing @relation(fields: [billingId], references: [id], onDelete: Cascade)
+
+  amount Float
+  status InvoiceStatus @default(PAID)
+  invoiceDate DateTime
+
+  downloadUrl String?
+
+  createdAt DateTime @default(now())
 }

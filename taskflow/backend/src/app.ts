@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
 import accountRoutes from "./routes/account.routes";
 import notificationRoutes from "./routes/notification.routes";
+import billingRoutes from "./routes/billing.routes";
 import swaggerSpec from "./config/swagger";
 import errorHandler from "./middleware/ErrorHandler";
 import path from "path";
@@ -52,6 +53,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/account", accountRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/billing", billingRoutes );
 
 app.use(errorHandler);
 
