@@ -46,6 +46,9 @@ function Profile() {
   const [avatarFile, setAvatarFile] =
     useState<File | null>(null);
 
+  const [removeAvatar, setRemoveAvatar] =
+  useState(false);
+
   const [initialProfile, setInitialProfile] =
   useState<UserProfile | null>(
     null
@@ -126,11 +129,14 @@ function Profile() {
       setAvatar(imageUrl);
     
       setAvatarFile(file);
+
+      setRemoveAvatar(false);
     };
   const handleRemoveAvatar =
     () => {
       setAvatar("");
       setAvatarFile(null);
+      setRemoveAvatar(true);
     };
 
   const handleSave =
@@ -182,6 +188,11 @@ function Profile() {
         formData.append(
           "timezone",
           timezone
+        );
+
+        formData.append(
+          "removeAvatar",
+          String(removeAvatar)
         );
       
         if (avatarFile) {
