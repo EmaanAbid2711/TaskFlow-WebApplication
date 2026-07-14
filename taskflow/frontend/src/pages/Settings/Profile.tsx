@@ -1,17 +1,17 @@
 import {useEffect, useMemo, useRef, useState} from "react";
 import { MapPin } from "lucide-react";
-
 import { toast } from "sonner";
+
 import {Button, ProfileAvatar} from "@/components";
+import { useAuth } from "@/context/AuthContext";
 import {getProfileService, updateProfileService} from "@/services/user.service";
 import type { UserProfile } from "@/interfaces/user";
 
 function Profile() {
+  const { updateUser } = useAuth();
+
   const fileInputRef =
     useRef<HTMLInputElement>(null);
-
-  const defaultAvatar =
-    "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200&h=200";
 
   const [loading, setLoading] =
     useState(true);
@@ -67,10 +67,10 @@ function Profile() {
           (
             initialProfile.avatar
               ? `${import.meta.env.VITE_API_URL}${initialProfile.avatar}`
-              : defaultAvatar
+              : ""
           )
     );
-  }, [fullName, username, bio, location, website, role, timezone, avatar, initialProfile, defaultAvatar  ]);
+  }, [fullName, username, bio, location, website, role, timezone, avatar, initialProfile ]);
 
   useEffect(() => {
     loadProfile();
@@ -98,7 +98,7 @@ function Profile() {
         const avatarUrl =
           user.avatar
             ? `${import.meta.env.VITE_API_URL}${user.avatar}`
-            : defaultAvatar;
+            : "";
 
         setAvatar(avatarUrl);
         setAvatarFile(null);
@@ -129,7 +129,7 @@ function Profile() {
     };
   const handleRemoveAvatar =
     () => {
-      setAvatar(defaultAvatar);
+      setAvatar("");
       setAvatarFile(null);
     };
 
@@ -198,19 +198,28 @@ function Profile() {
         
         const updatedUser =
           response.data;
-        
+
         const avatarUrl =
           updatedUser.avatar
             ? `${import.meta.env.VITE_API_URL}${updatedUser.avatar}`
-            : defaultAvatar;
-        
+            : "";
+
         setAvatar(avatarUrl);
+
         setAvatarFile(null);
-        
-        setInitialProfile(
-          updatedUser
-        );
-      
+
+        setInitialProfile(updatedUser);
+
+        /*
+         * Update the global authenticated user.
+         * Every component using useAuth() will
+         * immediately re-render.
+         */
+        updateUser({
+          name: updatedUser.name,
+          avatar: updatedUser.avatar,
+        });
+
         toast.success(
           "Profile updated successfully!"
         );
@@ -266,10 +275,7 @@ function Profile() {
           {/* Avatar */}
           <div className="flex flex-col gap-5 md:flex-row md:items-start">
             <ProfileAvatar
-              image={
-                avatar ||
-                defaultAvatar
-              }
+              image={avatar}
               name={fullName}
               onChange={
                 handleImageChange
