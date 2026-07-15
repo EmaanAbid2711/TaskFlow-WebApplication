@@ -1,18 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import {DashboardLayout, MetricCard, ProgressCard, ActivityCard, DeadlineCard, TeamMemberCard } from "../../components";
 import {metrics, projectProgress, activities, deadlines} from "../../data/dashboarddata.ts";
 import { getAllUsersService } from "@/services/user.service";
-import type { TeamMember } from "@/interfaces/dashboard";
+import { getDashboardStatsService } from "@/services/dashboard.service";
+import type { TeamMember, DashboardStats } from "@/interfaces/dashboard";
 
 
 function Dashboard() {
 
   const [teamMembers, setTeamMembers] =
   useState<TeamMember[]>([]);
+
+  const [stats, setStats] = useState<DashboardStats>({
+    totalProjects: 0,
+    totalTasks: 0,
+    completedTasks: 0,
+    teamMembers: 0,
+  });
   
   useEffect(() => {
     loadUsers();
+    loadDashboardStats();
   }, []);
   const loadUsers = async () => {
     try {
@@ -26,16 +35,65 @@ function Dashboard() {
     }
   };
 
+  const loadDashboardStats = async () => {
+    try {
+      const dashboardStats =
+        await getDashboardStatsService();
+    
+      setStats(dashboardStats);
+    } catch (error) {
+      console.error(
+        "Failed to load dashboard stats:",
+        error
+      );
+    }
+  };
+
   const [timeframe, setTimeframe] = useState<
     "weekly" | "monthly"
   >("weekly");
+
+  const liveMetrics = useMemo(() => {
+    return metrics.map((metric) => {
+      switch (metric.title) {
+        case "Total Projects":
+          return {
+            ...metric,
+            value: stats.totalProjects,
+          };
+
+        case "Total Tasks":
+          return {
+            ...metric,
+            value: stats.totalTasks,
+          };
+
+        case "Completed Tasks":
+          return {
+            ...metric,
+            value: stats.completedTasks,
+          };
+
+        case "Pending Tasks":
+          return {
+            ...metric,
+            value:
+              stats.totalTasks -
+              stats.completedTasks,
+          };
+
+        default:
+          return metric;
+      }
+    });
+  }, [stats]);
 
   return (
     <DashboardLayout>
 
       {/* Metrics */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {metrics.map((metric) => (
+        {liveMetrics.map((metric) => (
           <MetricCard
             key={metric.id}
             metric={metric}

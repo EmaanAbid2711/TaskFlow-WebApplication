@@ -49,3 +49,10 @@ export interface ChartPoint {
   day: string;
   completed: number;
 }
+
+export interface DashboardStats {
+  totalProjects: number;
+  totalTasks: number;
+  completedTasks: number;
+  teamMembers: number;
+}
