@@ -26,6 +26,20 @@ export const getUserProfile =
     });
   };
 
+export const getAllUsers = async () => {
+  return prisma.user.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      id: true,
+      name: true,
+      avatar: true,
+      role: true,
+    },
+  });
+};
+
 interface UpdateUserProfileData {
   name?: string;
   avatar?: string | null;

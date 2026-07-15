@@ -1,7 +1,4 @@
-import {
-  getProfileApi,
-  updateProfileApi,
-} from "../api/user.api";
+import {getProfileApi, updateProfileApi, getAllUsersApi} from "../api/user.api";
 
 export const getProfileService =
   async () => {
@@ -16,3 +13,11 @@ export const updateProfileService =
       data
     );
   };
+
+export const getAllUsersService = async () => {
+
+  const response = await getAllUsersApi();
+
+  return response.data;
+
+};

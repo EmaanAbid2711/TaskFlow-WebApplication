@@ -1,9 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {DashboardLayout, MetricCard, ProgressCard, ActivityCard, DeadlineCard, TeamMemberCard } from "../../components";
-import {metrics, projectProgress, activities, deadlines, teamMembers} from "../../data/dashboarddata.ts";
+import {metrics, projectProgress, activities, deadlines} from "../../data/dashboarddata.ts";
+import { getAllUsersService } from "@/services/user.service";
+import type { TeamMember } from "@/interfaces/dashboard";
+
 
 function Dashboard() {
+
+  const [teamMembers, setTeamMembers] =
+  useState<TeamMember[]>([]);
+  
+  useEffect(() => {
+    loadUsers();
+  }, []);
+  const loadUsers = async () => {
+    try {
+      const response =
+        await getAllUsersService();
+      setTeamMembers(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const [timeframe, setTimeframe] = useState<
     "weekly" | "monthly"
   >("weekly");

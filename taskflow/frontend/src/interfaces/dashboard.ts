@@ -41,9 +41,8 @@ export interface Deadline {
 export interface TeamMember {
   id: number;
   name: string;
-  role: string;
-  avatar: string;
-  online: boolean;
+  role?: string | null;
+  avatar?: string | null;
 }
 
 export interface ChartPoint {

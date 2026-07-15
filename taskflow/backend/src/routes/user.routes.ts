@@ -1,12 +1,28 @@
 import { Router } from "express";
 
 import authMiddleware from "../middleware/auth.middleware";
-import {profile, updateProfile} from "../controllers/user.controller";
+import {profile, updateProfile, getAllUsersController} from "../controllers/user.controller";
 import upload from "../config/multer";
 
 
 const router = Router();
 
+
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Get all users
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get(
+  "/",
+  authMiddleware,
+  getAllUsersController
+);
 
 
 /**

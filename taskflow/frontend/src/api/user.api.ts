@@ -28,3 +28,7 @@ export const updateProfileApi =
 
     return response.data;
   };
+
+export const getAllUsersApi = () => {
+  return api.get("/users");
+};

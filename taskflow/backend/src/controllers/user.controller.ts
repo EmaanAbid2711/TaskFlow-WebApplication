@@ -1,7 +1,7 @@
 import {Request, Response} from "express";
 import asyncHandler from "express-async-handler";
 
-import {getUserProfile, updateUserProfile} from "../services/user.service";
+import {getUserProfile, updateUserProfile, getAllUsers} from "../services/user.service";
 import {updateProfileSchema} from "../validations/user.validation";
 
 export const profile =
@@ -105,3 +105,15 @@ export const updateProfile =
       });
     }
   );
+
+export const getAllUsersController =
+  asyncHandler(async (_req, res) => {
+
+    const users = await getAllUsers();
+
+    res.status(200).json({
+      success: true,
+      data: users,
+    });
+
+  });
