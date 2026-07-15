@@ -1,10 +1,14 @@
 import { Plus } from "lucide-react";
 
 import TaskCard from "../TaskCard/TaskCard";
+import type {KanbanColumnProps} from "@/interfaces/projectProps";
 
-import type { KanbanColumnProps } from "../../../interfaces/projectProps";
-
-function KanbanColumn({title, tasks, type}: KanbanColumnProps) {
+function KanbanColumn({
+  title,
+  tasks,
+  type,
+  onAddTask,
+}: KanbanColumnProps) {
   return (
     <div className="w-[300px] shrink-0 lg:w-72">
 
@@ -22,6 +26,7 @@ function KanbanColumn({title, tasks, type}: KanbanColumnProps) {
                 : "bg-emerald-500"
             }`}
           />
+
           <span className="text-xs font-bold uppercase tracking-wide text-slate-700">
             {title}
           </span>
@@ -29,9 +34,13 @@ function KanbanColumn({title, tasks, type}: KanbanColumnProps) {
           <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
             {tasks.length}
           </span>
+
         </div>
 
-        <button className="rounded-md p-1 transition hover:bg-slate-100">
+        <button
+          onClick={() => onAddTask(type)}
+          className="rounded-md p-1 transition hover:bg-slate-100"
+        >
           <Plus
             size={16}
             className="text-slate-500"
@@ -39,10 +48,7 @@ function KanbanColumn({title, tasks, type}: KanbanColumnProps) {
         </button>
 
       </div>
-
-      {/* Cards */}
       <div className="space-y-4">
-
         {tasks.map((task) => (
           <TaskCard
             key={task.id}

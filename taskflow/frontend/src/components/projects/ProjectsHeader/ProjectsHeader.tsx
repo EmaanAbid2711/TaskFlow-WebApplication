@@ -168,10 +168,6 @@ function ProjectHeader() {
               Timeline
             </button>
 
-            <button className="pb-3 text-sm font-medium text-slate-500 transition hover:text-slate-900">
-              Files
-            </button>
-
           </div>
         </div>
       </section>

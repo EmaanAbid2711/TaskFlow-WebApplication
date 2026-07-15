@@ -14,3 +14,7 @@ export interface Task {
   assignee?: string;
   assignees?: string[];
 }
+
+export type DrawerMode =
+  | "create"
+  | "edit";

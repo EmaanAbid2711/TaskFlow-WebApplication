@@ -1,4 +1,4 @@
-import type { Task, TaskType } from "./projects";
+import type {Task, TaskType} from "./projects";
 
 export interface TaskCardProps {
   task: Task;
@@ -9,4 +9,14 @@ export interface KanbanColumnProps {
   title: string;
   tasks: Task[];
   type: TaskType;
+
+  onAddTask: (
+    status: TaskType
+  ) => void;
+}
+
+export interface KanbanBoardProps {
+  onAddTask: (
+    status: TaskType
+  ) => void;
 }
