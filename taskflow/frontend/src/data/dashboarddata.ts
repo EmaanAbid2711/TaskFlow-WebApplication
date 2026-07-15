@@ -1,4 +1,4 @@
-import type {SidebarItem, Activity, ChartPoint, Deadline, Metric, ProjectProgress, TeamMember} from "../interfaces/dashboard";
+import type {SidebarItem, Activity, ChartPoint, Deadline, Metric, ProjectProgress} from "../interfaces/dashboard";
 
 export const sidebarItems: SidebarItem[] = [
   {
@@ -140,29 +140,6 @@ export const deadlines: Deadline[] = [
   },
 ];
 
-export const teamMembers: TeamMember[] = [
-  {
-    id: 1,
-    name: "Elena Rodriguez",
-    role: "Designer",
-    avatar: "https://i.pravatar.cc/100?img=5",
-    online: true,
-  },
-  {
-    id: 2,
-    name: "Marcus Chen",
-    role: "Engineer",
-    avatar: "https://i.pravatar.cc/100?img=12",
-    online: true,
-  },
-  {
-    id: 3,
-    name: "David Miller",
-    role: "Project Lead",
-    avatar: "https://i.pravatar.cc/100?img=15",
-    online: false,
-  },
-];
 
 export const weeklyChart: ChartPoint[] = [
   { day: "Mon", completed: 20 },
