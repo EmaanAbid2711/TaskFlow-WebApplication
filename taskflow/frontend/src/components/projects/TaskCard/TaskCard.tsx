@@ -61,11 +61,11 @@ function TaskCard({task, type, onClick,}: TaskCardProps) {
           <>
             <div className="flex items-center gap-1 text-xs text-slate-500">
               <Calendar size={13} />
-              <span>{task.date}</span>
+              <span>{task.dueDate}</span>
             </div>
 
             <img
-              src={task.assignee}
+              src={task.assignee.avatar}
               alt="Assignee"
               className="h-7 w-7 rounded-full object-cover"
             />
@@ -101,11 +101,11 @@ function TaskCard({task, type, onClick,}: TaskCardProps) {
           <>
             <div className="flex items-center gap-1 text-xs text-slate-500">
               <Eye size={13} />
-              <span>{task.status}</span>
+              <span>{task.reviewStatus}</span>
             </div>
 
             <img
-              src={task.assignee}
+              src={task.assignee.avatar}
               alt="Reviewer"
               className="h-7 w-7 rounded-full object-cover"
             />
@@ -121,7 +121,7 @@ function TaskCard({task, type, onClick,}: TaskCardProps) {
             </div>
 
             <img
-              src={task.assignee}
+              src={task.assignee.avatar}
               alt="Completed"
               className="h-7 w-7 rounded-full object-cover opacity-60"
             />

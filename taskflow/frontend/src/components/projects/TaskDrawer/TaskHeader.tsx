@@ -1,11 +1,15 @@
 import {X, Share2, Trash2, FileText} from "lucide-react";
 
+import type { DrawerMode } from "@/interfaces/projects";
+
 interface Props {
+  mode: DrawerMode;
   taskId: string;
   onClose: () => void;
 }
 
 function TaskHeader({
+  mode,
   taskId,
   onClose,
 }: Props) {
@@ -22,30 +26,52 @@ function TaskHeader({
           <X size={20} />
         </button>
 
-        <div className="flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-1">
-          <FileText
-            size={14}
-            className="text-[#0052cc]"
-          />
+        <div className="min-w-0">
 
-          <span className="truncate text-xs font-semibold text-slate-600">
-            {taskId}
-          </span>
+          <h2 className="text-lg font-semibold text-slate-900">
+            {mode === "create"
+              ? "Create Task"
+              : "Edit Task"}
+          </h2>
+
+          <div className="mt-2 flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-1 w-fit">
+
+            <FileText
+              size={14}
+              className="text-[#0052cc]"
+            />
+
+            <span className="truncate text-xs font-semibold text-slate-600">
+              {taskId}
+            </span>
+
+          </div>
+
         </div>
+
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-1 md:gap-2">
+      <div className="flex items-center gap-2">
 
-        <button className="rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800">
+        <button
+          className="rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          title="Share"
+        >
           <Share2 size={18} />
         </button>
 
-        <button className="rounded-md p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600">
-          <Trash2 size={18} />
-        </button>
+        {mode === "edit" && (
+          <button
+            className="rounded-md p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+            title="Delete Task"
+          >
+            <Trash2 size={18} />
+          </button>
+        )}
 
       </div>
+
     </header>
   );
 }
