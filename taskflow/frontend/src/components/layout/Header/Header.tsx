@@ -58,7 +58,16 @@ function Header() {
           onClick={() =>
             navigate("/settings/profile")
           }
-          className="transition hover:scale-105"
+          className="flex
+                h-9
+                w-9
+                items-center
+                justify-center
+                overflow-hidden
+                rounded-full
+                transition
+                hover:ring-2
+                hover:ring-[#0052cc]/20"
           title="Profile"
         >
           {avatarUrl ? (

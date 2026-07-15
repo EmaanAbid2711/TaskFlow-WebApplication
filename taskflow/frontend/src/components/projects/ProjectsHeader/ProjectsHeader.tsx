@@ -1,6 +1,21 @@
 import { Folder, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+import { useAuth } from "@/context/AuthContext";
 
 function ProjectHeader() {
+  const navigate = useNavigate();
+
+  const { user } = useAuth();
+
+  const initials =
+    user?.name
+      ?.split(" ")
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) ?? "";
+
   return (
     <>
       {/* TOP HEADER */}
@@ -28,18 +43,54 @@ function ProjectHeader() {
               Get Started
             </button>
 
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-              alt="User"
-              className="h-9 w-9 rounded-full object-cover"
-            />
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/settings/profile")
+              }
+              className="
+                flex
+                h-9
+                w-9
+                items-center
+                justify-center
+                overflow-hidden
+                rounded-full
+                transition
+                hover:ring-2
+                hover:ring-[#0052cc]/20
+              "
+            >
+              {user?.avatar ? (
+                <img
+                  src={`${import.meta.env.VITE_API_URL}${user.avatar}`}
+                  alt={user.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div
+                  className="
+                    flex
+                    h-full
+                    w-full
+                    items-center
+                    justify-center
+                    bg-[#0052cc]
+                    text-sm
+                    font-semibold
+                    text-white
+                  "
+                >
+                  {initials}
+                </div>
+              )}
+            </button>
 
           </div>
         </div>
       </header>
 
-      {/* PROJECT INFO  */}
-
+      {/* PROJECT INFO */}
       <section className="border-b border-slate-200 bg-white px-4 py-6 md:px-8">
 
         {/* Breadcrumb */}
@@ -71,6 +122,7 @@ function ProjectHeader() {
                 <div className="h-2 w-40 overflow-hidden rounded-full bg-slate-200">
                   <div className="h-full w-3/4 rounded-full bg-[#0052cc]" />
                 </div>
+
                 <span className="text-sm font-bold">
                   75%
                 </span>
@@ -91,13 +143,15 @@ function ProjectHeader() {
                   / 32
                 </span>
               </p>
+
             </div>
           </div>
         </div>
 
-        {/* TABS*/}
+        {/* Tabs */}
         <div className="mt-8 overflow-x-auto">
           <div className="flex min-w-max gap-8 border-b border-slate-200">
+
             <button className="pb-3 text-sm font-medium text-slate-500 transition hover:text-slate-900">
               Overview
             </button>
