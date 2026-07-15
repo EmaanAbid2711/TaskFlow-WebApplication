@@ -107,9 +107,19 @@ export const updateProfile =
   );
 
 export const getAllUsersController =
-  asyncHandler(async (_req, res) => {
+  asyncHandler(async (req, res) => {
 
-    const users = await getAllUsers();
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+      return;
+    }
+
+    const users = await getAllUsers(
+      req.user.id
+    );
 
     res.status(200).json({
       success: true,

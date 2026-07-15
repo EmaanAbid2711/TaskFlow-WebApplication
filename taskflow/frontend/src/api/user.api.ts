@@ -30,5 +30,5 @@ export const updateProfileApi =
   };
 
 export const getAllUsersApi = () => {
-  return api.get("/users");
+  return api.get("/api/users");
 };

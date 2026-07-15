@@ -16,11 +16,13 @@ function Dashboard() {
   }, []);
   const loadUsers = async () => {
     try {
-      const response =
-        await getAllUsersService();
-      setTeamMembers(response.data);
+      const users = await getAllUsersService();
+    
+      console.log("Users Array:", users);
+    
+      setTeamMembers(users);
     } catch (error) {
-      console.error(error);
+      console.error("Failed to load users:", error);
     }
   };
 
