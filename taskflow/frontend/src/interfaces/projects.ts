@@ -4,6 +4,10 @@ export type TaskType =
   | "review"
   | "completed";
 
+export type DrawerMode =
+  | "create"
+  | "edit";
+
 export interface Task {
   id: number;
   title: string;
@@ -14,7 +18,3 @@ export interface Task {
   assignee?: string;
   assignees?: string[];
 }
-
-export type DrawerMode =
-  | "create"
-  | "edit";

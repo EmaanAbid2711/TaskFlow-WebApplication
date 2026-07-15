@@ -8,6 +8,7 @@ function KanbanColumn({
   tasks,
   type,
   onAddTask,
+  onTaskClick,
 }: KanbanColumnProps) {
   return (
     <div className="w-[300px] shrink-0 lg:w-72">
@@ -54,6 +55,7 @@ function KanbanColumn({
             key={task.id}
             task={task}
             type={type}
+            onClick={onTaskClick}
           />
         ))}
       </div>

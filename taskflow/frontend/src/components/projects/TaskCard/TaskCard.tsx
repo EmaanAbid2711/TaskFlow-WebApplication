@@ -2,10 +2,10 @@ import {Calendar, RefreshCw, Eye, CircleCheck} from "lucide-react";
 
 import type { TaskCardProps } from "../../../interfaces/projectProps";
 
-function TaskCard({task, type}: TaskCardProps) {
+function TaskCard({task, type, onClick,}: TaskCardProps) {
   return (
-    <div
-      className={`rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md ${
+    <div onClick={() => onClick(task)}
+      className={`cursor-pointer rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md ${
         type === "completed" ? "bg-slate-50" : ""
       }`}
     >

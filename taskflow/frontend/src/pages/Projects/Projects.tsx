@@ -2,15 +2,40 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 
 import {ProjectHeader, KanbanBoard, TaskDrawer} from "@/components";
-import type {TaskType} from "@/interfaces/projects";
+import type {TaskType, Task, DrawerMode} from "@/interfaces/projects";
 
 function Projects() {
   const [drawerOpen, setDrawerOpen] =
     useState(false);
 
+  const [drawerMode, setDrawerMode] =
+    useState<DrawerMode>("create");
+
+  const [selectedColumn, setSelectedColumn] =
+    useState<TaskType>("todo");
+
+  const [selectedTask, setSelectedTask] =
+    useState<Task | null>(null);
+
   const handleAddTask = (
-    _status: TaskType
+    status: TaskType
   ) => {
+    setDrawerMode("create");
+
+    setSelectedTask(null);
+
+    setSelectedColumn(status);
+
+    setDrawerOpen(true);
+  };
+
+  const handleTaskClick = (
+    task: Task
+  ) => {
+    setDrawerMode("edit");
+
+    setSelectedTask(task);
+
     setDrawerOpen(true);
   };
 
@@ -20,6 +45,7 @@ function Projects() {
       <div className="flex-1 overflow-hidden">
         <KanbanBoard
           onAddTask={handleAddTask}
+          onTaskClick={handleTaskClick}
         />
       </div>
 

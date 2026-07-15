@@ -4,6 +4,7 @@ import type {KanbanBoardProps} from "../../../interfaces/projectProps";
 
 function KanbanBoard({
   onAddTask,
+  onTaskClick,
 }: KanbanBoardProps) {
   return (
     <div className="h-full overflow-x-auto overflow-y-hidden">
@@ -14,6 +15,7 @@ function KanbanBoard({
           tasks={todoTasks}
           type="todo"
           onAddTask={onAddTask}
+          onTaskClick={onTaskClick}
         />
 
         <KanbanColumn
@@ -21,6 +23,7 @@ function KanbanBoard({
           tasks={inProgressTasks}
           type="progress"
           onAddTask={onAddTask}
+          onTaskClick={onTaskClick}
         />
 
         <KanbanColumn
@@ -28,6 +31,7 @@ function KanbanBoard({
           tasks={reviewTasks}
           type="review"
           onAddTask={onAddTask}
+          onTaskClick={onTaskClick}
         />
 
         <KanbanColumn
@@ -35,6 +39,7 @@ function KanbanBoard({
           tasks={completedTasks}
           type="completed"
           onAddTask={onAddTask}
+          onTaskClick={onTaskClick}
         />
 
       </div>
