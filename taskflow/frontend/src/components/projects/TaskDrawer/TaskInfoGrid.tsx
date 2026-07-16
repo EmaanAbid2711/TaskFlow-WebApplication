@@ -24,6 +24,9 @@ function TaskInfoGrid({
   const [calendarOpen, setCalendarOpen] =
     useState(false);
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const selectedDate =
     task.dueDate
       ? new Date(task.dueDate)
@@ -131,22 +134,23 @@ function TaskInfoGrid({
         >
 
           <PopoverTrigger
-            className="w-full"
-          >
-            <Button
-              type="button"
-              variant="outline"
-              className="flex w-full justify-between rounded-lg border-slate-200 font-normal"
-            >
-              {selectedDate
-                ? format(selectedDate, "PPP")
-                : "Select due date"}
-
-              <CalendarDays
-                size={16}
-                className="text-slate-500"
+            render={
+              <Button
+                type="button"
+                variant="outline"
+                className="flex w-full justify-between rounded-lg border-slate-200 font-normal"
               />
-            </Button>
+            }
+            
+          >
+            {selectedDate
+              ? format(selectedDate, "PPP")
+              : "Select due date"}
+
+            <CalendarDays
+              size={16}
+              className="text-slate-500"
+            />
           </PopoverTrigger>
 
           <PopoverContent
@@ -167,12 +171,7 @@ function TaskInfoGrid({
               
                 setCalendarOpen(false);
               }}
-              disabled={(date) =>
-                date <
-                new Date(
-                  new Date().setHours(0, 0, 0, 0)
-                )
-              }
+              disabled={(date) => date < today}
             />
 
           </PopoverContent>

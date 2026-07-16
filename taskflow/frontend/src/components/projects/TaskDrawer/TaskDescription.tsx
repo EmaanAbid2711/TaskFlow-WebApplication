@@ -1,108 +1,61 @@
-interface Props {
-  title: string;
+import type { Task } from "@/interfaces/projects";
 
-  description: string;
+interface Props {
+  task: Task;
 
   onChange: (
-    field: "title" | "description",
-    value: string
+    field: keyof Task,
+    value: any
   ) => void;
 }
 
-
 function TaskDescription({
-  title,
-  description,
+  task,
   onChange,
 }: Props) {
-
-
   return (
     <section>
-
-
-      {/* Title */}
-
       <div>
 
         <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
           Task Title
         </label>
 
-
         <input
           type="text"
-          value={title}
+          value={task.title}
           onChange={(e) =>
             onChange(
               "title",
               e.target.value
             )
           }
-          placeholder="Enter task title"
-          className="
-          w-full rounded-xl
-          border border-slate-200
-          bg-white
-          px-4 py-3
-          text-lg font-semibold
-          text-slate-900
-          outline-none
-          focus:border-[#0052cc]
-          "
+          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-lg font-semibold outline-none focus:border-[#0052cc]"
         />
 
       </div>
 
-
-
-      {/* Description */}
-
       <div className="mt-6">
-
 
         <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
           Description
         </label>
 
-
-
         <textarea
-
-          value={description}
-
-          onChange={(e)=>
+          rows={8}
+          value={task.description}
+          onChange={(e) =>
             onChange(
               "description",
               e.target.value
             )
           }
-
-          rows={8}
-
-          placeholder="Describe the task..."
-
-          className="
-          w-full resize-none
-          rounded-xl
-          border border-slate-200
-          bg-white
-          p-4
-          text-sm
-          leading-7
-          text-slate-700
-          outline-none
-          focus:border-[#0052cc]
-          "
-
+          className="w-full resize-none rounded-xl border border-slate-200 bg-white p-4 text-sm leading-7 outline-none focus:border-[#0052cc]"
         />
 
       </div>
-
-
     </section>
   );
 }
-
 
 export default TaskDescription;

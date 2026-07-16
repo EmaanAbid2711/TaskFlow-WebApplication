@@ -1,13 +1,13 @@
 import { ArrowRightLeft } from "lucide-react";
 
-import type { Activity } from "@/interfaces/projects";
+import type { Task } from "@/interfaces/projects";
 
 interface Props {
-  activities: Activity[];
+  task: Task;
 }
 
 function ActivityTimeline({
-  activities,
+  task,
 }: Props) {
 
   return (
@@ -28,7 +28,7 @@ function ActivityTimeline({
 
 
 
-      {activities.length === 0 ? (
+      {task.activities.length === 0 ? (
 
         <p className="text-sm text-slate-400">
           No activity yet
@@ -40,7 +40,7 @@ function ActivityTimeline({
         <div className="relative space-y-6 border-l-2 border-slate-100 pl-5">
 
 
-          {activities.map((activity) => (
+          {task.activities.map((activity) => (
 
             <div
               key={activity.id}

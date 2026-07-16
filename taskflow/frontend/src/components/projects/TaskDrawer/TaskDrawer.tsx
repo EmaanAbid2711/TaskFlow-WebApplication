@@ -107,11 +107,8 @@ function TaskDrawer({
         >
           <div className="space-y-8">
             <TaskDescription
-              title={task.title}
-              description={task.description}
-              onChange={
-                handleChange
-              }
+              task={task}
+              onChange={handleChange}
             />
 
             <TaskInfoGrid
@@ -122,23 +119,19 @@ function TaskDrawer({
             />
 
             <Attachments
-              attachments={
-                task.attachments ?? []
-              }
+              task={task}
+              onChange={handleChange}
             />
 
             <ActivityTimeline
-              activities={
-                task.activities ?? []
-              }
+              task={task}
             />
           </div>
         </div>
 
         <CommentBox
-          userAvatar={
-            task.assignee?.avatar
-          }
+          task={task}
+          onChange={handleChange}
         />
 
       </aside>

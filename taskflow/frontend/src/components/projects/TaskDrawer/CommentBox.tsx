@@ -1,21 +1,28 @@
 import {AtSign, Image, Smile} from "lucide-react";
 
+import type { Task } from "@/interfaces/projects";
+
 interface Props {
-  userAvatar?: string;
+  task: Task;
+
+  onChange: (
+    field: keyof Task,
+    value: any
+  ) => void;
 }
 
 function CommentBox({
-  userAvatar,
+  task,
 }: Props) {
 
   return (
     <div className="border-t border-slate-100 bg-white p-4">
       <div className="flex items-start gap-3">
         {
-          userAvatar
+          task.assignee.avatar
           ?
           <img
-            src={userAvatar}
+            src={task.assignee.avatar}
             alt="User"
             className="h-8 w-8 rounded-full object-cover"
           />

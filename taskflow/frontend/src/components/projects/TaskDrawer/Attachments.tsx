@@ -1,32 +1,37 @@
 import {FileImage, FileText, Upload} from "lucide-react";
 
-import type { Attachment } from "@/interfaces/projects";
+import type { Task } from "@/interfaces/projects";
 
 interface Props {
-  attachments: Attachment[];
+  task: Task;
+
+  onChange: (
+    field: keyof Task,
+    value: any
+  ) => void;
 }
 
 function Attachments({
-  attachments,
+  task,
 }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Attachments ({attachments.length})
+          Attachments ({task.attachments.length})
         </label>
         <button className="flex items-center gap-1 text-xs font-semibold text-[#0052cc]">
           <Upload size={12}/>
           Upload
         </button>
       </div>
-      {attachments.length === 0 ? (
+      {task.attachments.length === 0 ? (
         <p className="text-sm text-slate-400">
           No attachments
         </p>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {attachments.map((file)=>(
+          {task.attachments.map((file)=>(
             <div
               key={file.id}
               className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 hover:bg-slate-50"
