@@ -1,4 +1,4 @@
-import {X, Share2, Trash2, FileText} from "lucide-react";
+import {X, Trash2, FileText} from "lucide-react";
 
 import type { DrawerMode } from "@/interfaces/projects";
 
@@ -6,12 +6,16 @@ interface Props {
   mode: DrawerMode;
   taskId: string;
   onClose: () => void;
+  onSave: () => void;
+  onDelete: () => void;
 }
 
 function TaskHeader({
   mode,
   taskId,
   onClose,
+  onSave,
+  onDelete,
 }: Props) {
   return (
     <header className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 md:px-6">
@@ -53,25 +57,30 @@ function TaskHeader({
 
       {/* Right */}
       <div className="flex items-center gap-2">
-
         <button
-          className="rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
-          title="Share"
+          onClick={onSave}
+          className="rounded-lg bg-[#0052cc] px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
         >
-          <Share2 size={18} />
+          Save
         </button>
 
         {mode === "edit" && (
           <button
+            onClick={onDelete}
             className="rounded-md p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
-            title="Delete Task"
           >
             <Trash2 size={18} />
           </button>
         )}
 
+        <button
+          onClick={onClose}
+          className="rounded-md p-2 hover:bg-slate-100"
+        >
+          <X size={20} />
+        </button>
+      
       </div>
-
     </header>
   );
 }

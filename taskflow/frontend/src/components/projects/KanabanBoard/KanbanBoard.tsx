@@ -1,8 +1,8 @@
 import KanbanColumn from "../KanbanColumn/KanbanColumn";
-import {todoTasks, inProgressTasks, reviewTasks, completedTasks} from "../../../data/projectsData";
-import type {KanbanBoardProps} from "../../../interfaces/projectProps";
+import type {KanbanBoardProps} from "@/interfaces/projectProps";
 
 function KanbanBoard({
+  tasks,
   onAddTask,
   onTaskClick,
 }: KanbanBoardProps) {
@@ -12,32 +12,40 @@ function KanbanBoard({
 
         <KanbanColumn
           title="Todo"
-          tasks={todoTasks}
           type="todo"
+          tasks={tasks.filter(
+            (task) => task.status === "todo"
+          )}
           onAddTask={onAddTask}
           onTaskClick={onTaskClick}
         />
 
         <KanbanColumn
           title="In Progress"
-          tasks={inProgressTasks}
           type="progress"
+          tasks={tasks.filter(
+            (task) => task.status === "progress"
+          )}
           onAddTask={onAddTask}
           onTaskClick={onTaskClick}
         />
 
         <KanbanColumn
           title="Review"
-          tasks={reviewTasks}
           type="review"
+          tasks={tasks.filter(
+            (task) => task.status === "review"
+          )}
           onAddTask={onAddTask}
           onTaskClick={onTaskClick}
         />
 
         <KanbanColumn
           title="Completed"
-          tasks={completedTasks}
           type="completed"
+          tasks={tasks.filter(
+            (task) => task.status === "completed"
+          )}
           onAddTask={onAddTask}
           onTaskClick={onTaskClick}
         />

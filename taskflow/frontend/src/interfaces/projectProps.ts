@@ -1,34 +1,21 @@
-import type {Task, TaskType} from "./projects";
+import type { Task, TaskType } from "@/interfaces/projects";
 
 export interface TaskCardProps {
   task: Task;
   type: TaskType;
-
-  onClick: (
-    task: Task
-  ) => void;
+  onClick: (task: Task) => void;
 }
 
 export interface KanbanColumnProps {
   title: string;
   tasks: Task[];
   type: TaskType;
-
-  onAddTask: (
-    status: TaskType
-  ) => void;
-
-  onTaskClick: (
-    task: Task
-  ) => void;
+  onAddTask: (status: TaskType) => void;
+  onTaskClick: (task: Task) => void;
 }
 
 export interface KanbanBoardProps {
-  onAddTask: (
-    status: TaskType
-  ) => void;
-
-  onTaskClick: (
-    task: Task
-  ) => void;
+  tasks: Task[];
+  onAddTask: (status: TaskType) => void;
+  onTaskClick: (task: Task) => void;
 }
