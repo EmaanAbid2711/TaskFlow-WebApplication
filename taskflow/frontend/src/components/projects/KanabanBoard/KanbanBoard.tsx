@@ -1,5 +1,5 @@
 import KanbanColumn from "../KanbanColumn/KanbanColumn";
-import type {KanbanBoardProps} from "@/interfaces/projectProps";
+import type { KanbanBoardProps } from "@/interfaces/projectProps";
 
 function KanbanBoard({
   tasks,
@@ -9,7 +9,6 @@ function KanbanBoard({
   return (
     <div className="h-full overflow-x-auto overflow-y-hidden">
       <div className="flex min-w-max gap-5 px-4 py-6 md:px-8">
-
         <KanbanColumn
           title="Todo"
           type="todo"
@@ -49,7 +48,6 @@ function KanbanBoard({
           onAddTask={onAddTask}
           onTaskClick={onTaskClick}
         />
-
       </div>
     </div>
   );

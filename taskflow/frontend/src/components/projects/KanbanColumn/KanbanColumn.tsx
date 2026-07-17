@@ -1,7 +1,8 @@
 import { Plus } from "lucide-react";
+import { useDroppable } from "@dnd-kit/core";
 
 import TaskCard from "../TaskCard/TaskCard";
-import type {KanbanColumnProps} from "@/interfaces/projectProps";
+import type { KanbanColumnProps } from "@/interfaces/projectProps";
 
 function KanbanColumn({
   title,
@@ -10,12 +11,30 @@ function KanbanColumn({
   onAddTask,
   onTaskClick,
 }: KanbanColumnProps) {
-  return (
-    <div className="w-[300px] shrink-0 lg:w-72">
 
+  const { setNodeRef, isOver } = useDroppable({
+    id: type,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`
+        w-[300px] shrink-0 lg:w-72
+        rounded-xl transition-colors
+        ${
+          isOver
+            ? "bg-blue-50"
+            : ""
+        }
+      `}
+    >
       {/* Header */}
+
       <div className="mb-4 flex items-center justify-between">
+
         <div className="flex items-center gap-2">
+
           <span
             className={`h-2 w-2 rounded-full ${
               type === "todo"
@@ -49,7 +68,8 @@ function KanbanColumn({
         </button>
 
       </div>
-      <div className="space-y-4">
+
+      <div className="space-y-4 min-h-[120px]">
         {tasks.map((task) => (
           <TaskCard
             key={task.id}
@@ -59,6 +79,7 @@ function KanbanColumn({
           />
         ))}
       </div>
+
     </div>
   );
 }

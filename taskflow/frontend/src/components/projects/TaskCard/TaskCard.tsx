@@ -1,15 +1,51 @@
-import {Calendar, RefreshCw, Eye, CircleCheck} from "lucide-react";
+import { Calendar, RefreshCw, Eye, CircleCheck} from "lucide-react";
+import {useDraggable} from "@dnd-kit/core";
+import {CSS} from "@dnd-kit/utilities";
 
-import type { TaskCardProps } from "../../../interfaces/projectProps";
+import type {TaskCardProps} from "../../../interfaces/projectProps";
 
-function TaskCard({task, type, onClick,}: TaskCardProps) {
+function TaskCard({
+  task,
+  type,
+  onClick,
+}: TaskCardProps) {
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging,
+  } = useDraggable({
+    id: task.id.toString(),
+    data: {
+      task,
+    },
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    opacity: isDragging ? 0.45 : 1,
+    cursor: "grab",
+  };
+
   return (
-    <div onClick={() => onClick(task)}
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      onClick={() => onClick(task)}
       className={`cursor-pointer rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md ${
-        type === "completed" ? "bg-slate-50" : ""
+        isDragging ? "shadow-xl ring-2 ring-blue-400" : ""
+      } ${
+        type === "completed"
+          ? "bg-slate-50"
+          : ""
       }`}
     >
       {/* Priority Badge */}
+
       {task.priority && (
         <span
           className={`inline-flex rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${
@@ -25,6 +61,7 @@ function TaskCard({task, type, onClick,}: TaskCardProps) {
       )}
 
       {/* Title */}
+
       <h4
         className={`mt-3 break-words text-sm font-semibold leading-6 ${
           type === "completed"
@@ -35,7 +72,8 @@ function TaskCard({task, type, onClick,}: TaskCardProps) {
         {task.title}
       </h4>
 
-      {/* Progress Bar */}
+      {/* Progress */}
+
       {type === "progress" && (
         <div className="mt-4">
           <div className="h-2 overflow-hidden rounded-full bg-slate-200">
@@ -54,9 +92,9 @@ function TaskCard({task, type, onClick,}: TaskCardProps) {
       )}
 
       {/* Footer */}
+
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
 
-        {/* TODO */}
         {type === "todo" && (
           <>
             <div className="flex items-center gap-1 text-xs text-slate-500">
@@ -72,7 +110,6 @@ function TaskCard({task, type, onClick,}: TaskCardProps) {
           </>
         )}
 
-        {/* IN PROGRESS */}
         {type === "progress" && (
           <>
             <div className="flex items-center gap-1 text-xs font-semibold text-[#0052cc]">
@@ -96,7 +133,6 @@ function TaskCard({task, type, onClick,}: TaskCardProps) {
           </>
         )}
 
-        {/* REVIEW */}
         {type === "review" && (
           <>
             <div className="flex items-center gap-1 text-xs text-slate-500">
@@ -112,7 +148,6 @@ function TaskCard({task, type, onClick,}: TaskCardProps) {
           </>
         )}
 
-        {/* COMPLETED */}
         {type === "completed" && (
           <>
             <div className="flex items-center gap-1 text-xs font-semibold text-emerald-600">
