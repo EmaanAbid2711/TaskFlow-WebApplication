@@ -38,12 +38,70 @@ function TaskDrawer({
     field: keyof Task,
     value: any
   ) => {
+    let activityText = "";
+    switch(field) {
+      case "title":
+        activityText = "Task title updated";
+        break;
+
+      case "description":
+        activityText = "Task description updated";
+        break;
+
+      case "status":
+        activityText =
+          `Status changed to ${value}`;
+        break;
+
+      case "priority":
+        activityText =
+          `Priority changed to ${value}`;
+        break;
+
+      case "dueDate":
+        activityText =
+          "Due date updated";
+        break;
+
+      case "assignee":
+        activityText =
+          `Assigned to ${value.name}`;
+        break;
+
+      default:
+        break;
+    }
+
+    const newActivity =
+      activityText
+        ? {
+            id: Date.now(),
+            type:"system" as const,
+            text: activityText,
+            time:new Date().toLocaleString(),
+          }
+        : null;
 
     onChangeTask({
+
       ...task,
+
       [field]: value,
+
+
+      activities:
+        newActivity
+          ? [
+              ...task.activities,
+              newActivity,
+            ]
+          :
+            task.activities,
+
     });
+
   };
+
   return (
     <>
 

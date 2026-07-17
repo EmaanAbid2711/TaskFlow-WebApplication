@@ -116,16 +116,33 @@ function Projects() {
     if (!selectedTask) return;
 
     if (drawerMode === "create") {
-      const newTask = {
+      const newTask: Task = {
         ...selectedTask,
+
         id: Date.now(),
+
+        activities: [
+          {
+            id: Date.now(),
+            type: "system",
+            text: "Task created",
+            time: new Date().toLocaleString(),
+          },
+
+          ...selectedTask.activities,
+        ],
       };
+
 
       setTasks((prev) => [
         ...prev,
         newTask,
       ]);
-    } else {
+
+    } 
+
+    else {
+
       setTasks((prev) =>
         prev.map((task) =>
           task.id === selectedTask.id
@@ -133,8 +150,8 @@ function Projects() {
             : task
         )
       );
-    }
 
+    }
     setDrawerOpen(false);
   };
 
