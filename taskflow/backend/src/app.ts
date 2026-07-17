@@ -44,8 +44,7 @@ app.use(
   "/uploads",
   express.static(
     path.join(
-      __dirname,
-      "../uploads"
+      process.env.RAILWAY_VOLUME_MOUNT_PATH || "uploads"
     )
   )
 );
