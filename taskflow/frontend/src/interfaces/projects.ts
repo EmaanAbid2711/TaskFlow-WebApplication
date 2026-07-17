@@ -19,6 +19,7 @@ export interface Attachment {
   name: string;
   size: string;
   type: "pdf" | "image";
+  url: string;
 }
 
 export interface Activity {
