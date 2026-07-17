@@ -6,6 +6,7 @@ import {Button} from "@/components/ui/button";
 import {Calendar} from "@/components/ui/calendar";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import type {Task} from "@/interfaces/projects";
+import AssigneeSelector from "./AssigneeSelector";
 
 interface Props {
   task: Task;
@@ -188,19 +189,14 @@ function TaskInfoGrid({
           Assignee
         </label>
 
-        <input
-          value={task.assignee.name}
-          onChange={(e) =>
+        <AssigneeSelector
+          value={task.assignee}
+          onChange={(member) =>
             onChange(
               "assignee",
-              {
-                ...task.assignee,
-                name: e.target.value,
-              }
+              member
             )
           }
-          placeholder="Assignee"
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#0052cc]"
         />
 
       </div>
