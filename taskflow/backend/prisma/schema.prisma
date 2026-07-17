@@ -14,29 +14,36 @@ datasource db {
 }
 
 model User {
-  id                    String   @id @default(cuid())
-  name                  String
-  email                 String   @unique
-  password              String
-  avatar                String?
-  username              String?  @unique
-  bio                   String?
-  location              String?
-  website               String?
-  role                  String?
-  timezone              String?
-  resetPasswordToken    String?
-  resetPasswordExpiry   DateTime?
-  
-  twoFactorEnabled      Boolean  @default(false)
+  id                  String    @id @default(cuid())
+  name                String
+  email               String    @unique
+  password            String
+  avatar              String?
+  username            String?   @unique
+  bio                 String?
+  location            String?
+  website             String?
+  role                String?
+  timezone            String?
+  resetPasswordToken  String?
+  resetPasswordExpiry DateTime?
+  twoFactorEnabled    Boolean   @default(false)
 
   notificationSettings NotificationSettings?
-  billing Billing?
+  billing              Billing?
 
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  // Project relations
+  ownedProjects  Project[]       @relation("ProjectOwner")
+  projectMembers ProjectMember[]
+
+  // Task relations
+  assignedTasks Task[]     @relation("TaskAssignee")
+  comments      Comment[]
+  activities    Activity[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
-
 
 model NotificationSettings {
   id String @id @default(uuid())
@@ -46,33 +53,33 @@ model NotificationSettings {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Activity
-  taskAssignedEmail Boolean @default(true)
-  taskAssignedPush  Boolean @default(true)
+  taskAssignedEmail Boolean @default(false)
+  taskAssignedPush  Boolean @default(false)
 
-  commentsEmail Boolean @default(true)
-  commentsPush  Boolean @default(true)
+  commentsEmail Boolean @default(false)
+  commentsPush  Boolean @default(false)
 
-  remindersEmail Boolean @default(true)
+  remindersEmail Boolean @default(false)
   remindersPush  Boolean @default(false)
 
   completedEmail Boolean @default(false)
   completedPush  Boolean @default(false)
 
   // Projects
-  invitationEmail Boolean @default(true)
-  invitationPush  Boolean @default(true)
+  invitationEmail Boolean @default(false)
+  invitationPush  Boolean @default(false)
 
-  statusEmail Boolean @default(true)
+  statusEmail Boolean @default(false)
   statusPush  Boolean @default(false)
 
   memberEmail Boolean @default(false)
   memberPush  Boolean @default(false)
 
   // System
-  securityEmail Boolean @default(true)
-  securityPush  Boolean @default(true)
+  securityEmail Boolean @default(false)
+  securityPush  Boolean @default(false)
 
-  productEmail Boolean @default(true)
+  productEmail Boolean @default(false)
   productPush  Boolean @default(false)
 
   createdAt DateTime @default(now())
@@ -93,15 +100,15 @@ model Billing {
   id String @id @default(cuid())
 
   userId String @unique
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  plan PlanType @default(FREE)
-  monthlyPrice Float @default(0)
-  billingCycle String @default("Monthly")
-  renewalDate DateTime?
+  plan         PlanType  @default(FREE)
+  monthlyPrice Float     @default(0)
+  billingCycle String    @default("Monthly")
+  renewalDate  DateTime?
 
-  cardBrand String?
-  cardLast4 String?
+  cardBrand  String?
+  cardLast4  String?
   cardExpiry String?
 
   invoices Invoice[]
@@ -114,13 +121,109 @@ model Invoice {
   id String @id @default(cuid())
 
   billingId String
-  billing Billing @relation(fields: [billingId], references: [id], onDelete: Cascade)
+  billing   Billing @relation(fields: [billingId], references: [id], onDelete: Cascade)
 
-  amount Float
-  status InvoiceStatus @default(PAID)
+  amount      Float
+  status      InvoiceStatus @default(PAID)
   invoiceDate DateTime
 
   downloadUrl String?
 
   createdAt DateTime @default(now())
+}
+
+// PROJECT
+model Project {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  ownerId     String
+  owner       User            @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members     ProjectMember[]
+  tasks       Task[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+// PROJECT MEMBERS
+model ProjectMember {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String?
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, userId])
+}
+
+// TASK
+model Task {
+  id           String           @id @default(cuid())
+  title        String
+  description  String?
+  status       TaskStatus       @default(TODO)
+  priority     TaskPriority     @default(MEDIUM)
+  dueDate      DateTime?
+  progress     Int?
+  reviewStatus String?
+  projectId    String
+  project      Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assigneeId   String?
+  assignee     User?            @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  attachments  TaskAttachment[]
+  comments     Comment[]
+  activities   Activity[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+// TASK ATTACHMENTS
+model TaskAttachment {
+  id        String   @id @default(cuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  fileName  String
+  fileUrl   String
+  fileType  String
+  fileSize  String
+  createdAt DateTime @default(now())
+}
+
+// COMMENTS
+model Comment {
+  id        String   @id @default(cuid())
+  text      String
+  taskId    String
+  userId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+// ACTIVITY TIMELINE
+
+model Activity {
+  id        String   @id @default(cuid())
+  type      String
+  message   String
+  taskId    String
+  userId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+enum TaskStatus {
+  TODO
+  PROGRESS
+  REVIEW
+  COMPLETED
+}
+
+enum TaskPriority {
+  HIGH
+  MEDIUM
+  LOW
 }
