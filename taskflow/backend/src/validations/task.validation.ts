@@ -16,16 +16,16 @@ export const createTaskSchema = z.object({
     .cuid("Invalid project id."),
 
   status: z.enum([
-    "todo",
-    "progress",
-    "review",
-    "completed",
+    "TODO",
+    "PROGRESS",
+    "REVIEW",
+    "COMPLETED",
   ]),
 
   priority: z.enum([
-    "High",
-    "Medium",
-    "Low",
+    "HIGH",
+    "MEDIUM",
+    "LOW",
   ]),
 
   dueDate: z

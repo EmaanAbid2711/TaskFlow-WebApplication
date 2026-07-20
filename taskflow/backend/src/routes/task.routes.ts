@@ -1,7 +1,13 @@
 import { Router } from "express";
 
 import authMiddleware from "../middleware/auth.middleware";
-import {createTaskController, getProjectTasksController, getTaskController, updateTaskController, deleteTaskController} from "../controllers/task.controller";
+import {
+  createTaskController,
+  getProjectTasksController,
+  getTaskController,
+  updateTaskController,
+  deleteTaskController,
+} from "../controllers/task.controller";
 
 const router = Router();
 
@@ -16,10 +22,45 @@ const router = Router();
  * @swagger
  * /api/tasks:
  *   post:
- *     summary: Create Task
- *     tags: [Tasks]
+ *     summary: Create a new task
+ *     tags:
+ *       - Tasks
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - projectId
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Design Login Screen
+ *               description:
+ *                 type: string
+ *                 example: Create responsive login UI
+ *               status:
+ *                 type: string
+ *                 example: TODO
+ *               priority:
+ *                 type: string
+ *                 example: HIGH
+ *               dueDate:
+ *                 type: string
+ *                 format: date-time
+ *               projectId:
+ *                 type: string
+ *                 example: cmdd3l5lf0001abcxyz123
+ *               assigneeId:
+ *                 type: string
+ *                 example: cmdd4ab7k0002xyz987654
+ *     responses:
+ *       201:
+ *         description: Task created successfully
  */
 router.post(
   "/",
@@ -31,10 +72,21 @@ router.post(
  * @swagger
  * /api/tasks/project/{projectId}:
  *   get:
- *     summary: Get Project Tasks
- *     tags: [Tasks]
+ *     summary: Get all tasks of a project
+ *     tags:
+ *       - Tasks
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: cmdd3l5lf0001abcxyz123
+ *     responses:
+ *       200:
+ *         description: Tasks fetched successfully
  */
 router.get(
   "/project/:projectId",
@@ -46,10 +98,21 @@ router.get(
  * @swagger
  * /api/tasks/{id}:
  *   get:
- *     summary: Get Task
- *     tags: [Tasks]
+ *     summary: Get a task by ID
+ *     tags:
+ *       - Tasks
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: cmdd4efgh0005xyz123456
+ *     responses:
+ *       200:
+ *         description: Task fetched successfully
  */
 router.get(
   "/:id",
@@ -61,10 +124,41 @@ router.get(
  * @swagger
  * /api/tasks/{id}:
  *   patch:
- *     summary: Update Task
- *     tags: [Tasks]
+ *     summary: Update a task
+ *     tags:
+ *       - Tasks
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: cmdd4efgh0005xyz123456
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *               priority:
+ *                 type: string
+ *               dueDate:
+ *                 type: string
+ *                 format: date-time
+ *               assigneeId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Task updated successfully
  */
 router.patch(
   "/:id",
@@ -76,10 +170,21 @@ router.patch(
  * @swagger
  * /api/tasks/{id}:
  *   delete:
- *     summary: Delete Task
- *     tags: [Tasks]
+ *     summary: Delete a task
+ *     tags:
+ *       - Tasks
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: cmdd4efgh0005xyz123456
+ *     responses:
+ *       200:
+ *         description: Task deleted successfully
  */
 router.delete(
   "/:id",
