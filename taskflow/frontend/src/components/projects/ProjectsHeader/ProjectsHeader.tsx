@@ -10,12 +10,18 @@ interface Props {
   onProjectChange: (
     projectId: string
   ) => void;
+  search: string;
+  onSearchChange: (
+    value: string
+  ) => void;
 }
 
 function ProjectHeader({
   projects,
   selectedProject,
-  onProjectChange,}: Props) {
+  onProjectChange,
+  search,
+  onSearchChange,}: Props) {
   const navigate = useNavigate();
 
   const { user } = useAuth();
@@ -43,8 +49,26 @@ function ProjectHeader({
 
             <input
               type="text"
+              value={search}
+              onChange={(e) =>
+                onSearchChange(e.target.value)
+              }
               placeholder="Search tasks..."
-              className="w-full rounded-full border border-slate-200 bg-slate-100 py-2 pl-10 pr-4 text-sm outline-none transition focus:border-[#0052cc] focus:bg-white"
+              className="
+                w-full
+                rounded-full
+                border
+                border-slate-200
+                bg-slate-100
+                py-2
+                pl-10
+                pr-4
+                text-sm
+                outline-none
+                transition
+                focus:border-[#0052cc]
+                focus:bg-white
+              "
             />
           </div>
 
@@ -178,13 +202,14 @@ function ProjectHeader({
         <div className="mt-6 mb-4">
 
           <select
-        
+
             value={
               selectedProject?.id ?? ""
             }
           
             onChange={(e) =>
               onProjectChange(
+
                 e.target.value
               )
             }
@@ -211,9 +236,9 @@ function ProjectHeader({
                 {project.name}
             
               </option>
-        
+
             ))}
-        
+
           </select>
           
         </div>

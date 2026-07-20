@@ -11,6 +11,9 @@ import {mapTask} from "@/mappers/task.mapper";
 function Projects() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  const [search, setSearch] =
+  useState("");
+
   const [drawerMode, setDrawerMode] =
     useState<DrawerMode>("create");
 
@@ -24,6 +27,27 @@ function Projects() {
       tasks,
       setTasks,
   } = useProjects();
+
+  const filteredTasks = tasks.filter((task) => {
+
+  const keyword =
+    search.toLowerCase();
+
+  return (
+
+    task.title
+      .toLowerCase()
+      .includes(keyword)
+
+    ||
+
+    task.description
+      .toLowerCase()
+      .includes(keyword)
+
+  );
+
+});
 
   /**
    * ------------------------------------------------------------------
@@ -362,6 +386,8 @@ function Projects() {
         <ProjectHeader
           projects={projects}
           selectedProject={selectedProject}
+          search={search}
+          onSearchChange={setSearch}
           onProjectChange={(projectId) => {
           
             const project =
@@ -385,7 +411,7 @@ function Projects() {
         "
         >
           <KanbanBoard
-            tasks={tasks}
+            tasks={filteredTasks}
             onAddTask={handleAddTask}
             onTaskClick={handleTaskClick}
           />
