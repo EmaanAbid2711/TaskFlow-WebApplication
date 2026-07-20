@@ -18,9 +18,12 @@ function Projects() {
     useState<Task | null>(null);
 
   const {
+      projects,
+      selectedProject,
+      setSelectedProject,
       tasks,
       setTasks,
-      selectedProject,
+      loading,
   } = useProjects();
 
   /**
@@ -357,7 +360,24 @@ function Projects() {
         bg-slate-50
       "
       >
-        <ProjectHeader />
+        <ProjectHeader
+          projects={projects}
+          selectedProject={selectedProject}
+          onProjectChange={(projectId) => {
+          
+            const project =
+              projects.find(
+                p => p.id === projectId
+              );
+            
+            if (project) {
+            
+              setSelectedProject(
+                project
+              );
+            }
+          }}
+        />
 
         <div
           className="

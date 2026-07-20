@@ -2,8 +2,20 @@ import { Folder, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/context/AuthContext";
+import type { Project } from "@/interfaces/project";
 
-function ProjectHeader() {
+interface Props {
+  projects: Project[];
+  selectedProject: Project | null;
+  onProjectChange: (
+    projectId: string
+  ) => void;
+}
+
+function ProjectHeader({
+  projects,
+  selectedProject,
+  onProjectChange,}: Props) {
   const navigate = useNavigate();
 
   const { user } = useAuth();
@@ -38,10 +50,6 @@ function ProjectHeader() {
 
           {/* Right */}
           <div className="flex items-center justify-between gap-4 md:justify-end">
-
-            <button className="rounded-lg bg-[#0052cc] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0043a4]">
-              Get Started
-            </button>
 
             <button
               type="button"
@@ -95,19 +103,32 @@ function ProjectHeader() {
 
         {/* Breadcrumb */}
         <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+
           <Folder size={14} />
-          <span>Engineering</span>
+                    
+          <span>Projects</span>
+                    
           <span>/</span>
-          <span>TaskFlow</span>
+                    
+          <span>
+            {selectedProject?.name}
+          </span>
+                    
         </div>
 
         {/* Title + Stats */}
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
 
           {/* Title */}
-          <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">
-            Redesign System Architecture
-          </h1>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">
+              {selectedProject?.name}
+            </h1>
+
+            <p className="mt-2 text-slate-500">
+              {selectedProject?.description}
+            </p>  
+          </div>
 
           {/* Stats */}
           <div className="flex flex-col gap-5 sm:flex-row sm:gap-10">
@@ -120,11 +141,17 @@ function ProjectHeader() {
 
               <div className="flex items-center gap-3">
                 <div className="h-2 w-40 overflow-hidden rounded-full bg-slate-200">
-                  <div className="h-full w-3/4 rounded-full bg-[#0052cc]" />
+                  <div className="h-full rounded-full bg-[#0052cc]"
+                    style={{
+                      width: `${
+                        selectedProject?.stats.progress ?? 0
+                      }%`,
+                    }}
+                  />
                 </div>
 
                 <span className="text-sm font-bold">
-                  75%
+                  {selectedProject?.stats.progress ?? 0}%
                 </span>
               </div>
             </div>
@@ -137,15 +164,58 @@ function ProjectHeader() {
               </p>
 
               <p className="text-xl font-bold text-slate-900">
-                24
+                {selectedProject?.stats.completedTasks ?? 0}
                 <span className="text-base font-normal text-slate-400">
-                  {" "}
-                  / 32
+                {" / "}
+                {selectedProject?.stats.totalTasks ?? 0}            
                 </span>
               </p>
 
             </div>
           </div>
+        </div>
+
+        <div className="mt-6 mb-4">
+
+          <select
+        
+            value={
+              selectedProject?.id ?? ""
+            }
+          
+            onChange={(e) =>
+              onProjectChange(
+                e.target.value
+              )
+            }
+          
+            className="
+              rounded-lg
+              border
+              border-slate-300
+              bg-white
+              px-4
+              py-2
+              text-sm
+            "
+          
+          >
+          
+            {projects.map(project => (
+            
+              <option
+                key={project.id}
+                value={project.id}
+              >
+              
+                {project.name}
+            
+              </option>
+        
+            ))}
+        
+          </select>
+          
         </div>
 
         {/* Tabs */}

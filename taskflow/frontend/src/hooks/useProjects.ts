@@ -8,69 +8,74 @@ import { mapTasks } from "@/mappers/task.mapper";
 
 export function useProjects() {
 
-  const [projects,setProjects] =
+  const [projects, setProjects] =
     useState<Project[]>([]);
 
-  const [selectedProject,setSelectedProject] =
+  const [selectedProject, setSelectedProject] =
     useState<Project | null>(null);
 
-  const [tasks,setTasks] =
+  const [tasks, setTasks] =
     useState<Task[]>([]);
 
-  const [loading,setLoading] =
+  const [loading, setLoading] =
     useState(true);
 
-  const loadProjects = async()=>{
-    try{
+  const loadProjects = async () => {
+
+    try {
+
       const response =
         await getProjectsApi();
 
-      setProjects(
-        response.data
-      );
+      const data = response.data;
+      setProjects(data);
 
-      if(response.data.length){
+      if (
+        data.length > 0 &&
+        !selectedProject
+      ) {
+        setSelectedProject(data[0]);
+      }
+    } catch (error) {
 
-        setSelectedProject(
-          response.data[0]
+      console.log(error);
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadTasks = async (
+    projectId: string
+  ) => {
+
+    try {
+
+      const response =
+        await getProjectTasksApi(
+          projectId
         );
 
-      }
-    }
-    finally{
-      setLoading(false);
-
-    }
-  };
-
-  const loadTasks = async(
-    projectId:string
-  )=>{
-
-    const response =
-      await getProjectTasksApi(
-        projectId
+      setTasks(
+        mapTasks(response.data)
       );
 
-    setTasks(
-      mapTasks(
-        response.data
-      )
-    );
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     loadProjects();
-  },[]);
+  }, []);
 
-  useEffect(()=>{
-    if(selectedProject){
+  useEffect(() => {
+    if (selectedProject) {
       loadTasks(
         selectedProject.id
       );
     }
-
-  },[selectedProject]);
+  }, [selectedProject]);
 
   return {
     loading,
@@ -79,8 +84,7 @@ export function useProjects() {
     setSelectedProject,
     tasks,
     setTasks,
-    loadTasks,
     loadProjects,
+    loadTasks,
   };
-
 }

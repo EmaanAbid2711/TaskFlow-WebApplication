@@ -44,25 +44,61 @@ export const getProjects = async (
   ownerId: string
 ) => {
 
-  return prisma.project.findMany({
+  const projects = await prisma.project.findMany({
 
     where: {
-
       ownerId,
-
     },
 
     include: {
-
-      tasks: true,
-
+      tasks: {
+        select: {
+          id: true,
+          status: true,
+        },
+      },
     },
 
     orderBy: {
-
       createdAt: "desc",
-
     },
+
+  });
+
+  return projects.map(project => {
+
+    const totalTasks = project.tasks.length;
+
+    const completedTasks = project.tasks.filter(
+      task => task.status === "COMPLETED"
+    ).length;
+
+    const progress =
+      totalTasks === 0
+        ? 0
+        : Math.round(
+            (completedTasks / totalTasks) * 100
+          );
+
+    return {
+
+      id: project.id,
+
+      name: project.name,
+
+      description: project.description,
+
+      stats: {
+
+        totalTasks,
+
+        completedTasks,
+
+        progress,
+
+      },
+
+    };
 
   });
 
