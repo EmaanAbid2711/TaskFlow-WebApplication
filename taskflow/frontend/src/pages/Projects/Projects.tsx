@@ -23,7 +23,6 @@ function Projects() {
       setSelectedProject,
       tasks,
       setTasks,
-      loading,
   } = useProjects();
 
   /**
