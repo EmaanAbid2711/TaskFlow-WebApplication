@@ -45,7 +45,7 @@ function Projects() {
   const createEmptyTask = (
     status: TaskType
   ): Task => ({
-    id: 0,
+    id: "",
     title: "",
     description: "",
     status,
@@ -119,11 +119,11 @@ function Projects() {
       const newTask: Task = {
         ...selectedTask,
 
-        id: Date.now(),
+        id: crypto.randomUUID(),
 
         activities: [
           {
-            id: Date.now(),
+            id: crypto.randomUUID(),
             type: "system",
             text: "Task created",
             time: new Date().toLocaleString(),
@@ -185,7 +185,7 @@ function Projects() {
 
     if (!over) return;
 
-    const taskId = Number(active.id);
+    const taskId = String(active.id);
 
     const newStatus = over.id as TaskType;
 

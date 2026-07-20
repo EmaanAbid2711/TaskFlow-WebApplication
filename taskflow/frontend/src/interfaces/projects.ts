@@ -15,7 +15,7 @@ export interface Assignee {
 }
 
 export interface Attachment {
-  id: number;
+  id: string;
   name: string;
   size: string;
   type: "pdf" | "image";
@@ -23,7 +23,7 @@ export interface Attachment {
 }
 
 export interface Activity {
-  id: number;
+  id: string;
   type: "system" | "comment";
   user?: string;
   avatar?: string;
@@ -32,7 +32,7 @@ export interface Activity {
 }
 
 export interface Task {
-  id: number;
+  id: string;
   title: string;
   description: string;
   status: TaskType;
