@@ -4,7 +4,9 @@ import { Plus } from "lucide-react";
 
 import {ProjectHeader, KanbanBoard, TaskDrawer} from "@/components";
 import type {DrawerMode,Task, TaskType} from "@/interfaces/projects";
-import {todoTasks, inProgressTasks, reviewTasks, completedTasks} from "@/data/projectsData";
+import { useProjects } from "@/hooks/useProjects";
+import {createTaskApi, updateTaskApi, deleteTaskApi} from "@/api/task.api";
+import {mapTask} from "@/mappers/task.mapper";
 
 function Projects() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -15,12 +17,11 @@ function Projects() {
   const [selectedTask, setSelectedTask] =
     useState<Task | null>(null);
 
-  const [tasks, setTasks] = useState<Task[]>([
-    ...todoTasks,
-    ...inProgressTasks,
-    ...reviewTasks,
-    ...completedTasks,
-  ]);
+  const {
+      tasks,
+      setTasks,
+      selectedProject,
+  } = useProjects();
 
   /**
    * ------------------------------------------------------------------
@@ -112,47 +113,136 @@ function Projects() {
    * ------------------------------------------------------------------
    */
 
-  const handleSaveTask = () => {
-    if (!selectedTask) return;
+  const handleSaveTask = async () => {
 
-    if (drawerMode === "create") {
-      const newTask: Task = {
-        ...selectedTask,
-
-        id: crypto.randomUUID(),
-
-        activities: [
-          {
-            id: crypto.randomUUID(),
-            type: "system",
-            text: "Task created",
-            time: new Date().toLocaleString(),
-          },
-
-          ...selectedTask.activities,
-        ],
-      };
+    if(!selectedTask) return;
 
 
-      setTasks((prev) => [
-        ...prev,
-        newTask,
-      ]);
+    try{
+      // CREATE
+      if(drawerMode==="create"){
 
-    } 
+        if(!selectedProject)
+          return;
 
-    else {
+        const response =
+          await createTaskApi({
+            title:selectedTask.title,
+            description:
+              selectedTask.description,
+            status:
+              selectedTask.status,
 
-      setTasks((prev) =>
-        prev.map((task) =>
-          task.id === selectedTask.id
-            ? selectedTask
-            : task
-        )
+            priority:
+              selectedTask.priority,
+
+            dueDate:
+              selectedTask.dueDate || undefined,
+            progress:
+              selectedTask.progress,
+            reviewStatus:
+              selectedTask.reviewStatus,
+
+            projectId:
+              selectedProject.id,
+
+            assigneeId:
+              selectedTask.assignee.id || undefined,
+
+          });
+
+
+
+        setTasks(prev=>[
+          ...prev,
+          mapTask(response.data)
+        ]);
+
+      }
+
+
+
+      // UPDATE
+      else{
+
+
+        const response =
+          await updateTaskApi(
+
+            selectedTask.id,
+
+            {
+
+              title:
+                selectedTask.title,
+
+
+              description:
+                selectedTask.description,
+
+
+              status:
+                selectedTask.status,
+
+
+              priority:
+                selectedTask.priority,
+
+
+              dueDate:
+                selectedTask.dueDate,
+
+
+              progress:
+                selectedTask.progress,
+
+
+              reviewStatus:
+                selectedTask.reviewStatus,
+
+
+              assigneeId:
+                selectedTask.assignee.id
+
+            }
+
+          );
+
+        setTasks(prev=>
+          prev.map(task=>
+
+            task.id===selectedTask.id
+
+            ?
+
+            mapTask(response.data)
+
+            :
+
+            task
+
+          )
+        );
+
+
+      }
+
+
+
+      setDrawerOpen(false);
+
+
+
+    }
+    catch(error){
+
+      console.log(
+        "Task save error",
+        error
       );
 
     }
-    setDrawerOpen(false);
+
   };
 
   /**
@@ -161,17 +251,27 @@ function Projects() {
    * ------------------------------------------------------------------
    */
 
-  const handleDeleteTask = () => {
-    if (!selectedTask) return;
+  const handleDeleteTask = async()=>{
+   if(!selectedTask)
+    return;
 
-    setTasks((prev) =>
+   try{
+     await deleteTaskApi(
+      selectedTask.id
+     );
+     setTasks(prev=>
       prev.filter(
-        (task) =>
-          task.id !== selectedTask.id
+        task=>
+        task.id!==selectedTask.id
       )
+     );
+     setDrawerOpen(false);
+   }
+   catch(error){
+    console.log(
+      error
     );
-
-    setDrawerOpen(false);
+   }
   };
 
   /**
@@ -180,36 +280,69 @@ function Projects() {
    * -----------------------------------
    */
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleDragEnd = async(
+     event:DragEndEvent
+    )=>{
+     const {
+      active,
+      over
+     } = event;
+     if(!over)
+      return;
+     const taskId =
+     String(active.id);
 
-    if (!over) return;
+     const newStatus =
+     over.id as TaskType;
 
-    const taskId = String(active.id);
+     const oldTask =
+     tasks.find(
+      t=>t.id===taskId
+     );
+   
+     if(!oldTask)
+      return;
+    
+     try{
+   
+     await updateTaskApi(
+    
+      taskId,
+    
+      {
+        status:newStatus
+      }
+    
+     );
+   
+     setTasks(prev=>  
+     prev.map(task=>
+     task.id===taskId
+     ?
+    
+     {
+      ...task,
+      status:newStatus
+     }
+   
+     :
+   
+     task
+   
+     )
+   
+     );
+   
+     }
+     catch(error){ 
+     console.log(
+      "Status update failed",
+      error
+     );
+   
+     }
 
-    const newStatus = over.id as TaskType;
-
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === taskId
-          ? {
-              ...task,
-              status: newStatus,
-            }
-          : task
-      )
-    );
-
-    if (
-      selectedTask &&
-      selectedTask.id === taskId
-    ) {
-      setSelectedTask({
-        ...selectedTask,
-        status: newStatus,
-      });
-    }
-  };
+    };
 
   return (
     <DndContext
