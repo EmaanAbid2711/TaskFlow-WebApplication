@@ -9,14 +9,14 @@ interface Props {
 function Attachments({ task, onChange }: Props) {
   const handleFakeUpload = () => {
     const file = {
-      id: Date.now(),
+      id: crypto.randomUUID(),
       name: "New Attachment.png",
       size: "120 KB",
       type: "image" as const,
     };
 
     const activity = {
-      id: Date.now(),
+      id: crypto.randomUUID(),
       type: "system" as const,
       text: `Attachment uploaded: ${file.name}`,
       time: new Date().toLocaleString(),

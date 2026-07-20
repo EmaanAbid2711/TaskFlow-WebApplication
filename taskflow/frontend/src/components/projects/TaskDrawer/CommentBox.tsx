@@ -8,7 +8,7 @@ interface Props {
 
   onChange: (
     field: keyof Task,
-    value: any
+    value: any 
   ) => void;
 }
 
@@ -22,7 +22,7 @@ function CommentBox({
     if (!comment.trim()) return;
 
     const newComment: Activity = {
-      id: Date.now(),
+      id: crypto.randomUUID(),
       type: "comment",
 
       user: task.assignee.name,

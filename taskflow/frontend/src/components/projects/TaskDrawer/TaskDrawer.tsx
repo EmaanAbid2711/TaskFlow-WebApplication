@@ -75,7 +75,7 @@ function TaskDrawer({
     const newActivity =
       activityText
         ? {
-            id: Date.now(),
+            id: crypto.randomUUID(),
             type:"system" as const,
             text: activityText,
             time:new Date().toLocaleString(),

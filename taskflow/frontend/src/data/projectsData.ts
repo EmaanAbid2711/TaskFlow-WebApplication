@@ -2,7 +2,7 @@ import type { Task } from "@/interfaces/projects";
 
 export const todoTasks: Task[] = [
   {
-    id: 1,
+    id: "1",
     title: "Refactor Authentication Middleware",
 
     description:
@@ -27,7 +27,7 @@ export const todoTasks: Task[] = [
   },
 
   {
-    id: 2,
+    id: "2",
     title: "Update API Documentation",
 
     description:
@@ -54,7 +54,7 @@ export const todoTasks: Task[] = [
 
 export const inProgressTasks: Task[] = [
   {
-    id: 3,
+    id: "3",
 
     title: "Implement WebSocket Notifications",
 
@@ -89,7 +89,7 @@ export const inProgressTasks: Task[] = [
 
 export const reviewTasks: Task[] = [
   {
-    id: 4,
+    id: "4",
 
     title: "Accessibility Audit",
 
@@ -119,7 +119,7 @@ export const reviewTasks: Task[] = [
 
 export const completedTasks: Task[] = [
   {
-    id: 5,
+    id: "5",
 
     title: "Setup CI/CD Pipeline",
 
