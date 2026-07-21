@@ -442,7 +442,14 @@ if (
 
       comments: true,
 
-      activities: true,
+      activities:{
+        include:{
+          user:true
+        },
+        orderBy:{
+          createdAt:"desc"
+        }
+      }
 
     },
 
@@ -459,7 +466,14 @@ for (const activity of activities) {
 
 }
 
-return updatedTask;
+const finalTask =
+await getTaskById(
+  userId,
+  taskId
+);
+
+
+return finalTask;
 
 };
 
