@@ -3,18 +3,6 @@ import prisma from "../config/prisma";
 import type { CreateTaskInput, UpdateTaskInput} from "../validations/task.validation";
 import {TaskStatus, TaskPriority} from "@prisma/client";
 
-const statusMap: Record<string, TaskStatus> = {
-  todo: TaskStatus.TODO,
-  progress: TaskStatus.PROGRESS,
-  review: TaskStatus.REVIEW,
-  completed: TaskStatus.COMPLETED,
-};
-
-const priorityMap: Record<string, TaskPriority> = {
-  High: TaskPriority.HIGH,
-  Medium: TaskPriority.MEDIUM,
-  Low: TaskPriority.LOW,
-};
 
 async function createActivity(
   userId: string,
@@ -72,8 +60,8 @@ export const createTask = async (
     data: {
       title: data.title,
       description: data.description,
-      status: statusMap[data.status],
-      priority: priorityMap[data.priority],
+      status: data.status as TaskStatus,
+      priority: data.priority as TaskPriority,
       dueDate: data.dueDate
         ? new Date(data.dueDate)
         : null,
@@ -418,14 +406,10 @@ if (
       ...data,
 
       status:
-        data.status
-          ? statusMap[data.status]
-          : undefined,
+        data.status as TaskStatus,
 
       priority:
-        data.priority
-          ? priorityMap[data.priority]
-          : undefined,
+        data.priority as TaskPriority,
 
       dueDate:
         data.dueDate
