@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AtSign, Image, Smile } from "lucide-react";
 
 import type { Activity, Task } from "@/interfaces/projects";
+import { getAvatarUrl } from "@/lib/image"
 
 interface Props {
   task: Task;
@@ -50,13 +51,18 @@ function CommentBox({
 
         {task.assignee.avatar ? (
           <img
-            src={task.assignee.avatar}
-            alt="User"
+            src={getAvatarUrl(task.assignee.avatar)}
+            alt={task.assignee.name}
             className="h-8 w-8 rounded-full object-cover"
           />
         ) : (
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-xs">
-            ?
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-xs font-medium">
+            {task.assignee.name
+              .split(" ")
+              .map((word) => word[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase()}
           </div>
         )}
 

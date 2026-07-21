@@ -4,6 +4,7 @@ import {Camera, Upload, Eye, Trash2} from "lucide-react";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import { getAvatarUrl } from "@/lib/image";
 
 interface ProfileAvatarProps {
   image?: string;
@@ -61,7 +62,7 @@ function ProfileAvatar({
         >
           <Avatar className="h-20 w-20 cursor-pointer ring-2 ring-slate-200 transition-all duration-200 group-hover:ring-[#0052cc]">
             <AvatarImage
-              src={image}
+              src={getAvatarUrl(image)}
               alt={name}
             />
 
@@ -134,7 +135,7 @@ function ProfileAvatar({
 
           {image && (
             <img
-              src={image}
+              src={getAvatarUrl(image)}
               alt={name}
               className="mx-auto max-h-[420px] w-full rounded-2xl object-cover"
             />

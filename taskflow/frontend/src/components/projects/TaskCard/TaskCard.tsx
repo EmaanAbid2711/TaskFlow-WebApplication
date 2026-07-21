@@ -3,6 +3,7 @@ import {useDraggable} from "@dnd-kit/core";
 import {CSS} from "@dnd-kit/utilities";
 
 import type {TaskCardProps} from "../../../interfaces/projectProps";
+import { getAvatarUrl } from "@/lib/image";
 
 function TaskCard({
   task,
@@ -103,7 +104,7 @@ function TaskCard({
             </div>
 
             <img
-              src={task.assignee.avatar}
+              src={getAvatarUrl(task.assignee.avatar)}
               alt="Assignee"
               className="h-7 w-7 rounded-full object-cover"
             />
@@ -124,7 +125,7 @@ function TaskCard({
               {task.assignees?.map((img, index) => (
                 <img
                   key={index}
-                  src={img}
+                  src={getAvatarUrl(img)}
                   alt={`Member ${index + 1}`}
                   className="h-7 w-7 rounded-full border-2 border-white object-cover"
                 />
@@ -141,7 +142,7 @@ function TaskCard({
             </div>
 
             <img
-              src={task.assignee.avatar}
+              src={getAvatarUrl(task.assignee.avatar)}
               alt="Reviewer"
               className="h-7 w-7 rounded-full object-cover"
             />
@@ -156,7 +157,7 @@ function TaskCard({
             </div>
 
             <img
-              src={task.assignee.avatar}
+              src={getAvatarUrl(task.assignee.avatar)}
               alt="Completed"
               className="h-7 w-7 rounded-full object-cover opacity-60"
             />

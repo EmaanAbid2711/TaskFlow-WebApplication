@@ -6,7 +6,8 @@ import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/components/ui/command";
 import { Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar";
 import type { Assignee, UserOption } from "@/interfaces/projects";
-import { cn } from "@/lib/utils";
+import { cn , } from "@/lib/utils";
+import { getAvatarUrl } from "@/lib/image";
 
 interface Props {
   value: Assignee;
@@ -37,7 +38,9 @@ function AssigneeSelector({
       >
         <div className="flex items-center gap-2">
           <Avatar className="h-7 w-7">
-            <AvatarImage src={value.avatar} />
+            <AvatarImage
+              src={getAvatarUrl(value.avatar)}
+            />
 
             <AvatarFallback>
               {value.name.charAt(0)}
@@ -94,7 +97,7 @@ function AssigneeSelector({
                   <Avatar className="h-7 w-7">
                 
                     <AvatarImage
-                      src={user.avatar}
+                      src={getAvatarUrl(user.avatar)}
                     />
 
                     <AvatarFallback>
