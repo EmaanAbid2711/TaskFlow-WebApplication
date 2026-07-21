@@ -451,8 +451,8 @@ if (
 for (const activity of activities) {
 
   await createActivity(
-    task.id,
     userId,
+    task.id,
     "system",
     activity
   );
