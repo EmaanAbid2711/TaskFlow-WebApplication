@@ -82,7 +82,14 @@ export const createTask = async (
       projectId: data.projectId,
       assigneeId: data.assigneeId,
 
-    }
+    },
+
+    include: {  
+    assignee: true,
+    attachments: true,
+    comments: true,
+    activities: true,
+    },
 
   });
   await createActivity(
@@ -92,32 +99,7 @@ export const createTask = async (
   "Task created"
 );
 
-return prisma.task.findUnique({
-
-  where:{
-    id:task.id
-  },
-
-  include:{
-
-    assignee:true,
-
-    attachments:true,
-
-    comments:true,
-
-    activities:{
-      include:{
-        user:true
-      },
-      orderBy:{
-        createdAt:"desc"
-      }
-    }
-
-  }
-
-});
+return task;
 
 };
 
@@ -260,237 +242,196 @@ export const updateTask = async (
     throw new Error("Task not found.");
   }
 
-  //------------------------------------------------------------------
-  // Build update payload
-  //------------------------------------------------------------------
+  const activities: string[] = [];
 
-  const updateData = {
+/*
+|--------------------------------------------------------------------------
+| Compare Title
+|--------------------------------------------------------------------------
+*/
 
-    ...data,
+if (
+  data.title !== undefined &&
+  data.title !== task.title
+) {
+  activities.push("Task title updated");
+}
 
-    status:
-      data.status
-        ? statusMap[data.status]
-        : undefined,
+/*
+|--------------------------------------------------------------------------
+| Compare Description
+|--------------------------------------------------------------------------
+*/
 
-    priority:
-      data.priority
-        ? priorityMap[data.priority]
-        : undefined,
+if (
+  data.description !== undefined &&
+  data.description !== task.description
+) {
+  activities.push("Task description updated");
+}
 
-    dueDate:
-      data.dueDate
-        ? new Date(data.dueDate)
-        : undefined,
+/*
+|--------------------------------------------------------------------------
+| Compare Status
+|--------------------------------------------------------------------------
+*/
 
-  };
+if (
+  data.status &&
+  data.status !== task.status
+) {
+  activities.push(
+    `Status changed from ${task.status} to ${data.status}`
+  );
+}
 
-  //------------------------------------------------------------------
-  // Save task
-  //------------------------------------------------------------------
+/*
+|--------------------------------------------------------------------------
+| Compare Priority
+|--------------------------------------------------------------------------
+*/
 
-  const updatedTask =
-    await prisma.task.update({
+if (
+  data.priority &&
+  data.priority !== task.priority
+) {
+  activities.push(
+    `Priority changed from ${task.priority} to ${data.priority}`
+  );
+}
 
-      where: {
-        id: taskId,
-      },
+/*
+|--------------------------------------------------------------------------
+| Compare Due Date
+|--------------------------------------------------------------------------
+*/
 
-      data: updateData,
+if (
+  data.dueDate !== undefined
+) {
 
-    });
+  const oldDate =
+    task.dueDate
+      ?.toISOString()
+      .split("T")[0];
 
-  //------------------------------------------------------------------
-  // Activity Timeline
-  //------------------------------------------------------------------
+  const newDate =
+    data.dueDate;
 
-  const activities: {
-    type: string;
-    message: string;
-    taskId: string;
-    userId: string;
-  }[] = [];
+  if (oldDate !== newDate) {
 
-  // Title
-  if (
-    data.title !== undefined &&
-    data.title !== task.title
-  ) {
-    activities.push({
-      type: "system",
-      message: `Task title changed to "${data.title}"`,
-      taskId,
-      userId,
-    });
+    activities.push(
+      `Due date changed to ${newDate}`
+    );
+
   }
 
-  // Description
-  if (
-    data.description !== undefined &&
-    data.description !== task.description
-  ) {
-    activities.push({
-      type: "system",
-      message: "Task description updated",
-      taskId,
-      userId,
-    });
-  }
+}
 
-  // Status
-  if (
-    data.status !== undefined &&
-    statusMap[data.status] !== task.status
-  ) {
-    activities.push({
-      type: "system",
-      message: `Status changed from ${task.status} to ${statusMap[data.status]}`,
-      taskId,
-      userId,
-    });
-  }
+/*
+|--------------------------------------------------------------------------
+| Compare Progress
+|--------------------------------------------------------------------------
+*/
 
-  // Priority
-  if (
-    data.priority !== undefined &&
-    priorityMap[data.priority] !== task.priority
-  ) {
-    activities.push({
-      type: "system",
-      message: `Priority changed from ${task.priority} to ${priorityMap[data.priority]}`,
-      taskId,
-      userId,
-    });
-  }
+if (
+  data.progress !== undefined &&
+  data.progress !== task.progress
+) {
 
-  // Due Date
-  if (
-    data.dueDate !== undefined
-  ) {
+  activities.push(
+    `Progress updated to ${data.progress}%`
+  );
 
-    const oldDate =
-      task.dueDate
-        ? task.dueDate.toISOString().slice(0, 10)
-        : "";
+}
 
-    const newDate =
-      data.dueDate;
+/*
+|--------------------------------------------------------------------------
+| Compare Review Status
+|--------------------------------------------------------------------------
+*/
 
-    if (oldDate !== newDate) {
+if (
+  data.reviewStatus !== undefined &&
+  data.reviewStatus !== task.reviewStatus
+) {
 
-      activities.push({
+  activities.push(
+    `Review status changed`
+  );
 
-        type: "system",
+}
 
-        message:
-          newDate === ""
-            ? "Due date removed"
-            : `Due date changed to ${newDate}`,
+/*
+|--------------------------------------------------------------------------
+| Compare Assignee
+|--------------------------------------------------------------------------
+*/
 
-        taskId,
+if (
+  data.assigneeId !== undefined &&
+  data.assigneeId !== task.assigneeId
+) {
 
-        userId,
+  let assigneeName = "Unassigned";
+
+  if (data.assigneeId) {
+
+    const assignee =
+      await prisma.user.findUnique({
+
+        where: {
+          id: data.assigneeId,
+        },
+
+        select: {
+          name: true,
+        },
 
       });
 
-    }
+    assigneeName =
+      assignee?.name ??
+      "Unknown User";
 
   }
 
-  // Progress
-  if (
-    data.progress !== undefined &&
-    data.progress !== task.progress
-  ) {
-    activities.push({
-      type: "system",
-      message: `Progress updated to ${data.progress}%`,
-      taskId,
-      userId,
-    });
-  }
+  activities.push(
+    `Assigned to ${assigneeName}`
+  );
 
-  // Review Status
-  if (
-    data.reviewStatus !== undefined &&
-    data.reviewStatus !== task.reviewStatus
-  ) {
-    activities.push({
-      type: "system",
-      message: `Review status changed to "${data.reviewStatus}"`,
-      taskId,
-      userId,
-    });
-  }
-
-  // Assignee
-  if (
-    data.assigneeId !== undefined &&
-    data.assigneeId !== task.assigneeId
-  ) {
-
-    let assigneeName = "Unassigned";
-
-    if (data.assigneeId) {
-
-      const assignee =
-        await prisma.user.findUnique({
-
-          where: {
-            id: data.assigneeId,
-          },
-
-          select: {
-            name: true,
-          },
-
-        });
-
-      assigneeName =
-        assignee?.name ??
-        "Unknown User";
-
-    }
-
-    activities.push({
-
-      type: "system",
-
-      message:
-        data.assigneeId
-          ? `Assigned to ${assigneeName}`
-          : "Task unassigned",
-
-      taskId,
-
-      userId,
-
-    });
-
-  }
-
-  //------------------------------------------------------------------
-  // Save activities
-  //------------------------------------------------------------------
-
-  if (activities.length > 0) {
-
-    await prisma.activity.createMany({
-
-      data: activities,
-
-    });
-
-  }
+}
 
   //------------------------------------------------------------------
   // Return updated task with relations
   //------------------------------------------------------------------
 
-  return prisma.task.findUnique({
+  const updatedTask =
+  await prisma.task.update({
 
     where: {
       id: taskId,
+    },
+
+    data: {
+
+      ...data,
+
+      status:
+        data.status
+          ? statusMap[data.status]
+          : undefined,
+
+      priority:
+        data.priority
+          ? priorityMap[data.priority]
+          : undefined,
+
+      dueDate:
+        data.dueDate
+          ? new Date(data.dueDate)
+          : undefined,
+
     },
 
     include: {
@@ -501,25 +442,24 @@ export const updateTask = async (
 
       comments: true,
 
-      activities: {
-
-        include: {
-
-          user: true,
-
-        },
-
-        orderBy: {
-
-          createdAt: "asc",
-
-        },
-
-      },
+      activities: true,
 
     },
 
   });
+
+for (const activity of activities) {
+
+  await createActivity(
+    task.id,
+    userId,
+    "system",
+    activity
+  );
+
+}
+
+return updatedTask;
 
 };
 

@@ -19,8 +19,6 @@ interface Props {
   onDelete: () => void;
 }
 
-const {users} = useUsers();
-
 function TaskDrawer({
   open,
   onClose,
@@ -32,6 +30,7 @@ function TaskDrawer({
 
 }: Props) {
 
+  const {users} = useUsers();
 
   if (!task) {
     return null;
@@ -75,31 +74,11 @@ function TaskDrawer({
         break;
     }
 
-    const newActivity =
-      activityText
-        ? {
-            id: crypto.randomUUID(),
-            type:"system" as const,
-            text: activityText,
-            time:new Date().toLocaleString(),
-          }
-        : null;
-
     onChangeTask({
 
       ...task,
 
       [field]: value,
-
-
-      activities:
-        newActivity
-          ? [
-              ...task.activities,
-              newActivity,
-            ]
-          :
-            task.activities,
 
     });
 
