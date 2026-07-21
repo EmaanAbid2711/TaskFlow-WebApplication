@@ -16,6 +16,22 @@ const priorityMap: Record<string, TaskPriority> = {
   Low: TaskPriority.LOW,
 };
 
+async function createActivity(
+  userId: string,
+  taskId: string,
+  type: string,
+  message: string
+) {
+  await prisma.activity.create({
+    data: {
+      userId,
+      taskId,
+      type,
+      message,
+    },
+  });
+}
+
 export const createTask = async (
   userId: string,
   data: CreateTaskInput
@@ -51,53 +67,57 @@ export const createTask = async (
 
   }
 
-  return prisma.task.create({
+  const task = await prisma.task.create({
 
     data: {
-
       title: data.title,
+      description: data.description,
+      status: statusMap[data.status],
+      priority: priorityMap[data.priority],
+      dueDate: data.dueDate
+        ? new Date(data.dueDate)
+        : null,
+      progress: data.progress,
+      reviewStatus: data.reviewStatus,
+      projectId: data.projectId,
+      assigneeId: data.assigneeId,
 
-      description:
-        data.description,
-
-      status:
-        statusMap[data.status],
-
-      priority:
-        priorityMap[data.priority],
-
-      dueDate:
-        data.dueDate
-          ? new Date(data.dueDate)
-          : null,
-
-      progress:
-        data.progress,
-
-      reviewStatus:
-        data.reviewStatus,
-
-      projectId:
-        data.projectId,
-
-      assigneeId:
-        data.assigneeId,
-
-    },
-
-    include: {
-
-      assignee: true,
-
-      attachments: true,
-
-      comments: true,
-
-      activities: true,
-
-    },
+    }
 
   });
+  await createActivity(
+  userId,
+  task.id,
+  "system",
+  "Task created"
+);
+
+return prisma.task.findUnique({
+
+  where:{
+    id:task.id
+  },
+
+  include:{
+
+    assignee:true,
+
+    attachments:true,
+
+    comments:true,
+
+    activities:{
+      include:{
+        user:true
+      },
+      orderBy:{
+        createdAt:"desc"
+      }
+    }
+
+  }
+
+});
 
 };
 
@@ -142,7 +162,14 @@ async (
 
       comments: true,
 
-      activities: true,
+      activities:{
+        include:{
+          user:true
+        },
+        orderBy:{
+          createdAt:"desc"
+        }
+      },
 
     },
 
@@ -199,6 +226,9 @@ async (
         include: {
           user: true,
         },
+        orderBy:{
+          createdAt:"desc"
+        }
       },
 
       activities: {
@@ -214,8 +244,7 @@ async (
 };
 
 // Update Task
-export const updateTask =
-async (
+export const updateTask = async (
   userId: string,
   taskId: string,
   data: UpdateTaskInput
@@ -228,38 +257,240 @@ async (
     );
 
   if (!task) {
+    throw new Error("Task not found.");
+  }
 
-    throw new Error(
-      "Task not found."
-    );
+  //------------------------------------------------------------------
+  // Build update payload
+  //------------------------------------------------------------------
+
+  const updateData = {
+
+    ...data,
+
+    status:
+      data.status
+        ? statusMap[data.status]
+        : undefined,
+
+    priority:
+      data.priority
+        ? priorityMap[data.priority]
+        : undefined,
+
+    dueDate:
+      data.dueDate
+        ? new Date(data.dueDate)
+        : undefined,
+
+  };
+
+  //------------------------------------------------------------------
+  // Save task
+  //------------------------------------------------------------------
+
+  const updatedTask =
+    await prisma.task.update({
+
+      where: {
+        id: taskId,
+      },
+
+      data: updateData,
+
+    });
+
+  //------------------------------------------------------------------
+  // Activity Timeline
+  //------------------------------------------------------------------
+
+  const activities: {
+    type: string;
+    message: string;
+    taskId: string;
+    userId: string;
+  }[] = [];
+
+  // Title
+  if (
+    data.title !== undefined &&
+    data.title !== task.title
+  ) {
+    activities.push({
+      type: "system",
+      message: `Task title changed to "${data.title}"`,
+      taskId,
+      userId,
+    });
+  }
+
+  // Description
+  if (
+    data.description !== undefined &&
+    data.description !== task.description
+  ) {
+    activities.push({
+      type: "system",
+      message: "Task description updated",
+      taskId,
+      userId,
+    });
+  }
+
+  // Status
+  if (
+    data.status !== undefined &&
+    statusMap[data.status] !== task.status
+  ) {
+    activities.push({
+      type: "system",
+      message: `Status changed from ${task.status} to ${statusMap[data.status]}`,
+      taskId,
+      userId,
+    });
+  }
+
+  // Priority
+  if (
+    data.priority !== undefined &&
+    priorityMap[data.priority] !== task.priority
+  ) {
+    activities.push({
+      type: "system",
+      message: `Priority changed from ${task.priority} to ${priorityMap[data.priority]}`,
+      taskId,
+      userId,
+    });
+  }
+
+  // Due Date
+  if (
+    data.dueDate !== undefined
+  ) {
+
+    const oldDate =
+      task.dueDate
+        ? task.dueDate.toISOString().slice(0, 10)
+        : "";
+
+    const newDate =
+      data.dueDate;
+
+    if (oldDate !== newDate) {
+
+      activities.push({
+
+        type: "system",
+
+        message:
+          newDate === ""
+            ? "Due date removed"
+            : `Due date changed to ${newDate}`,
+
+        taskId,
+
+        userId,
+
+      });
+
+    }
 
   }
 
-  return prisma.task.update({
+  // Progress
+  if (
+    data.progress !== undefined &&
+    data.progress !== task.progress
+  ) {
+    activities.push({
+      type: "system",
+      message: `Progress updated to ${data.progress}%`,
+      taskId,
+      userId,
+    });
+  }
+
+  // Review Status
+  if (
+    data.reviewStatus !== undefined &&
+    data.reviewStatus !== task.reviewStatus
+  ) {
+    activities.push({
+      type: "system",
+      message: `Review status changed to "${data.reviewStatus}"`,
+      taskId,
+      userId,
+    });
+  }
+
+  // Assignee
+  if (
+    data.assigneeId !== undefined &&
+    data.assigneeId !== task.assigneeId
+  ) {
+
+    let assigneeName = "Unassigned";
+
+    if (data.assigneeId) {
+
+      const assignee =
+        await prisma.user.findUnique({
+
+          where: {
+            id: data.assigneeId,
+          },
+
+          select: {
+            name: true,
+          },
+
+        });
+
+      assigneeName =
+        assignee?.name ??
+        "Unknown User";
+
+    }
+
+    activities.push({
+
+      type: "system",
+
+      message:
+        data.assigneeId
+          ? `Assigned to ${assigneeName}`
+          : "Task unassigned",
+
+      taskId,
+
+      userId,
+
+    });
+
+  }
+
+  //------------------------------------------------------------------
+  // Save activities
+  //------------------------------------------------------------------
+
+  if (activities.length > 0) {
+
+    await prisma.activity.createMany({
+
+      data: activities,
+
+    });
+
+  }
+
+  //------------------------------------------------------------------
+  // Return updated task with relations
+  //------------------------------------------------------------------
+
+  return prisma.task.findUnique({
 
     where: {
       id: taskId,
-    },
-
-    data: {
-
-      ...data,
-
-      status:
-        data.status
-            ? statusMap[data.status]
-            : undefined,
-
-      priority:
-        data.priority
-            ? priorityMap[data.priority]
-            : undefined,
-
-      dueDate:
-        data.dueDate
-          ? new Date(data.dueDate)
-          : undefined,
-
     },
 
     include: {
@@ -270,7 +501,21 @@ async (
 
       comments: true,
 
-      activities: true,
+      activities: {
+
+        include: {
+
+          user: true,
+
+        },
+
+        orderBy: {
+
+          createdAt: "asc",
+
+        },
+
+      },
 
     },
 
