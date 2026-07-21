@@ -32,3 +32,13 @@ export const updateProfileApi =
 export const getAllUsersApi = () => {
   return api.get("/api/users");
 };
+
+export const getUsersApi = async () => {
+
+  const response = await api.get(
+    "/api/users"
+  );
+
+  return response.data;
+
+};

@@ -5,6 +5,7 @@ import Attachments from "./Attachments";
 import ActivityTimeline from "./ActivityTimeline";
 import CommentBox from "./CommentBox";
 import type {DrawerMode, Task} from "@/interfaces/projects";
+import { useUsers } from "@/hooks/useUsers";
 
 interface Props {
   open: boolean;
@@ -17,6 +18,8 @@ interface Props {
   onSave: () => void;
   onDelete: () => void;
 }
+
+const {users} = useUsers();
 
 function TaskDrawer({
   open,
@@ -171,6 +174,7 @@ function TaskDrawer({
 
             <TaskInfoGrid
               task={task}
+              users={users}
               onChange={
                 handleChange
               }

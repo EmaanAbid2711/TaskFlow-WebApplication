@@ -5,12 +5,12 @@ import {CalendarDays, ChevronDown} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Calendar} from "@/components/ui/calendar";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import type {Task} from "@/interfaces/projects";
+import type {Task, UserOption} from "@/interfaces/projects";
 import AssigneeSelector from "./AssigneeSelector";
 
 interface Props {
   task: Task;
-
+  users: UserOption[];
   onChange: (
     field: keyof Task,
     value: any
@@ -19,6 +19,7 @@ interface Props {
 
 function TaskInfoGrid({
   task,
+  users,
   onChange,
 }: Props) {
 
@@ -190,13 +191,15 @@ function TaskInfoGrid({
         </label>
 
         <AssigneeSelector
-          value={task.assignee}
-          onChange={(member) =>
-            onChange(
-              "assignee",
-              member
-            )
-          }
+            users={users}
+            value={task.assignee}
+            onChange={(member)=>
+              onChange(
+                "assignee",
+                member
+              )            
+            }
+
         />
 
       </div>

@@ -14,6 +14,13 @@ export interface Assignee {
   avatar: string;
 }
 
+export interface UserOption {
+  id: string;
+  name: string;
+  avatar: string;
+  role?: string;
+}
+
 export interface Attachment {
   id: string;
   name: string;
