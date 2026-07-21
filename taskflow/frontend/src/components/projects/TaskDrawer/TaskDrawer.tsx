@@ -40,44 +40,9 @@ function TaskDrawer({
     field: keyof Task,
     value: any
   ) => {
-    let activityText = "";
-    switch(field) {
-      case "title":
-        activityText = "Task title updated";
-        break;
-
-      case "description":
-        activityText = "Task description updated";
-        break;
-
-      case "status":
-        activityText =
-          `Status changed to ${value}`;
-        break;
-
-      case "priority":
-        activityText =
-          `Priority changed to ${value}`;
-        break;
-
-      case "dueDate":
-        activityText =
-          "Due date updated";
-        break;
-
-      case "assignee":
-        activityText =
-          `Assigned to ${value.name}`;
-        break;
-
-      default:
-        break;
-    }
 
     onChangeTask({
-
       ...task,
-
       [field]: value,
 
     });
