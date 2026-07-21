@@ -151,6 +151,13 @@ function Projects() {
         if(!selectedProject)
           return;
 
+        if (
+          selectedTask.title.trim().length < 3
+        ) {
+          alert("Task title must be at least 3 characters.");
+          return;
+        }
+
         const response =
           await createTaskApi({
             title:selectedTask.title,
