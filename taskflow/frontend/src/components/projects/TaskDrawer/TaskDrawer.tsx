@@ -12,12 +12,13 @@ interface Props {
   onClose: () => void;
   mode: DrawerMode;
   task: Task | null;
-  onChangeTask: (
-    updatedTask: Task
-  ) => void;
+  onChangeTask:
+    (
+      updatedTask: Task
+    ) => void;
   onSave: () => void;
   onDelete: () => void;
-  refreshTasks: () => Promise<void>;
+  refreshTasks: () => Promise<Task[]>;
 }
 
 function TaskDrawer({
@@ -127,13 +128,10 @@ function TaskDrawer({
             />
 
             <Attachments
-
               task={task}
-
               onChange={handleChange}
-
               refreshTasks={refreshTasks}
-
+              onChangeTask={onChangeTask}
             />
 
             <ActivityTimeline

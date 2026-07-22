@@ -5,8 +5,8 @@ import { Plus } from "lucide-react";
 import {ProjectHeader, KanbanBoard, TaskDrawer} from "@/components";
 import type {DrawerMode,Task, TaskType} from "@/interfaces/projects";
 import { useProjects } from "@/hooks/useProjects";
-import {createTaskApi, updateTaskApi, deleteTaskApi} from "@/api/task.api";
-import {mapTask} from "@/mappers/task.mapper";
+import {createTaskApi, updateTaskApi, deleteTaskApi, getProjectTasksApi} from "@/api/task.api";
+import {mapTask, mapTasks} from "@/mappers/task.mapper";
 
 function Projects() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -26,17 +26,29 @@ function Projects() {
       setSelectedProject,
       tasks,
       setTasks,
-      loadTasks,
   } = useProjects();
 
-  const refreshCurrentProject = async () => {
+  const refreshCurrentProject =
+async (): Promise<Task[]> => {
 
-  if (!selectedProject) return;
+  if (!selectedProject) {
+    return [];
+  }
 
-  await loadTasks(
-    selectedProject.id
-  );
+  const response =
+    await getProjectTasksApi(
+      selectedProject.id
+    );
 
+
+  const updatedTasks =
+    mapTasks(response.data);
+
+
+  setTasks(updatedTasks);
+
+
+  return updatedTasks;
 };
 
   const filteredTasks = tasks.filter((task) => {

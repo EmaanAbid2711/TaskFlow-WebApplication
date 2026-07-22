@@ -1,24 +1,50 @@
 import { useRef, useState } from "react";
-import {FileImage, FileText, Upload, Trash2, ExternalLink, Loader2} from "lucide-react";
+import {
+  FileImage,
+  FileText,
+  Upload,
+  Trash2,
+  ExternalLink,
+  Loader2,
+} from "lucide-react";
 
-import { uploadTaskAttachmentApi, deleteTaskAttachmentApi} from "@/api/task.api";
+import {
+  uploadTaskAttachmentApi,
+  deleteTaskAttachmentApi,
+} from "@/api/task.api";
+
 import type { Task } from "@/interfaces/projects";
 import ConfirmModal from "@/components/common/ConfirmModal/confirmmodal";
 
 interface Props {
   task: Task;
   onChange: (field: keyof Task, value: any) => void;
-  refreshTasks: () => Promise<void>;
+  refreshTasks: () => Promise<Task[]>;
+  onChangeTask: (task: Task) => void;
 }
 
-function Attachments({ task, refreshTasks }: Props) {
+function Attachments({ task, refreshTasks, onChangeTask }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [deleteId,setDeleteId] =  useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   /*
   |--------------------------------------------------------------------------
-  | Upload Attachment
+  | Update Drawer Task
+  |--------------------------------------------------------------------------
+  */
+  const syncTask = async () => {
+    const updatedTasks = await refreshTasks();
+    const updatedTask = updatedTasks.find((item) => item.id === task.id);
+
+    if (updatedTask) {
+      onChangeTask(updatedTask);
+    }
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Upload
   |--------------------------------------------------------------------------
   */
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,10 +54,10 @@ function Attachments({ task, refreshTasks }: Props) {
     try {
       setUploading(true);
       await uploadTaskAttachmentApi(task.id, file);
-      await refreshTasks();
+      await syncTask();
     } catch (error) {
-      console.error(error);
-      alert("Failed to upload attachment.");
+      console.log(error);
+      alert("Failed to upload attachment");
     } finally {
       setUploading(false);
       event.target.value = "";
@@ -40,25 +66,22 @@ function Attachments({ task, refreshTasks }: Props) {
 
   /*
   |--------------------------------------------------------------------------
-  | Delete Attachment
+  | Delete
   |--------------------------------------------------------------------------
   */
   const handleDelete = async () => {
-  if(!deleteId) return;
-  try {
-    await deleteTaskAttachmentApi(
-      task.id,
-      deleteId
-    );
-    await refreshTasks();
-  }
-  catch(error){
-    console.log(error);
-  }
-  finally{
-    setDeleteId(null);
-  }
-};
+    if (!deleteId) return;
+
+    try {
+      await deleteTaskAttachmentApi(task.id, deleteId);
+      await syncTask();
+    } catch (error) {
+      console.log(error);
+      alert("Failed to delete attachment");
+    } finally {
+      setDeleteId(null);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -85,7 +108,6 @@ function Attachments({ task, refreshTasks }: Props) {
           ) : (
             <Upload size={13} />
           )}
-
           {uploading ? "Uploading..." : "Upload"}
         </button>
       </div>
@@ -128,61 +150,27 @@ function Attachments({ task, refreshTasks }: Props) {
 
                 <button
                   type="button"
-                  onClick={(e)=>{
-                  
-                    e.preventDefault();
-                  
-                    setDeleteId(file.id);
-                  
-                  }}
-                
-                  className="
-                  ml-auto
-                  text-slate-400
-                  hover:text-red-600
-                  "
+                  onClick={() => setDeleteId(file.id)}
+                  className="text-slate-400 hover:text-red-600"
                 >
-                
-                <Trash2 size={16}/>
-                
+                  <Trash2 size={16} />
                 </button>
-
-                <ConfirmModal
-
-                  open={
-                    deleteId !== null
-                  }
-                
-                  title="Delete Attachment"
-                
-                  message="
-                  Are you sure you want to delete this attachment?
-                  This action cannot be undone.
-                  "
-                
-                  confirmText="Delete"
-                
-                  onCancel={() =>
-                    setDeleteId(null)
-                  }
-                
-                  onConfirm={
-                    handleDelete
-                  }
-                
-                />
               </div>
-
-          
-            
-          );
+            );
           })}
         </div>
       )}
+
+      <ConfirmModal
+        open={deleteId !== null}
+        title="Delete Attachment"
+        message="Are you sure you want to delete this attachment? This action cannot be undone."
+        confirmText="Delete"
+        onCancel={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+      />
     </div>
-
   );
-
 }
 
 export default Attachments;
