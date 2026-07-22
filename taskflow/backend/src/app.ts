@@ -37,6 +37,11 @@ app.get("/", (_, res) => {
 });
 
 app.use(
+  "/uploads",
+  express.static("/app/uploads")
+);
+
+app.use(
   "/api-docs",
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec)

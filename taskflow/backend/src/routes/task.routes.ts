@@ -1,13 +1,8 @@
 import { Router } from "express";
 
 import authMiddleware from "../middleware/auth.middleware";
-import {
-  createTaskController,
-  getProjectTasksController,
-  getTaskController,
-  updateTaskController,
-  deleteTaskController,
-} from "../controllers/task.controller";
+import { attachmentUpload } from "../config/multer";
+import {createTaskController, getProjectTasksController, getTaskController, updateTaskController, deleteTaskController, uploadTaskAttachmentController} from "../controllers/task.controller";
 
 const router = Router();
 
@@ -164,6 +159,44 @@ router.patch(
   "/:id",
   authMiddleware,
   updateTaskController
+);
+
+/**
+ * @swagger
+ * /api/tasks/{id}/attachments:
+ *   post:
+ *     summary: Upload attachment to task
+ *     tags:
+ *       - Tasks
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Attachment uploaded successfully
+ */
+router.post(
+  "/:id/attachments",
+  authMiddleware,
+  attachmentUpload.single("file"),
+  uploadTaskAttachmentController
 );
 
 /**

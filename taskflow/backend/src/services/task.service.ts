@@ -1,15 +1,15 @@
 import prisma from "../config/prisma";
 
 import type { CreateTaskInput, UpdateTaskInput} from "../validations/task.validation";
-import {TaskStatus, TaskPriority} from "@prisma/client";
+import {TaskStatus, TaskPriority, Prisma} from "@prisma/client";
 
 
-async function createActivity(
+const createActivity = async (
   userId: string,
   taskId: string,
   type: string,
   message: string
-) {
+) => {
   await prisma.activity.create({
     data: {
       userId,
@@ -18,7 +18,7 @@ async function createActivity(
       message,
     },
   });
-}
+};
 
 export const createTask = async (
   userId: string,
@@ -489,5 +489,55 @@ async (
     },
 
   });
+
+};
+
+interface UploadAttachmentInput {
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: string;
+}
+
+export const uploadTaskAttachment = async (
+  userId: string,
+  taskId: string,
+  file: UploadAttachmentInput
+) => {
+// Verify task exists and user has access
+
+  const task = await getTaskById(
+    userId,
+    taskId
+  );
+
+  if (!task) {
+    throw new Error("Task not found.");
+  }
+
+  // Save attachment
+ 
+  const attachment =
+    await prisma.taskAttachment.create({
+
+      data: {
+        taskId,
+        fileName: file.fileName,
+        fileUrl: file.fileUrl,
+        fileType: file.fileType,
+        fileSize: file.fileSize,
+
+      },
+
+    });
+
+  await createActivity(
+    userId,
+    taskId,
+    "system",
+    `Attachment uploaded: ${file.fileName}`
+
+  );
+  return attachment;
 
 };

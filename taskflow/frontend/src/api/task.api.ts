@@ -1,6 +1,7 @@
 import api from "./axios";
 
 import type {CreateTaskPayload, UpdateTaskPayload} from "@/interfaces/task.api";
+import { mapTask } from "@/mappers/task.mapper";
 
 export const getProjectTasksApi = async (
   projectId: string
@@ -26,7 +27,10 @@ export const getTaskApi = async (
       `/api/tasks/${taskId}`
     );
 
-  return response.data;
+  return {
+    success: response.data.success,
+    data: mapTask(response.data.data),
+  };
 
 };
 
@@ -99,6 +103,29 @@ export const deleteTaskApi = async (
     await api.delete(
       `/api/tasks/${taskId}`
     );
+
+  return response.data;
+
+};
+
+export const uploadTaskAttachmentApi = async (
+  taskId: string,
+  file: File
+) => {
+
+  const formData = new FormData();
+
+  formData.append("file", file);
+
+  const response = await api.post(
+    `/api/tasks/${taskId}/attachments`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
 
   return response.data;
 
