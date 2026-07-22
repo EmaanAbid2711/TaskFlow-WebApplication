@@ -2,6 +2,8 @@ import prisma from "../config/prisma";
 
 import type { CreateTaskInput, UpdateTaskInput} from "../validations/task.validation";
 import {TaskStatus, TaskPriority, Prisma} from "@prisma/client";
+import fs from "fs/promises";
+import path from "path";
 
 
 const createActivity = async (
@@ -539,5 +541,87 @@ export const uploadTaskAttachment = async (
 
   );
   return attachment;
+
+};
+
+export const deleteTaskAttachment = async (
+  userId: string,
+  taskId: string,
+  attachmentId: string
+) => {
+
+  // Verify task access
+  const task = await getTaskById(
+    userId,
+    taskId
+  );
+
+  if (!task) {
+    throw new Error("Task not found.");
+  }
+
+  // Find attachment
+  const attachment =
+    await prisma.taskAttachment.findFirst({
+
+      where: {
+        id: attachmentId,
+        taskId,
+      },
+
+    });
+
+  if (!attachment) {
+    throw new Error("Attachment not found.");
+  }
+
+  //----------------------------------------------------
+  // Delete physical file
+  //----------------------------------------------------
+
+  try {
+
+    const filePath = path.join(
+      process.env.RAILWAY_VOLUME_MOUNT_PATH || "uploads",
+      attachment.fileUrl.replace("/uploads/", "")
+    );
+
+    await fs.unlink(filePath);
+
+  } catch (error) {
+
+    console.warn(
+      "Attachment file already missing:",
+      attachment.fileUrl
+    );
+
+  }
+
+  //----------------------------------------------------
+  // Delete database record
+  //----------------------------------------------------
+
+  await prisma.taskAttachment.delete({
+
+    where: {
+      id: attachmentId,
+    },
+
+  });
+
+  //----------------------------------------------------
+  // Activity
+  //----------------------------------------------------
+
+  await createActivity(
+    userId,
+    taskId,
+    "system",
+    `Attachment deleted: ${attachment.fileName}`
+  );
+
+  return {
+    success: true,
+  };
 
 };
