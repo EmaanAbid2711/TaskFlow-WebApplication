@@ -3,6 +3,7 @@ import {FileImage, FileText, Upload, Trash2, ExternalLink, Loader2} from "lucide
 
 import { uploadTaskAttachmentApi, deleteTaskAttachmentApi} from "@/api/task.api";
 import type { Task } from "@/interfaces/projects";
+import ConfirmModal from "@/components/common/ConfirmModal/confirmmodal";
 
 interface Props {
   task: Task;
@@ -13,6 +14,7 @@ interface Props {
 function Attachments({ task, refreshTasks }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [deleteId,setDeleteId] =  useState<string | null>(null);
 
   /*
   |--------------------------------------------------------------------------
@@ -41,20 +43,22 @@ function Attachments({ task, refreshTasks }: Props) {
   | Delete Attachment
   |--------------------------------------------------------------------------
   */
-  const handleDelete = async (attachmentId: string) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this attachment?"
+  const handleDelete = async () => {
+  if(!deleteId) return;
+  try {
+    await deleteTaskAttachmentApi(
+      task.id,
+      deleteId
     );
-    if (!confirmed) return;
-
-    try {
-      await deleteTaskAttachmentApi(task.id, attachmentId);
-      await refreshTasks();
-    } catch (error) {
-      console.error(error);
-      alert("Failed to delete attachment.");
-    }
-  };
+    await refreshTasks();
+  }
+  catch(error){
+    console.log(error);
+  }
+  finally{
+    setDeleteId(null);
+  }
+};
 
   return (
     <div className="space-y-4">
@@ -124,18 +128,61 @@ function Attachments({ task, refreshTasks }: Props) {
 
                 <button
                   type="button"
-                  onClick={() => handleDelete(file.id)}
-                  className="rounded-md p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                  onClick={(e)=>{
+                  
+                    e.preventDefault();
+                  
+                    setDeleteId(file.id);
+                  
+                  }}
+                
+                  className="
+                  ml-auto
+                  text-slate-400
+                  hover:text-red-600
+                  "
                 >
-                  <Trash2 size={16} />
+                
+                <Trash2 size={16}/>
+                
                 </button>
+
+                <ConfirmModal
+
+                  open={
+                    deleteId !== null
+                  }
+                
+                  title="Delete Attachment"
+                
+                  message="
+                  Are you sure you want to delete this attachment?
+                  This action cannot be undone.
+                  "
+                
+                  confirmText="Delete"
+                
+                  onCancel={() =>
+                    setDeleteId(null)
+                  }
+                
+                  onConfirm={
+                    handleDelete
+                  }
+                
+                />
               </div>
-            );
+
+          
+            
+          );
           })}
         </div>
       )}
     </div>
+
   );
+
 }
 
 export default Attachments;
