@@ -150,23 +150,16 @@ export function mapTask(
 
     },
 
-    attachments:
-      (task.attachments ?? []).map(file => ({
-
-        id: file.id,
-
-        name: file.fileName,
-
-        size: file.fileSize,
-
-        type:
-          file.fileType.startsWith("image")
-            ? "image"
-            : "pdf",
-        
-        url: file.fileUrl,
-
-      })),
+    attachments: (task.attachments ?? []).map(file => ({
+      id: file.id,
+      name: file.fileName,
+      size: file.fileSize,
+      type: file.fileType.startsWith("image")
+        ? "image"
+        : "pdf",        
+      url: `${import.meta.env.VITE_API_URL}${file.fileUrl}`,
+ 
+    })),
 
     activities:
       (task.activities ?? []).map(activity => ({
