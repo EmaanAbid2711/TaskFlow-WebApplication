@@ -65,6 +65,14 @@ export function useProjects() {
     }
   };
 
+  const refreshCurrentProject = async () => {
+
+  if (!selectedProject) return;
+
+  await loadTasks(selectedProject.id);
+
+};
+
   useEffect(() => {
     loadProjects();
   }, []);
@@ -86,5 +94,6 @@ export function useProjects() {
     setTasks,
     loadProjects,
     loadTasks,
+    refreshCurrentProject
   };
 }

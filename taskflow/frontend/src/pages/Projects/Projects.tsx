@@ -26,7 +26,18 @@ function Projects() {
       setSelectedProject,
       tasks,
       setTasks,
+      loadTasks,
   } = useProjects();
+
+  const refreshCurrentProject = async () => {
+
+  if (!selectedProject) return;
+
+  await loadTasks(
+    selectedProject.id
+  );
+
+};
 
   const filteredTasks = tasks.filter((task) => {
 
@@ -466,6 +477,7 @@ function Projects() {
           onDelete={
             handleDeleteTask
           }
+          refreshTasks={refreshCurrentProject}
         />
       </div>
     </DndContext>

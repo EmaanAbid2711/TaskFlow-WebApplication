@@ -6,7 +6,6 @@ import ActivityTimeline from "./ActivityTimeline";
 import CommentBox from "./CommentBox";
 import type {DrawerMode, Task} from "@/interfaces/projects";
 import { useUsers } from "@/hooks/useUsers";
-import { getTaskApi } from "@/api/task.api";
 
 interface Props {
   open: boolean;
@@ -18,6 +17,7 @@ interface Props {
   ) => void;
   onSave: () => void;
   onDelete: () => void;
+  refreshTasks: () => Promise<void>;
 }
 
 function TaskDrawer({
@@ -28,6 +28,7 @@ function TaskDrawer({
   onChangeTask,
   onDelete,
   onSave,
+  refreshTasks,
 
 }: Props) {
 
@@ -126,16 +127,13 @@ function TaskDrawer({
             />
 
             <Attachments
-                task={task}
-                onChange={handleChange}
-                onRefresh={async () => {
-                
-                  const response =
-                    await getTaskApi(task.id);
-                
-                  onChangeTask(response.data);
-                
-                }}
+
+              task={task}
+
+              onChange={handleChange}
+
+              refreshTasks={refreshTasks}
+
             />
 
             <ActivityTimeline

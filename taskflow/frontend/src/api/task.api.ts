@@ -130,3 +130,17 @@ export const uploadTaskAttachmentApi = async (
   return response.data;
 
 };
+
+export const deleteTaskAttachmentApi = async (
+  taskId: string,
+  attachmentId: string
+) => {
+
+  const response =
+    await api.delete(
+      `/api/tasks/${taskId}/attachments/${attachmentId}`
+    );
+
+  return response.data;
+
+};
