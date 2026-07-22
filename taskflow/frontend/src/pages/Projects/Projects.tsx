@@ -307,11 +307,7 @@ function Projects() {
    }
   };
 
-  /**
-   * ------------------------------------------------------------------
-   * Drag End
-   * -----------------------------------
-   */
+  // Drag End
 
   const handleDragEnd = async(
      event:DragEndEvent
