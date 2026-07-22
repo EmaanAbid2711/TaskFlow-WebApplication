@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import path from "path";
 import asyncHandler from "express-async-handler";
 
-import {createTask, getProjectTasks, getTaskById, updateTask, deleteTask, uploadTaskAttachment,} from "../services/task.service";
+import {createTask, getProjectTasks, getTaskById, updateTask, deleteTask, uploadTaskAttachment,deleteTaskAttachment} from "../services/task.service";
 import {createTaskSchema, updateTaskSchema} from "../validations/task.validation";
 
 export const createTaskController =
@@ -187,6 +187,48 @@ asyncHandler(async (req: Request, res: Response) => {
 
 });
 
+export const deleteTaskAttachmentController =
+asyncHandler(async (
+
+  req: Request,
+
+  res: Response
+
+) => {
+
+  if (!req.user) {
+
+    res.status(401).json({
+
+      success: false,
+
+      message: "Unauthorized",
+
+    });
+
+    return;
+
+  }
+
+  await deleteTaskAttachment(
+
+    req.user.id,
+
+    String(req.params.id),
+
+    String(req.params.attachmentId)
+
+  );
+
+  res.status(200).json({
+
+    success: true,
+
+    message: "Attachment deleted successfully.",
+
+  });
+
+});
 
 export const deleteTaskController =
 asyncHandler(async (req: Request, res: Response) => {

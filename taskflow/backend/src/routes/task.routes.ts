@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import authMiddleware from "../middleware/auth.middleware";
 import { attachmentUpload } from "../config/multer";
-import {createTaskController, getProjectTasksController, getTaskController, updateTaskController, deleteTaskController, uploadTaskAttachmentController} from "../controllers/task.controller";
+import {createTaskController, getProjectTasksController, getTaskController, updateTaskController, deleteTaskController, uploadTaskAttachmentController, deleteTaskAttachmentController} from "../controllers/task.controller";
 
 const router = Router();
 
@@ -197,6 +197,58 @@ router.post(
   authMiddleware,
   attachmentUpload.single("file"),
   uploadTaskAttachmentController
+);
+
+
+/**
+ * @swagger
+ * /api/tasks/{id}/attachments/{attachmentId}:
+ *   delete:
+ *     summary: Delete a task attachment
+ *     tags:
+ *       - Tasks
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Task ID
+ *         example: cmrvqf0q4000gma0pgo0xlzun
+ *       - in: path
+ *         name: attachmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Attachment ID
+ *         example: cmrvts3hg0001waaw56ddogt3
+ *     responses:
+ *       200:
+ *         description: Attachment deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Attachment deleted successfully.
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Task or attachment not found
+ *       500:
+ *         description: Internal Server Error
+ */
+router.delete(
+  "/:id/attachments/:attachmentId",
+  authMiddleware,
+  deleteTaskAttachmentController
 );
 
 /**
