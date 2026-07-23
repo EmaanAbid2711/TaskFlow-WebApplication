@@ -1,6 +1,6 @@
 import prisma from "../config/prisma";
 
-import type { CreateTaskInput, UpdateTaskInput} from "../validations/task.validation";
+import type { CreateTaskInput, UpdateTaskInput, CreateCommentInput} from "../validations/task.validation";
 import {TaskStatus, TaskPriority, Prisma} from "@prisma/client";
 import fs from "fs/promises";
 import path from "path";
@@ -77,7 +77,14 @@ export const createTask = async (
     include: {  
     assignee: true,
     attachments: true,
-    comments: true,
+    comments: {
+    include: {
+        user: true,
+    },
+    orderBy: {
+        createdAt: "asc",
+    },
+},
     activities: true,
     },
 
@@ -132,7 +139,14 @@ async (
 
       attachments: true,
 
-      comments: true,
+      comments: {
+    include: {
+        user: true,
+    },
+    orderBy: {
+        createdAt: "asc",
+    },
+},
 
       activities:{
         include:{
@@ -426,7 +440,14 @@ if (
 
       attachments: true,
 
-      comments: true,
+      comments: {
+    include: {
+        user: true,
+    },
+    orderBy: {
+        createdAt: "asc",
+    },
+},
 
       activities:{
         include:{
@@ -623,5 +644,52 @@ export const deleteTaskAttachment = async (
   return {
     success: true,
   };
+
+};
+
+export const createTaskComment = async (
+  userId: string,
+  taskId: string,
+  data: CreateCommentInput
+) => {
+
+  const task =
+    await getTaskById(
+      userId,
+      taskId
+    );
+
+  if (!task) {
+    throw new Error("Task not found.");
+  }
+
+  const comment =
+    await prisma.comment.create({
+
+      data: {
+        text: data.text,
+        taskId,
+        userId,
+      },
+
+      include: {
+        user: true,
+      },
+
+    });
+
+  await createActivity(
+
+    userId,
+
+    taskId,
+
+    "comment",
+
+    "Added a comment"
+
+  );
+
+  return comment;
 
 };

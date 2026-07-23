@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import path from "path";
 import asyncHandler from "express-async-handler";
 
-import {createTask, getProjectTasks, getTaskById, updateTask, deleteTask, uploadTaskAttachment,deleteTaskAttachment} from "../services/task.service";
-import {createTaskSchema, updateTaskSchema} from "../validations/task.validation";
+import {createTask, getProjectTasks, getTaskById, updateTask, deleteTask, uploadTaskAttachment,deleteTaskAttachment, createTaskComment} from "../services/task.service";
+import {createTaskSchema, updateTaskSchema, createCommentSchema} from "../validations/task.validation";
 
 export const createTaskController =
 asyncHandler(async (req: Request, res: Response) => {
@@ -251,6 +251,41 @@ asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
     message: "Task deleted successfully.",
+  });
+
+});
+
+export const createTaskCommentController =
+asyncHandler(async (
+  req: Request,
+  res: Response
+) => {
+
+  if (!req.user) {
+
+    res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+
+    return;
+  }
+
+  const data =
+    createCommentSchema.parse(
+      req.body
+    );
+
+  const comment =
+    await createTaskComment(
+      req.user.id,
+      String(req.params.id),
+      data
+    );
+
+  res.status(201).json({
+    success: true,
+    data: comment,
   });
 
 });
