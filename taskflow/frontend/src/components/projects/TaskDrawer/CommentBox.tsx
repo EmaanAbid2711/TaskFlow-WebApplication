@@ -3,6 +3,7 @@ import { AtSign, Image, Smile } from "lucide-react";
 
 import type { Activity, Task } from "@/interfaces/projects";
 import { getAvatarUrl } from "@/lib/image"
+import { useAuth } from "@/context/AuthContext";
 
 interface Props {
   task: Task;
@@ -17,47 +18,50 @@ function CommentBox({
   task,
   onChange,
 }: Props) {
+  const { user } = useAuth();
+
   const [comment, setComment] = useState("");
 
   const handlePostComment = () => {
-    if (!comment.trim()) return;
+  if (!comment.trim()) return;
+  if (!user) return;
 
-    const newComment: Activity = {
-      id: crypto.randomUUID(),
-      type: "comment",
+  const newComment: Activity = {
+    id: crypto.randomUUID(),
+    type: "comment",
+    user: user.name,
+    avatar: user.avatar ?? undefined,
+    text: comment,
+    time: new Date().toLocaleString([], {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }),
+  };
 
-      user: task.assignee.name,
-      avatar: task.assignee.avatar,
-
-      text: comment,
-
-      time: new Date().toLocaleString([], {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }),
-    };
-
-    onChange("activities", [
+  onChange(
+    "activities",
+    [
       ...task.activities,
       newComment,
-    ]);
+    ]
+  );
 
-    setComment("");
-  };
+  setComment("");
+};
 
   return (
     <div className="border-t border-slate-100 bg-white p-4">
       <div className="flex items-start gap-3">
 
-        {task.assignee.avatar ? (
+        {user?.avatar ? (
           <img
-            src={getAvatarUrl(task.assignee.avatar)}
-            alt={task.assignee.name}
+            src={getAvatarUrl(user.avatar)}
+            alt={user.name}
             className="h-8 w-8 rounded-full object-cover"
           />
         ) : (
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-xs font-medium">
-            {task.assignee.name
+            {(user?.name?? "")
               .split(" ")
               .map((word) => word[0])
               .join("")
