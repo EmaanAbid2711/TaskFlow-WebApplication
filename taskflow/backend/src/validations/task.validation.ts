@@ -57,3 +57,14 @@ export type CreateTaskInput =
 
 export type UpdateTaskInput =
   z.infer<typeof updateTaskSchema>;
+
+export const createCommentSchema = z.object({
+  text: z
+    .string()
+    .trim()
+    .min(1, "Comment cannot be empty.")
+    .max(2000),
+});
+
+export type CreateCommentInput =
+  z.infer<typeof createCommentSchema>;

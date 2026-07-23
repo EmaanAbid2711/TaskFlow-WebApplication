@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import authMiddleware from "../middleware/auth.middleware";
 import { attachmentUpload } from "../config/multer";
-import {createTaskController, getProjectTasksController, getTaskController, updateTaskController, deleteTaskController, uploadTaskAttachmentController, deleteTaskAttachmentController} from "../controllers/task.controller";
+import {createTaskController, getProjectTasksController, getTaskController, updateTaskController, deleteTaskController, uploadTaskAttachmentController, deleteTaskAttachmentController, createTaskCommentController} from "../controllers/task.controller";
 
 const router = Router();
 
@@ -249,6 +249,12 @@ router.delete(
   "/:id/attachments/:attachmentId",
   authMiddleware,
   deleteTaskAttachmentController
+);
+
+router.post(
+  "/:id/comments",
+  authMiddleware,
+  createTaskCommentController
 );
 
 /**
