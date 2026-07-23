@@ -142,7 +142,8 @@ function TaskDrawer({
 
         <CommentBox
           task={task}
-          onChange={handleChange}
+          refreshTasks={refreshTasks}
+          onChangeTask={onChangeTask}
         />
 
       </aside>

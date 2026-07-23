@@ -77,7 +77,14 @@ export const createTask = async (
     include: {  
     assignee: true,
     attachments: true,
-    comments: true,
+    comments: {
+    include: {
+        user: true,
+    },
+    orderBy: {
+        createdAt: "asc",
+    },
+},
     activities: true,
     },
 
@@ -132,7 +139,14 @@ async (
 
       attachments: true,
 
-      comments: true,
+      comments: {
+    include: {
+        user: true,
+    },
+    orderBy: {
+        createdAt: "asc",
+    },
+},
 
       activities:{
         include:{
@@ -426,7 +440,14 @@ if (
 
       attachments: true,
 
-      comments: true,
+      comments: {
+    include: {
+        user: true,
+    },
+    orderBy: {
+        createdAt: "asc",
+    },
+},
 
       activities:{
         include:{

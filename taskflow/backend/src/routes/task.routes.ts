@@ -251,6 +251,53 @@ router.delete(
   deleteTaskAttachmentController
 );
 
+/**
+ * @swagger
+ * /api/tasks/{id}/comments:
+ *   post:
+ *     summary: Add a comment to a task
+ *     tags:
+ *       - Tasks
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Task ID
+ *         example: cmrvqf0q4000gma0pgo0xlzun
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - text
+ *             properties:
+ *               text:
+ *                 type: string
+ *                 example: We should change the button color to blue.
+ *     responses:
+ *       201:
+ *         description: Comment created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Task not found
+ */
 router.post(
   "/:id/comments",
   authMiddleware,

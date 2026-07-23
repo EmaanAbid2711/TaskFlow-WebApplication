@@ -144,3 +144,17 @@ export const deleteTaskAttachmentApi = async (
   return response.data;
 
 };
+
+export const createTaskCommentApi = (
+  taskId: string,
+  text: string
+) => {
+
+  return api.post(
+    `/api/tasks/${taskId}/comments`,
+    {
+      text,
+    }
+  );
+
+};

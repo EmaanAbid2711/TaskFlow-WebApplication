@@ -1,4 +1,4 @@
-import type { Task } from "@/interfaces/projects";
+import type { Task, Activity } from "@/interfaces/projects";
 
 /*
 |--------------------------------------------------------------------------
@@ -52,6 +52,17 @@ interface BackendTask {
       avatar: string | null;
     };
   }[];
+
+  comments?: {
+    id: string;
+    text: string;
+    createdAt: string;
+    user: {
+      id: string;
+      name: string;
+      avatar: string | null;
+    };
+  }[];
 }
 
 /*
@@ -63,9 +74,7 @@ interface BackendTask {
 function mapStatus(
   status: BackendTask["status"]
 ): Task["status"] {
-
   switch (status) {
-
     case "TODO":
       return "todo";
 
@@ -89,9 +98,7 @@ function mapStatus(
 function mapPriority(
   priority: BackendTask["priority"]
 ): Task["priority"] {
-
   switch (priority) {
-
     case "HIGH":
       return "High";
 
@@ -113,8 +120,36 @@ export function mapTask(
   task: BackendTask
 ): Task {
 
-  return {
+  const systemActivities: Activity[] =
+    (task.activities ?? []).map((activity): Activity => ({
+      id: activity.id,
+      type: "system",
+      user: activity.user?.name,
+      avatar: activity.user?.avatar ?? undefined,
+      text: activity.message,
+      time: activity.createdAt,
+    }));
 
+  const commentActivities: Activity[] =
+    (task.comments ?? []).map((comment): Activity => ({
+      id: comment.id,
+      type: "comment",
+      user: comment.user.name,
+      avatar: comment.user.avatar ?? undefined,
+      text: comment.text,
+      time: comment.createdAt,
+    }));
+
+  const activities: Activity[] = [
+    ...systemActivities,
+    ...commentActivities,
+  ].sort(
+    (a, b) =>
+      new Date(a.time).getTime() -
+      new Date(b.time).getTime()
+  );
+
+  return {
     id: task.id,
 
     title: task.title,
@@ -138,7 +173,6 @@ export function mapTask(
       task.reviewStatus ?? "",
 
     assignee: {
-
       id:
         task.assignee?.id ?? "",
 
@@ -147,48 +181,22 @@ export function mapTask(
 
       avatar:
         task.assignee?.avatar ?? "",
-
     },
 
-    attachments: (task.attachments ?? []).map(file => ({
-      id: file.id,
-      name: file.fileName,
-      size: file.fileSize,
-      type: file.fileType.startsWith("image")
-        ? "image"
-        : "pdf",        
-      url: `${import.meta.env.VITE_API_URL}${file.fileUrl}`,
- 
-    })),
-
-    activities:
-      (task.activities ?? []).map(activity => ({
-
-        id: activity.id,
-
+    attachments:
+      (task.attachments ?? []).map(file => ({
+        id: file.id,
+        name: file.fileName,
+        size: file.fileSize,
         type:
-          activity.type === "comment"
-            ? "comment"
-            : "system",
-
-        user:
-          activity.user?.name,
-
-        avatar:
-          activity.user?.avatar ?? undefined,
-
-        text:
-          activity.message,
-
-        time:
-          new Date(
-            activity.createdAt
-          ).toLocaleString(),
-
+          file.fileType.startsWith("image")
+            ? "image"
+            : "pdf",
+        url: `${import.meta.env.VITE_API_URL}${file.fileUrl}`,
       })),
 
+    activities,
   };
-
 }
 
 /*
@@ -200,7 +208,5 @@ export function mapTask(
 export function mapTasks(
   tasks: BackendTask[]
 ): Task[] {
-
   return tasks.map(mapTask);
-
 }
