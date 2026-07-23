@@ -1,17 +1,19 @@
 import api from "./axios";
 
 export const getProjectsApi = async () => {
-  const response = await api.get("/api/projects");
+
+  const response =
+    await api.get("/api/projects");
   return response.data;
 };
 
 export const getProjectApi = async (
   projectId: string
 ) => {
-  const response = await api.get(
-    `/api/projects/${projectId}`
-  );
-
+  const response =
+    await api.get(
+      `/api/projects/${projectId}`
+    );
   return response.data;
 };
 
@@ -21,10 +23,12 @@ export const createProjectApi = async (
     description?: string;
   }
 ) => {
-  const response = await api.post(
-    "/api/projects",
-    data
-  );
+
+  const response =
+    await api.post(
+      "/api/projects",
+      data
+    );
 
   return response.data;
 };
@@ -36,10 +40,11 @@ export const updateProjectApi = async (
     description?: string;
   }
 ) => {
-  const response = await api.patch(
-    `/api/projects/${projectId}`,
-    data
-  );
+  const response =
+    await api.patch(
+      `/api/projects/${projectId}`,
+      data
+    );
 
   return response.data;
 };
@@ -47,9 +52,10 @@ export const updateProjectApi = async (
 export const deleteProjectApi = async (
   projectId: string
 ) => {
-  const response = await api.delete(
-    `/api/projects/${projectId}`
-  );
+  const response =
+    await api.delete(
+      `/api/projects/${projectId}`
+    );
 
   return response.data;
 };

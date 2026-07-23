@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { AtSign, Image, Smile } from "lucide-react";
 
 import type { Task } from "@/interfaces/projects";
 import { getAvatarUrl } from "@/lib/image";
@@ -70,15 +69,7 @@ function CommentBox({ task, refreshTasks, onChangeTask }: Props) {
 
           <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex gap-3 text-slate-400">
-              <button type="button">
-                <AtSign size={16} />
-              </button>
-              <button type="button">
-                <Smile size={16} />
-              </button>
-              <button type="button">
-                <Image size={16} />
-              </button>
+              
             </div>
 
             <button
