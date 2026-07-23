@@ -26,6 +26,7 @@ function Projects() {
       setSelectedProject,
       tasks,
       setTasks,
+      refreshProjectStats,
   } = useProjects();
 
   const refreshCurrentProject =
@@ -50,6 +51,7 @@ async (): Promise<Task[]> => {
 
   return updatedTasks;
 };
+
 
   const filteredTasks = tasks.filter((task) => {
 
@@ -164,8 +166,9 @@ async (): Promise<Task[]> => {
 
   const handleSaveTask = async () => {
 
-    if(!selectedTask) return;
-
+    if (!selectedTask || !selectedProject) {
+      return;
+    }
 
     try{
       // CREATE
@@ -213,6 +216,7 @@ async (): Promise<Task[]> => {
           ...prev,
           mapTask(response.data)
         ]);
+        await refreshProjectStats(selectedProject.id);
 
       }
 
@@ -266,19 +270,14 @@ async (): Promise<Task[]> => {
 
         setTasks(prev=>
           prev.map(task=>
-
             task.id===selectedTask.id
-
             ?
-
             mapTask(response.data)
-
             :
-
             task
-
           )
         );
+        await refreshProjectStats(selectedProject.id);
 
 
       }
@@ -321,6 +320,7 @@ async (): Promise<Task[]> => {
         task.id!==selectedTask.id
       )
      );
+     if (selectedProject) { await refreshProjectStats(selectedProject.id); }
      setDrawerOpen(false);
    }
    catch(error){
@@ -354,6 +354,9 @@ async (): Promise<Task[]> => {
    
      if(!oldTask)
       return;
+
+    if (!selectedProject)
+    return;
     
      try{
    
@@ -371,20 +374,14 @@ async (): Promise<Task[]> => {
      prev.map(task=>
      task.id===taskId
      ?
-    
      {
       ...task,
       status:newStatus
      }
-   
-     :
-   
-     task
-   
+     :task
      )
-   
      );
-   
+     await refreshProjectStats(selectedProject.id);
      }
      catch(error){ 
      console.log(
