@@ -1,10 +1,13 @@
 import { Router } from "express";
 
 import authMiddleware from "../middleware/auth.middleware";
+
 import {
   createProjectController,
   getProjectsController,
   getProjectController,
+  updateProjectController,
+  deleteProjectController,
 } from "../controllers/project.controller";
 
 const router = Router();
@@ -103,6 +106,88 @@ router.get(
   "/:id",
   authMiddleware,
   getProjectController
+);
+
+/**
+ * @swagger
+ * /api/projects/{id}:
+ *   patch:
+ *     summary: Update a project
+ *     tags:
+ *       - Projects
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: cmdd3l5lf0001abcxyz123
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Updated TaskFlow
+ *               description:
+ *                 type: string
+ *                 example: Updated project description
+ *
+ *     responses:
+ *       200:
+ *         description: Project updated successfully
+ *
+ *       404:
+ *         description: Project not found
+ *
+ *       401:
+ *         description: Unauthorized
+ */
+router.patch(
+  "/:id",
+  authMiddleware,
+  updateProjectController
+);
+
+/**
+ * @swagger
+ * /api/projects/{id}:
+ *   delete:
+ *     summary: Delete a project
+ *     tags:
+ *       - Projects
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: cmdd3l5lf0001abcxyz123
+ *
+ *     responses:
+ *       200:
+ *         description: Project deleted successfully
+ *
+ *       404:
+ *         description: Project not found
+ *
+ *       401:
+ *         description: Unauthorized
+ */
+router.delete(
+  "/:id",
+  authMiddleware,
+  deleteProjectController
 );
 
 export default router;

@@ -1,53 +1,11 @@
 import prisma from "../config/prisma";
-import type { CreateProjectInput } from "../validations/project.validation";
+import type {CreateProjectInput, UpdateProjectInput} from "../validations/project.validation";
 
-export const createProject = async (
-  ownerId: string,
-  data: CreateProjectInput
-) => {
 
-  return prisma.project.create({
-
-    data: {
-
-      name: data.name,
-
-      description: data.description,
-
-      ownerId,
-
-      members: {
-
-        create: {
-
-          userId: ownerId,
-
-          role: "Owner",
-
-        },
-
-      },
-
-    },
-
-    include: {
-
-      members: true,
-
-    },
-
-  });
-
-};
-
-export const getProjects = async (
-  ownerId: string
-) => {
-
-  const projects = await prisma.project.findMany({
-
+async function buildProjectResponse(projectId: string) {
+  const project = await prisma.project.findUnique({
     where: {
-      ownerId,
+      id: projectId,
     },
 
     include: {
@@ -58,95 +16,181 @@ export const getProjects = async (
         },
       },
     },
+  });
+
+  if (!project) {
+    return null;
+  }
+
+  const totalTasks = project.tasks.length;
+
+  const completedTasks = project.tasks.filter(
+    (task) => task.status === "COMPLETED"
+  ).length;
+
+  const progress =
+    totalTasks === 0
+      ? 0
+      : Math.round(
+          (completedTasks / totalTasks) * 100
+        );
+
+  return {
+    id: project.id,
+
+    name: project.name,
+
+    description: project.description,
+
+    stats: {
+      totalTasks,
+      completedTasks,
+      progress,
+    },
+  };
+}
+
+// Create Project
+
+export const createProject = async (
+  ownerId: string,
+  data: CreateProjectInput
+) => {
+  const project = await prisma.project.create({
+    data: {
+      name: data.name,
+
+      description: data.description,
+
+      ownerId,
+
+      members: {
+        create: {
+          userId: ownerId,
+
+          role: "Owner",
+        },
+      },
+    },
+  });
+
+  return buildProjectResponse(project.id);
+};
+
+// Get Projects
+
+export const getProjects = async (
+  ownerId: string
+) => {
+  const projects = await prisma.project.findMany({
+    where: {
+      ownerId,
+    },
+
+    select: {
+      id: true,
+    },
 
     orderBy: {
       createdAt: "desc",
     },
-
   });
 
-  return projects.map(project => {
-
-    const totalTasks = project.tasks.length;
-
-    const completedTasks = project.tasks.filter(
-      task => task.status === "COMPLETED"
-    ).length;
-
-    const progress =
-      totalTasks === 0
-        ? 0
-        : Math.round(
-            (completedTasks / totalTasks) * 100
-          );
-
-    return {
-
-      id: project.id,
-
-      name: project.name,
-
-      description: project.description,
-
-      stats: {
-
-        totalTasks,
-
-        completedTasks,
-
-        progress,
-
-      },
-
-    };
-
-  });
-
+  return Promise.all(
+    projects.map((project) =>
+      buildProjectResponse(project.id)
+    )
+  );
 };
+
+// Get Single Project
 
 export const getProjectById = async (
   ownerId: string,
   projectId: string
 ) => {
-
   return prisma.project.findFirst({
-
     where: {
-
       id: projectId,
 
       ownerId,
-
     },
 
     include: {
-
       members: {
-
         include: {
-
           user: {
-
             select: {
-
               id: true,
 
               name: true,
 
               avatar: true,
-
             },
-
           },
-
         },
-
       },
 
       tasks: true,
+    },
+  });
+};
 
+// Update Project
+
+export const updateProject = async (
+  ownerId: string,
+  projectId: string,
+  data: UpdateProjectInput
+) => {
+  const project =
+    await prisma.project.findFirst({
+      where: {
+        id: projectId,
+        ownerId,
+      },
+    });
+
+  if (!project) {
+    return null;
+  }
+
+  await prisma.project.update({
+    where: {
+      id: projectId,
     },
 
+    data,
   });
 
+  return buildProjectResponse(projectId);
+};
+
+// Delete Project
+
+export const deleteProject = async (
+  ownerId: string,
+  projectId: string
+) => {
+  const project =
+    await prisma.project.findFirst({
+      where: {
+        id: projectId,
+        ownerId,
+      },
+    });
+
+  if (!project) {
+    return null;
+  }
+
+  await prisma.project.delete({
+    where: {
+      id: projectId,
+    },
+  });
+
+  return {
+    success: true,
+  };
 };
