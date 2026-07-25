@@ -1,7 +1,7 @@
 import { useState, useEffect} from "react";
 import {DndContext, PointerSensor, closestCorners, useSensor, useSensors, type DragEndEvent} from "@dnd-kit/core";
 import { Plus } from "lucide-react";
-import {useLocation, useNavigate} from "react-router-dom";
+import {useLocation, useNavigate, useSearchParams} from "react-router-dom";
 
 import {ProjectHeader, KanbanBoard, TaskDrawer, ProjectDrawer} from "@/components";
 import type {DrawerMode,Task, TaskType} from "@/interfaces/projects";
@@ -23,6 +23,9 @@ function Projects() {
   const [search, setSearch] =
   useState("");
 
+  const [searchParams, setSearchParams] =
+  useSearchParams();
+
   const [drawerMode, setDrawerMode] =
     useState<DrawerMode>("create");
 
@@ -36,6 +39,7 @@ function Projects() {
       tasks,
       setTasks,
       refreshProjectStats,
+      createProject,
   } = useProjects();
 
 
@@ -60,6 +64,38 @@ useEffect(() => {
   location.search,
   navigate,
 ]);
+
+useEffect(() => {
+
+  if (
+    searchParams.get("new") === "true"
+  ) {
+
+    setProjectDrawerOpen(true);
+
+  }
+
+}, [searchParams]);
+
+const handleCreateProject =
+async (
+  name: string,
+  description: string
+)=>{
+
+  await createProject(
+    name,
+    description
+  );
+
+  setProjectDrawerOpen(false);
+
+  searchParams.delete("new");
+
+  setSearchParams(searchParams);
+
+};
+
 
   const refreshCurrentProject =
 async (): Promise<Task[]> => {
@@ -524,12 +560,12 @@ async (): Promise<Task[]> => {
         <ProjectDrawer
           open={projectDrawerOpen}
           mode="create"
-          onClose={() =>
-            setProjectDrawerOpen(false)
-          }
-          onSave={async () => {
-            // Will implement in the next Commit
+          onClose={() => {
+            setProjectDrawerOpen(false);
+            searchParams.delete("new");
+            setSearchParams(searchParams);
           }}
+          onSave={handleCreateProject}
         />
       </div>
     </DndContext>
