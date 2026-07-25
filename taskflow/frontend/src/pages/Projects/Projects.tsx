@@ -1,15 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import {DndContext, PointerSensor, closestCorners, useSensor, useSensors, type DragEndEvent} from "@dnd-kit/core";
 import { Plus } from "lucide-react";
+import {useLocation, useNavigate} from "react-router-dom";
 
-import {ProjectHeader, KanbanBoard, TaskDrawer} from "@/components";
+import {ProjectHeader, KanbanBoard, TaskDrawer, ProjectDrawer} from "@/components";
 import type {DrawerMode,Task, TaskType} from "@/interfaces/projects";
 import { useProjects } from "@/hooks/useProjects";
 import {createTaskApi, updateTaskApi, deleteTaskApi, getProjectTasksApi} from "@/api/task.api";
 import {mapTask, mapTasks} from "@/mappers/task.mapper";
 
 function Projects() {
+  
+  const navigate = useNavigate();
+
+  const location = useLocation();
+
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const [projectDrawerOpen, setProjectDrawerOpen] =
+  useState(false);
 
   const [search, setSearch] =
   useState("");
@@ -28,6 +37,29 @@ function Projects() {
       setTasks,
       refreshProjectStats,
   } = useProjects();
+
+
+useEffect(() => {
+  const params =
+    new URLSearchParams(location.search);
+
+  if (params.get("new") === "true") {
+
+    setProjectDrawerOpen(true);
+
+    navigate(
+      "/projects",
+      {
+        replace: true,
+      }
+    );
+
+  }
+
+}, [
+  location.search,
+  navigate,
+]);
 
   const refreshCurrentProject =
 async (): Promise<Task[]> => {
@@ -487,6 +519,17 @@ async (): Promise<Task[]> => {
             handleDeleteTask
           }
           refreshTasks={refreshCurrentProject}
+        />
+
+        <ProjectDrawer
+          open={projectDrawerOpen}
+          mode="create"
+          onClose={() =>
+            setProjectDrawerOpen(false)
+          }
+          onSave={async () => {
+            // Will implement in the next Commit
+          }}
         />
       </div>
     </DndContext>
