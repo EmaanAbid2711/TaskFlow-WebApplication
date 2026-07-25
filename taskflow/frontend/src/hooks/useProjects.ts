@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import {getProjectsApi, getProjectApi} from "@/api/project.api";
+import {getProjectsApi, getProjectApi, createProjectApi, updateProjectApi, deleteProjectApi} from "@/api/project.api";
 import {getProjectTasksApi} from "@/api/task.api";
 import type { Project } from "@/interfaces/project";
 import type { Task } from "@/interfaces/projects";
@@ -55,6 +55,126 @@ export function useProjects() {
       setLoading(false);
     }
   };
+
+
+/*
+|--------------------------------------------------------------------------
+| Create Project
+|--------------------------------------------------------------------------
+*/
+
+const createProject = async (
+  name: string,
+  description?: string
+) => {
+
+  const response =
+    await createProjectApi({
+      name,
+      description,
+    });
+
+  const project =
+    response.data;
+
+  setProjects(previous => [
+    project,
+    ...previous,
+  ]);
+
+  setSelectedProject(project);
+
+  setTasks([]);
+
+  return project;
+
+};
+
+/*
+|--------------------------------------------------------------------------
+| Update Project
+|--------------------------------------------------------------------------
+*/
+
+const updateProject = async (
+  projectId: string,
+  name: string,
+  description?: string
+) => {
+
+  const response =
+    await updateProjectApi(
+      projectId,
+      {
+        name,
+        description,
+      }
+    );
+
+  const updatedProject =
+    response.data;
+
+  setProjects(previous =>
+    previous.map(project =>
+      project.id === projectId
+        ? updatedProject
+        : project
+    )
+  );
+
+  setSelectedProject(previous => {
+
+    if (!previous) {
+      return previous;
+    }
+
+    return previous.id === projectId
+      ? updatedProject
+      : previous;
+
+  });
+
+  return updatedProject;
+
+};
+
+
+/*
+|--------------------------------------------------------------------------
+| Delete Project
+|--------------------------------------------------------------------------
+*/
+
+const deleteProject = async (
+  projectId: string
+) => {
+
+  await deleteProjectApi(projectId);
+
+  setProjects(previous => {
+
+    const remaining =
+      previous.filter(
+        project => project.id !== projectId
+      );
+
+    if (selectedProject?.id === projectId) {
+
+      if (remaining.length > 0) {
+        setSelectedProject(remaining[0]);
+      } else {
+        setSelectedProject(null);
+        setTasks([]);
+      }
+
+    }
+
+    return remaining;
+
+  });
+
+};
+
 
   /*
   |--------------------------------------------------------------------------
@@ -178,18 +298,20 @@ export function useProjects() {
   },[selectedProject]);
 
   return {
-    loading,
-    projects,
-    setProjects,
-    selectedProject,
-    setSelectedProject,
-    tasks,
-    setTasks,
-    loadProjects,
-    loadTasks,
-    refreshCurrentProject,
-    refreshProjectStats
-
+  loading,
+  projects,
+  setProjects,
+  selectedProject,
+  setSelectedProject,
+  tasks,
+  setTasks,
+  createProject,
+  updateProject,
+  deleteProject,
+  loadProjects,
+  loadTasks,
+  refreshCurrentProject,
+  refreshProjectStats,
   };
 
 }
