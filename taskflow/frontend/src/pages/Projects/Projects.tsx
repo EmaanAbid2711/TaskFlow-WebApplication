@@ -8,7 +8,6 @@ import type {DrawerMode,Task, TaskType} from "@/interfaces/projects";
 import { useProjects } from "@/hooks/useProjects";
 import {createTaskApi, updateTaskApi, deleteTaskApi, getProjectTasksApi} from "@/api/task.api";
 import {mapTask, mapTasks} from "@/mappers/task.mapper";
-
 function Projects() {
   
   const navigate = useNavigate();
@@ -19,6 +18,9 @@ function Projects() {
 
   const [projectDrawerOpen, setProjectDrawerOpen] =
   useState(false);
+
+  const [projectDrawerMode,setProjectDrawerMode] =
+  useState<"create"|"edit">( "create" );
 
   const [search, setSearch] =
   useState("");
@@ -34,12 +36,15 @@ function Projects() {
 
   const {
       projects,
+      setProjects,
       selectedProject,
       setSelectedProject,
       tasks,
       setTasks,
       refreshProjectStats,
       createProject,
+      updateProject,
+      deleteProject,
   } = useProjects();
 
 
@@ -48,6 +53,10 @@ useEffect(() => {
     new URLSearchParams(location.search);
 
   if (params.get("new") === "true") {
+
+    setProjectDrawerMode(
+      "create"
+    );
 
     setProjectDrawerOpen(true);
 
@@ -66,34 +75,98 @@ useEffect(() => {
 ]);
 
 useEffect(() => {
-
   if (
     searchParams.get("new") === "true"
   ) {
-
     setProjectDrawerOpen(true);
-
   }
-
 }, [searchParams]);
 
-const handleCreateProject =
-async (
-  name: string,
-  description: string
+
+useEffect(()=>{ const params =
+ new URLSearchParams(
+  location.search
+ );
+ const edit =
+ params.get("edit");
+ if(edit){
+   const project =
+   projects.find(
+    p=>p.id===edit
+   );
+   if(project){
+    setSelectedProject(
+      project
+    );
+    setProjectDrawerOpen(
+      true
+    );
+   }
+   navigate(
+    "/projects",
+    {
+      replace:true
+    }
+   );
+ }
+},[
+ location.search,
+ projects,
+ navigate
+]);
+
+const handleSaveProject = async (
+    name:string,
+    description:string
 )=>{
 
-  await createProject(
-    name,
-    description
+    try{
+
+        if(projectDrawerMode==="create"){
+
+            await createProject(
+                name,
+                description
+            );
+
+        }
+
+        else{
+
+            if(!selectedProject)
+                return;
+
+            await updateProject(
+                selectedProject.id,
+                name,
+                description
+            );
+
+        }
+
+        setProjectDrawerOpen(false);
+
+    }
+
+    catch(error){
+
+        console.log(error);
+
+    }
+
+}
+
+const handleDeleteProject =
+async () => {
+
+  if(!selectedProject)
+    return;
+
+  await deleteProject(
+    selectedProject.id
   );
 
   setProjectDrawerOpen(false);
-
-  searchParams.delete("new");
-
-  setSearchParams(searchParams);
-
 };
 
 
@@ -479,18 +552,23 @@ async (): Promise<Task[]> => {
           selectedProject={selectedProject}
           search={search}
           onSearchChange={setSearch}
+          onCreateProject={() => {
+            setProjectDrawerMode("create");
+            setProjectDrawerOpen(true);
+          }}
+          onEditProject={() => {
+            setProjectDrawerMode("edit");
+            setProjectDrawerOpen(true);
+          }}
+          onDeleteProject={handleDeleteProject}
           onProjectChange={(projectId) => {
           
             const project =
               projects.find(
                 p => p.id === projectId
               );
-            
-            if (project) {
-            
-              setSelectedProject(
-                project
-              );
+            if(project){
+              setSelectedProject(project);
             }
           }}
         />
@@ -558,15 +636,32 @@ async (): Promise<Task[]> => {
         />
 
         <ProjectDrawer
-          open={projectDrawerOpen}
-          mode="create"
-          onClose={() => {
-            setProjectDrawerOpen(false);
-            searchParams.delete("new");
-            setSearchParams(searchParams);
-          }}
-          onSave={handleCreateProject}
-        />
+    open={projectDrawerOpen}
+
+    mode={projectDrawerMode}
+
+    initialName={selectedProject?.name}
+
+    initialDescription={
+      selectedProject?.description
+    }
+
+    onClose={()=>{
+      setProjectDrawerOpen(false);
+
+      searchParams.delete("new");
+
+      setSearchParams(searchParams);
+    }}
+
+    onSave={handleSaveProject}
+
+    onDelete={
+      projectDrawerMode === "edit"
+        ? handleDeleteProject
+        : undefined
+    }
+/>
       </div>
     </DndContext>
   );

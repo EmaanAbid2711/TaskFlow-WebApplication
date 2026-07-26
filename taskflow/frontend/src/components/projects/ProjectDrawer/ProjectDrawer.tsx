@@ -14,6 +14,8 @@ interface Props {
     name: string,
     description: string
   ) => Promise<void>;
+
+  onDelete?: () => Promise<void>;
 }
 
 function ProjectDrawer({
@@ -23,6 +25,7 @@ function ProjectDrawer({
   initialDescription = "",
   onClose,
   onSave,
+  onDelete,
 }: Props) {
 
   const [name, setName] =
@@ -32,6 +35,9 @@ function ProjectDrawer({
     useState("");
 
   const [saving, setSaving] =
+    useState(false);
+
+  const [deleting, setDeleting] =
     useState(false);
 
   useEffect(() => {
@@ -83,6 +89,28 @@ function ProjectDrawer({
       }
 
     };
+
+  const handleDelete =
+async () => {
+
+  if (!onDelete)
+    return;
+  const confirmDelete =
+    window.confirm(
+      "Are you sure you want to delete this project?"
+    );
+
+  if(!confirmDelete)
+    return;
+
+  try {
+    setDeleting(true);
+    await onDelete();
+  }
+  finally {
+    setDeleting(false);
+  }
+};
 
   return (
     <>
@@ -211,43 +239,76 @@ function ProjectDrawer({
 
         {/* Footer */}
 
-        <div className="flex justify-end gap-3 border-t p-6">
+        <div className="flex justify-between border-t p-6">
+  {
+    mode === "edit" && (
+      <button
+        onClick={handleDelete}
+        disabled={deleting}
+        className="
+        rounded-lg
+        bg-red-600
+        hover:bg-red-700
+        disabled:opacity-50
+        px-5
+        py-2
+        text-white
+        "
+      >
 
-          <button
-            onClick={onClose}
-            className="
-            rounded-lg
-            border
-            px-5
-            py-2
-          "
-          >
-            Cancel
-          </button>
+        {
+          deleting
+          ?
+          "Deleting..."
+          :
+          "Delete Project"
+        }
 
-          <button
-            disabled={saving}
-            onClick={handleSave}
-            className="
-            rounded-lg
-            bg-[#0052cc]
-            px-5
-            py-2
-            text-white
-          "
-          >
+      </button>
 
-            {
-              saving
-                ? "Saving..."
-                : mode === "create"
-                ? "Create Project"
-                : "Save Changes"
-            }
+    )
+  }
+  <div className="flex gap-3">
 
-          </button>
+    <button
+      onClick={onClose}
+      className="
+      rounded-lg
+      border
+      px-5
+      py-2
+      "
+    >
+      Cancel
+    </button>
 
-        </div>
+
+    <button
+      disabled={saving}
+      onClick={handleSave}
+      className="
+      rounded-lg
+      bg-[#0052cc]
+      px-5
+      py-2
+      text-white
+      "
+    >
+      {
+        saving
+        ?
+        "Saving..."
+        :
+        mode==="create"
+        ?
+        "Create Project"
+        :
+        "Save Changes"
+      }
+
+    </button>
+  </div>
+</div>
 
       </div>
     </>

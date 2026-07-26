@@ -97,46 +97,30 @@ const createProject = async (
 */
 
 const updateProject = async (
-  projectId: string,
-  name: string,
-  description?: string
+    projectId: string,
+    name: string,
+    description: string
 ) => {
 
-  const response =
-    await updateProjectApi(
-      projectId,
-      {
-        name,
-        description,
-      }
+    const response =
+        await updateProjectApi(projectId,{
+            name,
+            description,
+        });
+
+    const updated = response.data;
+
+    setProjects(previous =>
+        previous.map(project =>
+            project.id === projectId
+                ? updated
+                : project
+        )
     );
 
-  const updatedProject =
-    response.data;
-
-  setProjects(previous =>
-    previous.map(project =>
-      project.id === projectId
-        ? updatedProject
-        : project
-    )
-  );
-
-  setSelectedProject(previous => {
-
-    if (!previous) {
-      return previous;
-    }
-
-    return previous.id === projectId
-      ? updatedProject
-      : previous;
-
-  });
-
-  return updatedProject;
-
+    setSelectedProject(updated);
 };
+
 
 
 /*
