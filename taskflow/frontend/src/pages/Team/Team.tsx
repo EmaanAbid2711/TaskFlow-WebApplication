@@ -1,53 +1,78 @@
 import { useEffect, useState } from "react";
-import { DashboardLayout, TeamMemberCard } from "@/components";
+
+import { TeamMemberCard } from "@/components";
 import { getAllUsersService } from "@/services/user.service";
 import type { TeamMember } from "@/interfaces/dashboard";
 
 function Team() {
-  const [members, setMembers] = useState<TeamMember[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  const [members, setMembers] =
+    useState<TeamMember[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
     loadMembers();
   }, []);
 
-  const loadMembers = async () => {
-    try {
-      const users = await getAllUsersService();
-      setMembers(users);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const loadMembers =
+    async () => {
+      try {
+
+        const users =
+          await getAllUsersService();
+
+        setMembers(users);
+
+      } catch (error) {
+
+        console.error(error);
+
+      } finally {
+
+        setLoading(false);
+
+      }
+    };
+
+  if (loading) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        Loading team...
+      </div>
+    );
+  }
 
   return (
-    <DashboardLayout>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Team Members</h1>
-        <p className="mt-2 text-slate-500">
-          All registered users of TaskFlow.
-        </p>
-      </div>
+    <div className="flex-1 overflow-y-auto p-8">
 
-      {loading ? (
-        <div className="text-slate-500">Loading...</div>
-      ) : (
-        <div className="space-y-5">
+      <div className="mx-auto max-w-5xl">
+
+        <h1 className="mb-8 text-3xl font-bold text-slate-900">
+          Team Members
+        </h1>
+
+        <div className="space-y-4">
+
           {members.map((member) => (
+
             <div
               key={member.id}
-              className=" w-full rounded-xl border bg-white p-5 shadow-sm "
+              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
             >
               <TeamMemberCard
                 member={member}
               />
             </div>
+
           ))}
+
         </div>
-      )}
-    </DashboardLayout>
+
+      </div>
+
+    </div>
   );
 }
 

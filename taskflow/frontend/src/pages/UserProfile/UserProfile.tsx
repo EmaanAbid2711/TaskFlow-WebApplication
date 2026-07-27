@@ -4,7 +4,7 @@ import { ArrowLeft, Globe, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
 import { getUserByIdService } from "@/services/user.service";
-import type { UserProfile } from "@/interfaces/user";
+import type { UserProfileData } from "@/interfaces/user";
 
 function UserProfile() {
   const { id } = useParams();
@@ -15,7 +15,7 @@ function UserProfile() {
     useState(true);
 
   const [user, setUser] =
-    useState<UserProfile | null>(
+    useState<UserProfileData | null>(
       null
     );
 

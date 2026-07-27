@@ -21,3 +21,16 @@ export interface UpdateProfileData {
   role?: string;
   timezone?: string;
 }
+
+export interface UserProfileData {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string | null;
+  username?: string | null;
+  bio?: string | null;
+  location?: string | null;
+  website?: string | null;
+  role?: string | null;
+  timezone?: string | null;
+}
