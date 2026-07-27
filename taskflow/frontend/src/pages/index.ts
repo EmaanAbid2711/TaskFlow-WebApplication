@@ -10,4 +10,4 @@ export { default as Account} from "./Settings/Account"
 export { default as Notifications} from "./Settings/Notifications"
 export { default as Billing} from "./Settings/Billing"
 export { default as Team } from "./Team/Team"
-
+export { default as UserProfile } from "./UserProfile/UserProfile"
