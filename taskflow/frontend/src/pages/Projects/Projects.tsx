@@ -552,22 +552,29 @@ async (): Promise<Task[]> => {
           search={search}
           onSearchChange={setSearch}
           onCreateProject={() => {
-            setProjectDrawerMode("create");
+            setProjectDrawerMode(
+              "create"
+            );
             setProjectDrawerOpen(true);
           }}
           onEditProject={() => {
-            setProjectDrawerMode("edit");
+            setProjectDrawerMode(
+              "edit"
+            );
             setProjectDrawerOpen(true);
           }}
-          onDeleteProject={handleDeleteProject}
-          onProjectChange={(projectId) => {
-          
+          onDeleteProject={
+            handleDeleteProject
+          }
+          onProjectChange={(projectId)=>{
             const project =
               projects.find(
-                p => p.id === projectId
+                p=>p.id===projectId
               );
             if(project){
-              setSelectedProject(project);
+              setSelectedProject(
+                project
+              );
             }
           }}
         />
@@ -644,7 +651,7 @@ async (): Promise<Task[]> => {
         }
         initialDescription={
           projectDrawerMode === "edit"
-            ? selectedProject?.description
+            ? selectedProject?.description ?? ""
             : ""
         }
 

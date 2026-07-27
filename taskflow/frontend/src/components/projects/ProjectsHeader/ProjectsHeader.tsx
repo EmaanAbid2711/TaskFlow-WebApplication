@@ -8,12 +8,16 @@ import type { Project } from "@/interfaces/project";
 interface Props {
   projects: Project[];
   selectedProject: Project | null;
-  onProjectChange: (projectId: string) => void;
-  search: string;
-  onSearchChange: (value: string) => void;
-  onCreateProject: () => void;
-  onEditProject: () => void;
-  onDeleteProject: () => void;
+  onProjectChange: (
+    projectId:string
+  ) => void;
+  search:string;
+  onSearchChange:(
+    value:string
+  )=>void;
+  onCreateProject:()=>void;
+  onEditProject:()=>void;
+  onDeleteProject:()=>void;
 }
 
 function ProjectHeader({

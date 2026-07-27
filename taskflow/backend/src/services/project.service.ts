@@ -121,7 +121,6 @@ export const getProjects = async (
 };
 
 // Get Single Project
-
 export const getProjectById = async (
   userId: string,
   projectId: string
@@ -134,9 +133,9 @@ export const getProjectById = async (
           ownerId: userId,
         },
         {
-          tasks: {
-            some: {
-              assigneeId: userId,
+          tasks:{
+            some:{
+              assigneeId:userId
             },
           },
         },

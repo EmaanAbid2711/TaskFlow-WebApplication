@@ -26,35 +26,37 @@ export function useProjects() {
   |--------------------------------------------------------------------------
   */
   const loadProjects = async()=>{
-
-    try{
-      const response =
-        await getProjectsApi();
-
-      const data =
-        response.data;
-
-      setProjects(data);
-
-      if(
-        data.length > 0 &&
-        !selectedProject
-      ){
-        setSelectedProject(
-          data[0]
-        );
-
+  try{
+    const response =
+      await getProjectsApi();
+    const data =
+      response.data;
+    setProjects(data);
+    setSelectedProject(
+      previous => {
+        if(previous){
+          const exists =
+            data.find(
+              (p:Project)=>
+              p.id===previous.id
+            );
+          if(exists){
+            return exists;
+          }
+        }
+        return data.length > 0
+          ? data[0]
+          : null;
       }
-    }
-    catch(error){
-
-      console.log(error);
-    }
-    finally{
-
-      setLoading(false);
-    }
-  };
+    );
+  }
+  catch(error){
+    console.log(error);
+  }
+  finally{
+    setLoading(false);
+  }
+};
 
 
 /*
