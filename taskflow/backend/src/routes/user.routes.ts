@@ -24,21 +24,6 @@ router.get(
   getAllUsersController
 );
 
-/**
- * @swagger
- * /api/users/{id}:
- *   get:
- *     summary: Get user by ID
- *     tags:
- *       - Users
- *     security:
- *       - bearerAuth: []
- */
-router.get(
-  "/:id",
-  authMiddleware,
-  getUserByIdController
-);
 
 /**
  * @swagger
@@ -59,10 +44,6 @@ router.get(
   authMiddleware,
   profile
 );
-
-
-
-
 
 /**
  * @swagger
@@ -124,6 +105,20 @@ router.patch(
   updateProfile
 );
 
-
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get(
+  "/:id",
+  authMiddleware,
+  getUserByIdController
+);
 
 export default router;
