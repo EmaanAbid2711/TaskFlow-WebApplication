@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
+import ConfirmModal from "@/components/common/ConfirmModal/confirmmodal";
+
 interface Props {
   open: boolean;
   mode: "create" | "edit";
@@ -40,6 +42,9 @@ function ProjectDrawer({
   const [deleting, setDeleting] =
     useState(false);
 
+  const [confirmOpen, setConfirmOpen] =
+  useState(false);
+  
   useEffect(() => {
 
     if (open) {
@@ -90,22 +95,13 @@ function ProjectDrawer({
 
     };
 
-  const handleDelete =
-async () => {
-
+  const handleDelete = async () => {
   if (!onDelete)
     return;
-  const confirmDelete =
-    window.confirm(
-      "Are you sure you want to delete this project?"
-    );
-
-  if(!confirmDelete)
-    return;
-
   try {
     setDeleting(true);
     await onDelete();
+    setConfirmOpen(false);
   }
   finally {
     setDeleting(false);
@@ -243,7 +239,7 @@ async () => {
   {
     mode === "edit" && (
       <button
-        onClick={handleDelete}
+        onClick={() => setConfirmOpen(true)}
         disabled={deleting}
         className="
         rounded-lg
@@ -311,6 +307,27 @@ async () => {
 </div>
 
       </div>
+      <ConfirmModal
+        open={confirmOpen}
+        title="Delete Project?"
+        message="This project and all of its tasks will be permanently deleted. This action cannot be undone."
+        confirmText={
+          deleting
+            ? "Deleting..."
+            : "Delete"
+        }
+        cancelText="Cancel"
+        onCancel={() => {
+        
+          if (!deleting) {
+          
+            setConfirmOpen(false);
+          
+          }
+        
+        }}
+        onConfirm={handleDelete}
+      />
     </>
   );
 }
