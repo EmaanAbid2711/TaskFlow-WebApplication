@@ -144,27 +144,28 @@ async (
   return prisma.task.findMany({
 
     where: {
+  projectId,
 
-      projectId,
-
+  OR: [
+    {
       project: {
-
-        OR: [
-          {
-            ownerId: userId,
-          },
-          {
-            members: {
-              some: {
-                userId,
-              },
-            },
-          },
-        ],
-
+        ownerId: userId,
       },
-
     },
+    {
+      project: {
+        members: {
+          some: {
+            userId,
+          },
+        },
+      },
+    },
+    {
+      assigneeId: userId,
+    },
+  ],
+},
 
     include: {
 
@@ -213,27 +214,27 @@ async (
   return prisma.task.findFirst({
 
     where: {
-
-      id: taskId,
-
+  id: taskId,
+  OR: [
+    {
       project: {
-
-        OR: [
-          {
-            ownerId: userId,
-          },
-          {
-            members: {
-              some: {
-                userId,
-              },
-            },
-          },
-        ],
-
+        ownerId: userId,
       },
-
     },
+    {
+      project: {
+        members: {
+          some: {
+            userId,
+          },
+        },
+      },
+    },
+    {
+      assigneeId: userId,
+    },
+  ],
+},
 
     include: {
 
