@@ -227,7 +227,13 @@ function Sidebar({
           </nav>
 
           {/* New Project */}
-          <button className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0052cc] py-3 text-sm font-medium text-white transition hover:bg-[#0043a4]">
+          <button
+            onClick={() => {
+              navigate("/projects?new=true");
+              onClose();
+            }}
+            className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0052cc] py-3 text-sm font-medium text-white transition hover:bg-[#0043a4]"
+          >
             <Plus size={18} />
             New Project
           </button>

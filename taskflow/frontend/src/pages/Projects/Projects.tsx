@@ -1,18 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import {DndContext, PointerSensor, closestCorners, useSensor, useSensors, type DragEndEvent} from "@dnd-kit/core";
 import { Plus } from "lucide-react";
+import {useLocation, useNavigate, useSearchParams} from "react-router-dom";
 
-import {ProjectHeader, KanbanBoard, TaskDrawer} from "@/components";
+import {ProjectHeader, KanbanBoard, TaskDrawer, ProjectDrawer} from "@/components";
 import type {DrawerMode,Task, TaskType} from "@/interfaces/projects";
 import { useProjects } from "@/hooks/useProjects";
 import {createTaskApi, updateTaskApi, deleteTaskApi, getProjectTasksApi} from "@/api/task.api";
 import {mapTask, mapTasks} from "@/mappers/task.mapper";
-
 function Projects() {
+  
+  const navigate = useNavigate();
+
+  const location = useLocation();
+
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const [projectDrawerOpen, setProjectDrawerOpen] =
+  useState(false);
+
+  const [projectDrawerMode,setProjectDrawerMode] =
+  useState<"create"|"edit">( "create" );
 
   const [search, setSearch] =
   useState("");
+
+  const [searchParams, setSearchParams] =
+  useSearchParams();
 
   const [drawerMode, setDrawerMode] =
     useState<DrawerMode>("create");
@@ -27,7 +41,133 @@ function Projects() {
       tasks,
       setTasks,
       refreshProjectStats,
+      createProject,
+      updateProject,
+      deleteProject,
   } = useProjects();
+
+
+useEffect(() => {
+  const params =
+    new URLSearchParams(location.search);
+
+  if (params.get("new") === "true") {
+
+    setProjectDrawerMode(
+      "create"
+    );
+
+    setProjectDrawerOpen(true);
+
+    navigate(
+      "/projects",
+      {
+        replace: true,
+      }
+    );
+
+  }
+
+}, [
+  location.search,
+  navigate,
+]);
+
+useEffect(() => {
+  if (
+    searchParams.get("new") === "true"
+  ) {
+    setProjectDrawerOpen(true);
+  }
+}, [searchParams]);
+
+
+useEffect(()=>{ const params =
+ new URLSearchParams(
+  location.search
+ );
+ const edit =
+ params.get("edit");
+ if(edit){
+   const project =
+   projects.find(
+    p=>p.id===edit
+   );
+   if(project){
+    setSelectedProject(
+      project
+    );
+    setProjectDrawerOpen(
+      true
+    );
+   }
+   navigate(
+    "/projects",
+    {
+      replace:true
+    }
+   );
+ }
+},[
+ location.search,
+ projects,
+ navigate
+]);
+
+const handleSaveProject = async (
+    name:string,
+    description:string
+)=>{
+
+    try{
+
+        if(projectDrawerMode==="create"){
+
+            await createProject(
+                name,
+                description
+            );
+
+        }
+
+        else{
+
+            if(!selectedProject)
+                return;
+
+            await updateProject(
+                selectedProject.id,
+                name,
+                description
+            );
+
+        }
+
+        setProjectDrawerOpen(false);
+
+    }
+
+    catch(error){
+
+        console.log(error);
+
+    }
+
+}
+
+const handleDeleteProject =
+async () => {
+
+  if(!selectedProject)
+    return;
+
+  await deleteProject(
+    selectedProject.id
+  );
+
+  setProjectDrawerOpen(false);
+};
+
 
   const refreshCurrentProject =
 async (): Promise<Task[]> => {
@@ -411,18 +551,23 @@ async (): Promise<Task[]> => {
           selectedProject={selectedProject}
           search={search}
           onSearchChange={setSearch}
+          onCreateProject={() => {
+            setProjectDrawerMode("create");
+            setProjectDrawerOpen(true);
+          }}
+          onEditProject={() => {
+            setProjectDrawerMode("edit");
+            setProjectDrawerOpen(true);
+          }}
+          onDeleteProject={handleDeleteProject}
           onProjectChange={(projectId) => {
           
             const project =
               projects.find(
                 p => p.id === projectId
               );
-            
-            if (project) {
-            
-              setSelectedProject(
-                project
-              );
+            if(project){
+              setSelectedProject(project);
             }
           }}
         />
@@ -488,6 +633,34 @@ async (): Promise<Task[]> => {
           }
           refreshTasks={refreshCurrentProject}
         />
+
+        <ProjectDrawer
+    open={projectDrawerOpen}
+
+    mode={projectDrawerMode}
+
+    initialName={selectedProject?.name}
+
+    initialDescription={
+      selectedProject?.description
+    }
+
+    onClose={()=>{
+      setProjectDrawerOpen(false);
+
+      searchParams.delete("new");
+
+      setSearchParams(searchParams);
+    }}
+
+    onSave={handleSaveProject}
+
+    onDelete={
+      projectDrawerMode === "edit"
+        ? handleDeleteProject
+        : undefined
+    }
+/>
       </div>
     </DndContext>
   );

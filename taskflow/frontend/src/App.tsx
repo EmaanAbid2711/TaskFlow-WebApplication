@@ -6,6 +6,7 @@ import { Toaster } from "./components/ui/sonner";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
+
 function App() {
   return ( 
     <AuthProvider>
