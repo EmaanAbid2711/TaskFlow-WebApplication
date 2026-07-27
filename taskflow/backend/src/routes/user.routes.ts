@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import authMiddleware from "../middleware/auth.middleware";
-import {profile, updateProfile, getAllUsersController} from "../controllers/user.controller";
+import {profile, updateProfile, getAllUsersController, getUserByIdController} from "../controllers/user.controller";
 import upload from "../config/multer";
 
 
@@ -24,6 +24,21 @@ router.get(
   getAllUsersController
 );
 
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get(
+  "/:id",
+  authMiddleware,
+  getUserByIdController
+);
 
 /**
  * @swagger

@@ -1,7 +1,7 @@
 import {Request, Response} from "express";
 import asyncHandler from "express-async-handler";
 
-import {getUserProfile, updateUserProfile, getAllUsers} from "../services/user.service";
+import {getUserProfile, updateUserProfile, getAllUsers, getUserById} from "../services/user.service";
 import {updateProfileSchema} from "../validations/user.validation";
 
 export const profile =
@@ -22,6 +22,40 @@ export const profile =
       const userId = req.user.id;
       const user =
         await getUserProfile(userId);
+
+      res.status(200).json({
+        success: true,
+        data: user,
+      });
+    }
+  );
+
+export const getUserByIdController =
+  asyncHandler(
+    async (
+      req: Request<{ id: string }>,
+      res: Response
+    ): Promise<void> => {
+
+      if (!req.user) {
+        res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+        return;
+      }
+
+      const { id } = req.params;
+
+      const user = await getUserById(id);
+
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+        return;
+      }
 
       res.status(200).json({
         success: true,

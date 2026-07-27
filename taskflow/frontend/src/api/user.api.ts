@@ -42,3 +42,14 @@ export const getUsersApi = async () => {
   return response.data;
 
 };
+
+export const getUserByIdApi =
+  async (
+    userId: string
+  ) => {
+    const response =
+      await api.get(
+        `/api/users/${userId}`
+      );
+    return response.data;
+  };

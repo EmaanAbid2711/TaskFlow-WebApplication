@@ -1,4 +1,4 @@
-import {getProfileApi, updateProfileApi, getAllUsersApi} from "../api/user.api";
+import {getProfileApi, updateProfileApi, getAllUsersApi, getUserByIdApi} from "../api/user.api";
 
 export const getProfileService = async () => {
   return await getProfileApi();
@@ -19,3 +19,12 @@ export const getAllUsersService = async () => {
   // Return ONLY the users array
   return response.data.data;
 };
+
+export const getUserByIdService =
+  async (
+    userId: string
+  ) => {
+    return await getUserByIdApi(
+      userId
+    );
+  };

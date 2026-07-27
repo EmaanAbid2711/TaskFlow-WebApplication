@@ -26,6 +26,34 @@ export const getUserProfile =
     });
   };
 
+export const getUserById = async (
+  userId: string
+) => {
+
+  return prisma.user.findUnique({
+
+    where: {
+      id: userId,
+    },
+
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      avatar: true,
+      username: true,
+      bio: true,
+      location: true,
+      website: true,
+      role: true,
+      timezone: true,
+    },
+
+  });
+
+};
+
+
 export const getAllUsers = async (
     currentUserId: string
   ) => {
