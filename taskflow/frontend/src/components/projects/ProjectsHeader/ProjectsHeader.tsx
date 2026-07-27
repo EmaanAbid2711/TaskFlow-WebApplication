@@ -158,9 +158,21 @@ function ProjectHeader({
               )}
             </div>
 
-            <p className="mt-2 text-slate-500">
-              {selectedProject?.description}
-            </p>
+            <div className="mt-2 space-y-1">
+              <p className="text-slate-500">
+                {selectedProject?.description}
+              </p>
+
+              {selectedProject && (
+                <p className="text-sm text-slate-400">
+                  Owner:
+                  <span className="ml-1 font-medium text-slate-600">
+                    {selectedProject.owner.name}
+                  </span>
+                </p>
+              )}
+
+            </div>
           </div>
 
           {/* Stats */}
