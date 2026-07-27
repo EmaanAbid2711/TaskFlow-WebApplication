@@ -34,13 +34,15 @@ function Team() {
       {loading ? (
         <div className="text-slate-500">Loading...</div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="space-y-5">
           {members.map((member) => (
             <div
               key={member.id}
-              className="rounded-xl border bg-white p-5 shadow-sm"
+              className=" w-full rounded-xl border bg-white p-5 shadow-sm "
             >
-              <TeamMemberCard member={member} />
+              <TeamMemberCard
+                member={member}
+              />
             </div>
           ))}
         </div>
