@@ -4,19 +4,24 @@ import type {CreateProjectInput, UpdateProjectInput} from "../validations/projec
 
 async function buildProjectResponse(projectId: string) {
   const project = await prisma.project.findUnique({
-    where: {
-      id: projectId,
-    },
-
-    include: {
-      tasks: {
-        select: {
-          id: true,
-          status: true,
-        },
+  where: {
+    id: projectId,
+  },
+  include: {
+    tasks: {
+      select: {
+        id: true,
+        status: true,
       },
     },
-  });
+    owner: {
+      select: {
+        id: true,
+        name: true,
+      },
+    },
+  },
+});
 
   if (!project) {
     return null;
@@ -37,11 +42,9 @@ async function buildProjectResponse(projectId: string) {
 
   return {
     id: project.id,
-
     name: project.name,
-
     description: project.description,
-
+    owner: project.owner,
     stats: {
       totalTasks,
       completedTasks,
@@ -80,11 +83,26 @@ export const createProject = async (
 // Get Projects
 
 export const getProjects = async (
-  ownerId: string
+  userId: string
 ) => {
   const projects = await prisma.project.findMany({
     where: {
-      ownerId,
+
+      OR: [
+        // User created the project
+        {
+          ownerId: userId,
+        },
+        // OR user has at least one assigned task
+        {
+          tasks: {
+            some: {
+              assigneeId: userId,
+            },
+          },
+        },
+      ],
+
     },
 
     select: {
@@ -95,7 +113,6 @@ export const getProjects = async (
       createdAt: "desc",
     },
   });
-
   return Promise.all(
     projects.map((project) =>
       buildProjectResponse(project.id)
@@ -106,31 +123,37 @@ export const getProjects = async (
 // Get Single Project
 
 export const getProjectById = async (
-  ownerId: string,
+  userId: string,
   projectId: string
 ) => {
   return prisma.project.findFirst({
     where: {
       id: projectId,
-
-      ownerId,
+      OR: [
+        {
+          ownerId: userId,
+        },
+        {
+          tasks: {
+            some: {
+              assigneeId: userId,
+            },
+          },
+        },
+      ],
     },
-
     include: {
       members: {
         include: {
           user: {
             select: {
               id: true,
-
               name: true,
-
               avatar: true,
             },
           },
         },
       },
-
       tasks: true,
     },
   });
