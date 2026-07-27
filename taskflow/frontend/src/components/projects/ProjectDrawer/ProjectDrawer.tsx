@@ -46,17 +46,17 @@ function ProjectDrawer({
   useState(false);
   
   useEffect(() => {
-
-    if (open) {
-
+    if (!open) return;
+    if (mode === "create") {
+      setName("");
+      setDescription("");
+    } else {
       setName(initialName);
-
       setDescription(initialDescription);
-
     }
-
   }, [
     open,
+    mode,
     initialName,
     initialDescription,
   ]);
