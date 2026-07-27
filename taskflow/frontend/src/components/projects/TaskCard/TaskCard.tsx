@@ -73,24 +73,6 @@ function TaskCard({
         {task.title}
       </h4>
 
-      {/* Progress */}
-
-      {type === "progress" && (
-        <div className="mt-4">
-          <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-            <div
-              className="h-full rounded-full bg-[#0052cc] transition-all"
-              style={{
-                width: `${task.progress}%`,
-              }}
-            />
-          </div>
-
-          <p className="mt-2 text-xs text-slate-500">
-            {task.progress}% Complete
-          </p>
-        </div>
-      )}
 
       {/* Footer */}
 
