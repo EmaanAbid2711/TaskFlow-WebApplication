@@ -36,7 +36,6 @@ function Projects() {
 
   const {
       projects,
-      setProjects,
       selectedProject,
       setSelectedProject,
       tasks,
