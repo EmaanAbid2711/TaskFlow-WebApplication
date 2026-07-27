@@ -635,32 +635,35 @@ async (): Promise<Task[]> => {
         />
 
         <ProjectDrawer
-    open={projectDrawerOpen}
+        open={projectDrawerOpen}
+        mode={projectDrawerMode}
+        initialName={
+          projectDrawerMode === "edit"
+            ? selectedProject?.name
+            : ""
+        }
+        initialDescription={
+          projectDrawerMode === "edit"
+            ? selectedProject?.description
+            : ""
+        }
 
-    mode={projectDrawerMode}
-
-    initialName={selectedProject?.name}
-
-    initialDescription={
-      selectedProject?.description
-    }
-
-    onClose={()=>{
-      setProjectDrawerOpen(false);
-
-      searchParams.delete("new");
-
-      setSearchParams(searchParams);
-    }}
-
-    onSave={handleSaveProject}
-
-    onDelete={
-      projectDrawerMode === "edit"
-        ? handleDeleteProject
-        : undefined
-    }
-/>
+          onClose={()=>{
+            setProjectDrawerOpen(false);
+          
+            searchParams.delete("new");
+          
+            setSearchParams(searchParams);
+          }}
+        
+          onSave={handleSaveProject}
+        
+          onDelete={
+            projectDrawerMode === "edit"
+              ? handleDeleteProject
+              : undefined
+          }
+      />
       </div>
     </DndContext>
   );
