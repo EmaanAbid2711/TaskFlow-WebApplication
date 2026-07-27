@@ -22,6 +22,36 @@ const createActivity = async (
   });
 };
 
+const ensureProjectMember = async (
+  projectId: string,
+  userId?: string | null
+) => {
+  if (!userId) {
+    return;
+  }
+  const existing =
+    await prisma.projectMember.findUnique({
+      where: {
+        projectId_userId: {
+          projectId,
+          userId,
+        },
+      },
+    });
+
+  if (existing) {
+    return;
+  }
+
+  await prisma.projectMember.create({
+    data: {
+      projectId,
+      userId,
+      role: "Member",
+    },
+  });
+};
+
 export const createTask = async (
   userId: string,
   data: CreateTaskInput
@@ -58,7 +88,6 @@ export const createTask = async (
   }
 
   const task = await prisma.task.create({
-
     data: {
       title: data.title,
       description: data.description,
@@ -89,6 +118,10 @@ export const createTask = async (
     },
 
   });
+  await ensureProjectMember(
+    project.id,
+    task.assigneeId
+  );
   await createActivity(
   userId,
   task.id,
