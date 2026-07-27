@@ -28,6 +28,9 @@ function ProjectHeader({
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const isOwner =
+  selectedProject?.owner.id === user?.id;
+
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -127,7 +130,7 @@ function ProjectHeader({
               </h1>
 
               {/* Project menu */}
-              {selectedProject && (
+              {selectedProject && isOwner &&(
                 <div ref={menuRef} className="relative">
                   <button
                     onClick={() => setMenuOpen((previous) => !previous)}
