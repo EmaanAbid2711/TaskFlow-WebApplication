@@ -107,7 +107,17 @@ function Sidebar({
             </button>
 
             {/* Team */}
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-slate-600 transition hover:bg-slate-100">
+            <button
+              onClick={() =>
+                goTo("/team")
+              }
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 transition
+                ${
+                  location.pathname === "/team"
+                    ? "bg-[#0052cc] text-white"
+                    : "text-slate-600 hover:bg-slate-100"
+                }`}
+            >
               <Users size={18} />
               Team
             </button>
