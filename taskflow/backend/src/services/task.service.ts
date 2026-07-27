@@ -495,6 +495,11 @@ if (
 
   });
 
+  await ensureProjectMember(
+  updatedTask.projectId,
+  updatedTask.assigneeId
+);
+
 for (const activity of activities) {
 
   await createActivity(
