@@ -2,6 +2,7 @@ import { useState, useEffect} from "react";
 import {DndContext, PointerSensor, closestCorners, useSensor, useSensors, type DragEndEvent} from "@dnd-kit/core";
 import { Plus } from "lucide-react";
 import {useLocation, useNavigate, useSearchParams} from "react-router-dom";
+import { toast } from "sonner";
 
 import {ProjectHeader, KanbanBoard, TaskDrawer, ProjectDrawer} from "@/components";
 import type {DrawerMode,Task, TaskType} from "@/interfaces/projects";
@@ -51,6 +52,12 @@ function Projects() {
 
 const isOwner =
   selectedProject?.owner.id === user?.id;
+
+const canOpenTask = (task: Task) => {
+  if (isOwner) return true;
+
+  return task.assignee.id === user?.id;
+};
 
 useEffect(() => {
   const params =
@@ -281,15 +288,17 @@ async (): Promise<Task[]> => {
    * ------------------------------------------------------------------
    */
 
-  const handleTaskClick = (
-    task: Task
-  ) => {
-    setDrawerMode("edit");
-
-    setSelectedTask(task);
-
-    setDrawerOpen(true);
-  };
+    const handleTaskClick = (
+      task: Task
+    ) => {
+      if (!canOpenTask(task)) {
+        toast.error("You can only open tasks assigned to you.");
+        return;
+      }
+      setDrawerMode("edit");
+      setSelectedTask(task);
+      setDrawerOpen(true);
+    };
 
   /**
    * ------------------------------------------------------------------
