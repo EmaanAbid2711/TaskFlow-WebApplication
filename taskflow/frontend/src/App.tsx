@@ -4,12 +4,14 @@ import {Login, ForgotPassword, ResetPassword, Signup, Dashboard, Projects, Landi
 import { AppLayout } from "./components";
 import { Toaster } from "./components/ui/sonner";
 import { AuthProvider } from "./context/AuthContext";
+import { DashboardProvider } from "@/context/DashboardContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 
 function App() {
   return ( 
     <AuthProvider>
+      <DashboardProvider>
       <BrowserRouter>
         <Toaster richColors />
         <Routes>
@@ -131,6 +133,7 @@ function App() {
 
         </Routes>
       </BrowserRouter>
+      </DashboardProvider>
     </AuthProvider>
   );
 }

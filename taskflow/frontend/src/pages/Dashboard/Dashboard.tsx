@@ -3,8 +3,8 @@ import { useState, useEffect, useMemo } from "react";
 import {DashboardLayout, MetricCard, ProgressCard, ActivityCard, DeadlineCard, TeamMemberCard } from "../../components";
 import {metrics, projectProgress, activities, deadlines} from "../../data/dashboarddata.ts";
 import { getAllUsersService } from "@/services/user.service";
-import { getDashboardStatsService } from "@/services/dashboard.service";
-import type { TeamMember, DashboardStats } from "@/interfaces/dashboard";
+import { useDashboard } from "@/context/DashboardContext";
+import type { TeamMember } from "@/interfaces/dashboard";
 
 
 function Dashboard() {
@@ -12,16 +12,12 @@ function Dashboard() {
   const [teamMembers, setTeamMembers] =
   useState<TeamMember[]>([]);
 
-  const [stats, setStats] = useState<DashboardStats>({
-    totalProjects: 0,
-    totalTasks: 0,
-    completedTasks: 0,
-    teamMembers: 0,
-  });
+  const {
+    stats,
+  } = useDashboard();
   
   useEffect(() => {
     loadUsers();
-    loadDashboardStats();
   }, []);
   const loadUsers = async () => {
     try {
@@ -32,20 +28,6 @@ function Dashboard() {
       setTeamMembers(users);
     } catch (error) {
       console.error("Failed to load users:", error);
-    }
-  };
-
-  const loadDashboardStats = async () => {
-    try {
-      const dashboardStats =
-        await getDashboardStatsService();
-    
-      setStats(dashboardStats);
-    } catch (error) {
-      console.error(
-        "Failed to load dashboard stats:",
-        error
-      );
     }
   };
 

@@ -10,6 +10,7 @@ import { useProjects } from "@/hooks/useProjects";
 import {createTaskApi, updateTaskApi, deleteTaskApi, getProjectTasksApi} from "@/api/task.api";
 import {mapTask, mapTasks} from "@/mappers/task.mapper";
 import { useAuth } from "@/context/AuthContext";
+import { useDashboard } from "@/context/DashboardContext";
 
 function Projects() {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ function Projects() {
   const location = useLocation();
 
   const { user } = useAuth();
+
+  const {refreshDashboardStats} = useDashboard();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -134,26 +137,21 @@ const handleSaveProject = async (
     try{
 
         if(projectDrawerMode==="create"){
-
             await createProject(
                 name,
                 description
             );
-
         }
-
         else{
-
             if(!selectedProject)
                 return;
-
             await updateProject(
                 selectedProject.id,
                 name,
                 description
             );
-
         }
+        await refreshDashboardStats();
 
         setProjectDrawerOpen(false);
 
@@ -169,14 +167,12 @@ const handleSaveProject = async (
 
 const handleDeleteProject =
 async () => {
-
   if(!selectedProject)
     return;
-
   await deleteProject(
     selectedProject.id
   );
-
+  await refreshDashboardStats();
   setProjectDrawerOpen(false);
 };
 
@@ -370,7 +366,10 @@ async (): Promise<Task[]> => {
           ...prev,
           mapTask(response.data)
         ]);
-        await refreshProjectStats(selectedProject.id);
+        await refreshProjectStats(
+          selectedProject.id
+        );
+        await refreshDashboardStats();
 
       }
 
@@ -432,7 +431,7 @@ async (): Promise<Task[]> => {
           )
         );
         await refreshProjectStats(selectedProject.id);
-
+        await refreshDashboardStats();
 
       }
 
@@ -474,8 +473,12 @@ async (): Promise<Task[]> => {
         task.id!==selectedTask.id
       )
      );
-     if (selectedProject) { await refreshProjectStats(selectedProject.id); }
-     setDrawerOpen(false);
+     if (selectedProject) {await refreshProjectStats(
+          selectedProject.id
+        );
+      }
+      await refreshDashboardStats();
+      setDrawerOpen(false);
    }
    catch(error){
     console.log(
@@ -539,7 +542,10 @@ async (): Promise<Task[]> => {
      :task
      )
      );
-     await refreshProjectStats(selectedProject.id);
+     await refreshProjectStats(
+      selectedProject.id
+    );
+    await refreshDashboardStats();
      }
      catch(error){ 
      console.log(
