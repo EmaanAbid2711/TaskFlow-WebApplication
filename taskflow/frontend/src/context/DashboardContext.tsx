@@ -1,7 +1,8 @@
-import {createContext, useContext, useEffect, useState,  type ReactNode} from "react";
+import {createContext, useContext, useEffect, useState, type ReactNode} from "react";
 
 import { getDashboardStatsService } from "@/services/dashboard.service";
 import type { DashboardStats } from "@/interfaces/dashboard";
+import { useAuth } from "@/context/AuthContext";
 
 interface DashboardContextType {
   stats: DashboardStats;
@@ -22,55 +23,53 @@ export function DashboardProvider({
   children,
 }: Props) {
 
+  const { user } = useAuth();
+
   const [loading, setLoading] =
     useState(true);
 
+  const emptyDashboardStats: DashboardStats = {
+  totalProjects:0,
+  totalTasks:0,
+  completedTasks:0,
+  pendingTasks:0,
+  projectProgress:[],
+};
+
   const [stats, setStats] =
-    useState<DashboardStats>({
-      totalProjects: 0,
-      totalTasks: 0,
-      completedTasks: 0,
-      pendingTasks: 0,
-      projectProgress:[],
-    });
+  useState<DashboardStats>(
+    emptyDashboardStats
+  );
 
   const refreshDashboardStats =
-    async () => {
-
-      try {
-
-        const dashboardStats =
-          await getDashboardStatsService();
-
-        setStats(dashboardStats);
-
-      }
-
-      catch (error) {
-
-        console.error(
-          "Dashboard refresh failed",
-          error
-        );
-
-      }
-
-    };
+  async () => {
+    if(!user){
+      setStats(emptyDashboardStats);
+      return;
+    }
+    try {
+      const dashboardStats =
+        await getDashboardStatsService();
+      setStats(dashboardStats);
+    }
+    catch(error){
+      console.error(
+        "Dashboard refresh failed",
+        error
+      );
+      setStats(emptyDashboardStats);
+    }
+  };
 
   useEffect(() => {
-
-    const loadDashboard =
-      async () => {
-
-        await refreshDashboardStats();
-
-        setLoading(false);
-
-      };
-
-    loadDashboard();
-
-  }, []);
+   const loadDashboard =
+     async () => {
+       setLoading(true);
+       await refreshDashboardStats();
+       setLoading(false);
+     };
+   loadDashboard();
+    }, [user]);
 
   return (
 
