@@ -102,17 +102,11 @@ function TaskCard({
               />
               Active
             </div>
-
-            <div className="flex -space-x-2">
-              {task.assignees?.map((img, index) => (
-                <img
-                  key={index}
-                  src={getAvatarUrl(img)}
-                  alt={`Member ${index + 1}`}
-                  className="h-7 w-7 rounded-full border-2 border-white object-cover"
-                />
-              ))}
-            </div>
+            <img
+              src={getAvatarUrl(task.assignee.avatar)}
+              alt={task.assignee.name}
+              className="h-7 w-7 rounded-full object-cover"
+            />
           </>
         )}
 
