@@ -31,6 +31,7 @@ export function DashboardProvider({
       totalTasks: 0,
       completedTasks: 0,
       pendingTasks: 0,
+      projectProgress:[],
     });
 
   const refreshDashboardStats =

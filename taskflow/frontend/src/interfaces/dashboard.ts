@@ -15,7 +15,7 @@ export interface Metric {
 }
 
 export interface ProjectProgress {
-  id: number;
+  id: string;
   name: string;
   progress: number;
   color: string;
@@ -55,4 +55,5 @@ export interface DashboardStats {
   totalTasks: number;
   completedTasks: number;
   pendingTasks: number;
+  projectProgress: ProjectProgress[];
 }

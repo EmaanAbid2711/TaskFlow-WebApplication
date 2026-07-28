@@ -4,8 +4,8 @@ export const getDashboardStats = async (
   userId: string
 ) => {
 
-  const projects =
-    await prisma.project.findMany({
+  const totalProjects =
+    await prisma.project.count({
       where: {
         OR: [
           {
@@ -20,47 +20,109 @@ export const getDashboardStats = async (
           },
         ],
       },
-
-      select: {
-        id: true,
-      },
     });
-
-  const projectIds =
-    projects.map(project => project.id);
-
-
-  const totalProjects =
-    projectIds.length;
 
   const totalTasks =
     await prisma.task.count({
-      where: {
-        projectId: {
-          in: projectIds,
+      where:{
+        project:{
+          OR:[
+            {
+              ownerId:userId,
+            },
+            {
+              members:{
+                some:{
+                  userId,
+                },
+              },
+            },
+          ],
         },
       },
     });
 
   const completedTasks =
     await prisma.task.count({
-      where: {
-        projectId: {
-          in: projectIds,
+      where:{
+        status:"COMPLETED",
+        project:{
+          OR:[
+            {
+              ownerId:userId,
+            },
+            {
+              members:{
+                some:{
+                  userId,
+                },
+              },
+            },
+          ],
         },
-
-        status: "COMPLETED",
       },
     });
 
   const pendingTasks =
-    totalTasks -
-    completedTasks;
+    totalTasks - completedTasks;
 
+  const projects =
+    await prisma.project.findMany({
+      where:{
+        OR:[
+          {
+            ownerId:userId,
+          },
+          {
+            members:{
+              some:{
+                userId,
+              },
+            },
+          },
+        ],
+      },
+
+      include:{
+        tasks:true,
+      },
+      orderBy:{
+        createdAt:"desc",
+      },
+    });
+
+  const projectProgress =
+    projects.map(project=>{
+
+      const total =
+        project.tasks.length;
+
+      const completed =
+        project.tasks.filter(
+          task =>
+          task.status==="COMPLETED"
+        ).length;
+
+      const progress =
+        total === 0
+        ? 0
+        : Math.round(
+            (completed / total) * 100
+          );
+
+      return {
+        id:project.id,
+        name:
+          project.name,
+        progress,
+        color:"#0052cc",
+      };
+    });
   return {
     totalProjects,
     totalTasks,
     completedTasks,
     pendingTasks,
+    projectProgress,
   };
 };
