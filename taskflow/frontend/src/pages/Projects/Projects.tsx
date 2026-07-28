@@ -489,6 +489,10 @@ async (): Promise<Task[]> => {
   const handleDragEnd = async(
      event:DragEndEvent
     )=>{
+      if (!isOwner) {
+        return;
+      }
+
      const {
       active,
       over
@@ -549,9 +553,9 @@ async (): Promise<Task[]> => {
 
   return (
     <DndContext
-      sensors={sensors}
+      sensors={isOwner ? sensors : []}
       collisionDetection={closestCorners}
-      onDragEnd={handleDragEnd}
+      onDragEnd={isOwner ? handleDragEnd : undefined}
     >
       <div
         className="
