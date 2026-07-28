@@ -1,4 +1,4 @@
-import type {SidebarItem, Activity, ChartPoint, Deadline, Metric, ProjectProgress} from "../interfaces/dashboard";
+import type {SidebarItem, Activity, ChartPoint, Deadline, Metric} from "../interfaces/dashboard";
 
 export const sidebarItems: SidebarItem[] = [
   {
@@ -68,26 +68,6 @@ export const metrics: Metric[] = [
   },
 ];
 
-export const projectProgress: ProjectProgress[] = [
-  {
-    id: 1,
-    name: "UI Redesign",
-    progress: 78,
-    color: "#0052cc",
-  },
-  {
-    id: 2,
-    name: "API Integration",
-    progress: 45,
-    color: "#d97706",
-  },
-  {
-    id: 3,
-    name: "User Feedback",
-    progress: 22,
-    color: "#64748b",
-  },
-];
 
 export const activities: Activity[] = [
   {
