@@ -13,9 +13,10 @@ interface Props {
   value: Assignee | null; 
   users: UserOption[];
   onChange: (member: Assignee | null) => void; 
+  disabled?: boolean;
 }
 
-function AssigneeSelector({ value, users, onChange }: Props) {
+function AssigneeSelector({ value, users, onChange, disabled }: Props) {
   const [open, setOpen] = useState(false);
 
   // Helper to check if a valid assignee is selected
@@ -28,6 +29,7 @@ function AssigneeSelector({ value, users, onChange }: Props) {
           <Button
             variant="outline"
             type="button"
+            disabled={disabled}
             className="w-full justify-between rounded-lg"
           />
         }

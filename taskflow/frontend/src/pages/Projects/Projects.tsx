@@ -668,6 +668,7 @@ async (): Promise<Task[]> => {
             handleDeleteTask
           }
           refreshTasks={refreshCurrentProject}
+          canChangeAssignee={isOwner}
         />
 
         <ProjectDrawer

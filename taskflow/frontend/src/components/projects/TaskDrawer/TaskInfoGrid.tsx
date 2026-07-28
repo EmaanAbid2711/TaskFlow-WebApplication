@@ -15,12 +15,14 @@ interface Props {
     field: keyof Task,
     value: any
   ) => void;
+  canChangeAssignee: boolean;
 }
 
 function TaskInfoGrid({
   task,
   users,
   onChange,
+  canChangeAssignee
 }: Props) {
 
   const [calendarOpen, setCalendarOpen] =
@@ -199,6 +201,8 @@ function TaskInfoGrid({
                 member
               )            
             }
+            disabled={!canChangeAssignee}
+
 
         />
 

@@ -19,6 +19,7 @@ interface Props {
   onSave: () => void;
   onDelete: () => void;
   refreshTasks: () => Promise<Task[]>;
+  canChangeAssignee: boolean;
 }
 
 function TaskDrawer({
@@ -30,6 +31,7 @@ function TaskDrawer({
   onDelete,
   onSave,
   refreshTasks,
+  canChangeAssignee,
 
 }: Props) {
 
@@ -125,6 +127,7 @@ function TaskDrawer({
               onChange={
                 handleChange
               }
+              canChangeAssignee={canChangeAssignee}
             />
 
             <Attachments
