@@ -8,11 +8,14 @@ import type {DrawerMode,Task, TaskType} from "@/interfaces/projects";
 import { useProjects } from "@/hooks/useProjects";
 import {createTaskApi, updateTaskApi, deleteTaskApi, getProjectTasksApi} from "@/api/task.api";
 import {mapTask, mapTasks} from "@/mappers/task.mapper";
+import { useAuth } from "@/context/AuthContext";
+
 function Projects() {
-  
   const navigate = useNavigate();
 
   const location = useLocation();
+
+  const { user } = useAuth();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -46,6 +49,8 @@ function Projects() {
       deleteProject,
   } = useProjects();
 
+const isOwner =
+  selectedProject?.owner.id === user?.id;
 
 useEffect(() => {
   const params =
@@ -589,15 +594,26 @@ async (): Promise<Task[]> => {
             tasks={filteredTasks}
             onAddTask={handleAddTask}
             onTaskClick={handleTaskClick}
+            canCreateTask={
+              selectedProject?.owner.id ===
+              user?.id
+            }
           />
         </div>
 
         {/* Floating Add Button */}
 
         <button
-          onClick={() =>
-            handleAddTask("todo")
-          }
+        onClick={() => {
+          if (!isOwner) return;
+          handleAddTask("todo");
+        }}
+        disabled={!isOwner}
+        title={
+          isOwner
+            ? "Create Task"
+            : "Only the project owner can create tasks"
+        }
           className={`
           fixed bottom-5 right-5
           z-40
@@ -608,7 +624,11 @@ async (): Promise<Task[]> => {
           text-white
           shadow-lg
           transition-all
-          hover:scale-105
+          ${
+            isOwner
+              ? "bg-[#0052cc] hover:scale-105"
+              : "bg-slate-400 cursor-not-allowed"
+          }
           md:bottom-8 md:right-8
 
           ${

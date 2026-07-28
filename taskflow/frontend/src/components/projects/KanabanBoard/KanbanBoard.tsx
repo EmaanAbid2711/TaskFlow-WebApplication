@@ -5,6 +5,7 @@ function KanbanBoard({
   tasks,
   onAddTask,
   onTaskClick,
+  canCreateTask,
 }: KanbanBoardProps) {
   return (
     <div className="h-full overflow-x-auto overflow-y-hidden">
@@ -17,6 +18,7 @@ function KanbanBoard({
           )}
           onAddTask={onAddTask}
           onTaskClick={onTaskClick}
+          canCreateTask={canCreateTask}
         />
 
         <KanbanColumn
@@ -27,6 +29,7 @@ function KanbanBoard({
           )}
           onAddTask={onAddTask}
           onTaskClick={onTaskClick}
+          canCreateTask={canCreateTask}
         />
 
         <KanbanColumn
@@ -37,6 +40,7 @@ function KanbanBoard({
           )}
           onAddTask={onAddTask}
           onTaskClick={onTaskClick}
+          canCreateTask={canCreateTask}
         />
 
         <KanbanColumn
@@ -47,6 +51,7 @@ function KanbanBoard({
           )}
           onAddTask={onAddTask}
           onTaskClick={onTaskClick}
+          canCreateTask={canCreateTask}
         />
       </div>
     </div>

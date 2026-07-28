@@ -10,6 +10,7 @@ function KanbanColumn({
   type,
   onAddTask,
   onTaskClick,
+  canCreateTask,
 }: KanbanColumnProps) {
 
   const { setNodeRef, isOver } = useDroppable({
@@ -58,13 +59,16 @@ function KanbanColumn({
         </div>
 
         <button
-          onClick={() => onAddTask(type)}
-          className="rounded-md p-1 transition hover:bg-slate-100"
+            onClick={() => onAddTask(type)}
+            disabled={!canCreateTask}
+            className={`rounded-lg p-2 transition
+                ${
+                    canCreateTask
+                        ? "hover:bg-slate-100 cursor-pointer"
+                        : "cursor-not-allowed opacity-40"
+                }`}
         >
-          <Plus
-            size={16}
-            className="text-slate-500"
-          />
+            <Plus />
         </button>
 
       </div>

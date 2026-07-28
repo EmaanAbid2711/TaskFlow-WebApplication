@@ -13,12 +13,14 @@ export interface KanbanColumnProps {
   type: TaskType;
   onAddTask: (status: TaskType) => void;
   onTaskClick: (task: Task) => void;
+  canCreateTask: boolean;
 }
 
 export interface KanbanBoardProps {
   tasks: Task[];
   onAddTask: (status: TaskType) => void;
   onTaskClick: (task: Task) => void;
+  canCreateTask: boolean;
 }
 
 export interface ProjectHeaderProps {
