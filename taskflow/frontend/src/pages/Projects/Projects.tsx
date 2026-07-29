@@ -96,6 +96,68 @@ useEffect(() => {
   }
 }, [searchParams]);
 
+useEffect(() => {
+  const projectId =
+    searchParams.get("projectId");
+  const taskId =
+    searchParams.get("taskId");
+
+  if(
+    !projectId ||
+    !taskId ||
+    projects.length === 0
+  ){
+    return;
+  }
+  const project =
+    projects.find(
+      p => p.id === projectId
+    );
+
+  if(!project){
+    return;
+  }
+  setSelectedProject(project);
+},[
+  searchParams,
+  projects
+]);
+
+useEffect(() => {
+
+  const taskId =
+    searchParams.get("taskId");
+
+  if(
+    !taskId ||
+    tasks.length === 0
+  ){
+    return;
+  }
+  const task =
+    tasks.find(
+      t => t.id === taskId
+    );
+
+  if(task){
+    setDrawerMode("edit");
+    setSelectedTask(task);
+    setDrawerOpen(true);
+    searchParams.delete("taskId");
+    searchParams.delete("projectId");
+    setSearchParams(
+      searchParams,
+      {
+        replace:true
+      }
+    );
+  }
+
+},[
+  tasks,
+  searchParams,
+  setSearchParams
+]);
 
 useEffect(()=>{ const params =
  new URLSearchParams(
@@ -128,6 +190,27 @@ useEffect(()=>{ const params =
  projects,
  navigate
 ]);
+
+useEffect(() => {
+  const params = new URLSearchParams(location.search);
+  const projectId = params.get("project");
+  const taskId = params.get("task");
+
+  if (projectId && taskId && projects.length) {
+    const project = projects.find(p => p.id === projectId);
+
+    if (project) {
+      setSelectedProject(project);
+      
+      const task = tasks.find(t => t.id === taskId);
+      if (task) {
+        setSelectedTask(task);
+        setDrawerMode("edit");
+        setDrawerOpen(true);
+      }
+    }
+  }
+}, [location.search, projects, tasks]);
 
 const handleSaveProject = async (
     name:string,

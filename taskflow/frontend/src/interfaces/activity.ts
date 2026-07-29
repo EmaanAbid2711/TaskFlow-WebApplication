@@ -16,10 +16,22 @@ export interface ActivityTask {
 
 export interface ActivityItem {
   id: string;
-  type: string;
+  type:
+    | "system"
+    | "comment";
   message: string;
   createdAt: string;
-  user: ActivityUser;
-  task: ActivityTask;
-  project: ActivityProject;
+  user: {
+    id: string;
+    name: string;
+    avatar?: string | null;
+  };
+  task: {
+    id: string;
+    title: string;
+  };
+  project: {
+    id: string;
+    name: string;
+  };
 }

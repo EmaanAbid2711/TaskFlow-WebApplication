@@ -36,6 +36,10 @@ export interface Activity {
   avatar?: string;
   text: string;
   time: string;
+  projectId: string;
+  projectName: string;
+  taskId: string;
+  taskTitle: string;
 }
 
 export interface Task {

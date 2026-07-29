@@ -171,13 +171,26 @@ export const getDashboardStats = async (
     pendingTasks,
     projectProgress,
     recentActivities: recentActivities.map(activity => ({
-    id: activity.id,
-    user: activity.user.name,
-    avatar: activity.user.avatar,
-    message: activity.message,
-    project: activity.task.project.name,
-    type: activity.type,
-    createdAt: activity.createdAt,
-  })),
+  id:
+    activity.id,
+  user:
+    activity.user.name,
+  avatar:
+    activity.user.avatar,
+  message:
+    activity.message,
+  project:
+    activity.task.project.name,
+  projectId:
+    activity.task.project.id,
+  taskId:
+    activity.task.id,
+  task:
+    activity.task.title,
+  type:
+    activity.type,
+  createdAt:
+    activity.createdAt,
+})),
   };
 };
