@@ -43,26 +43,42 @@ interface BackendTask {
   }[];
 
   activities?: {
+  id: string;
+  type: string;
+  message: string;
+  createdAt: string;
+  user?: {
+    name: string;
+    avatar: string | null;
+  };
+  project?: {
     id: string;
-    type: string;
-    message: string;
-    createdAt: string;
-    user?: {
-      name: string;
-      avatar: string | null;
-    };
-  }[];
+    name: string;
+  };
+  task?: {
+    id: string;
+    title: string;
+  };
+}[];
 
   comments?: {
+  id: string;
+  text: string;
+  createdAt: string;
+  user: {
     id: string;
-    text: string;
-    createdAt: string;
-    user: {
-      id: string;
-      name: string;
-      avatar: string | null;
-    };
-  }[];
+    name: string;
+    avatar: string | null;
+  };
+  project?: {
+    id: string;
+    name: string;
+  };
+  task?: {
+    id: string;
+    title: string;
+  };
+}[];
 }
 
 /*
@@ -121,24 +137,36 @@ export function mapTask(
 ): Task {
 
   const systemActivities: Activity[] =
-    (task.activities ?? []).map((activity): Activity => ({
-      id: activity.id,
-      type: "system",
-      user: activity.user?.name,
-      avatar: activity.user?.avatar ?? undefined,
-      text: activity.message,
-      time: activity.createdAt,
-    }));
+  (task.activities ?? []).map((activity): Activity => ({
+    id: activity.id,
+    type: "system",
+    user: activity.user?.name,
+    avatar: activity.user?.avatar ?? undefined,
+    text: activity.message,
+    time: activity.createdAt,
+
+    projectId: activity.project?.id ?? "",
+    projectName: activity.project?.name ?? "",
+
+    taskId: activity.task?.id ?? task.id,
+    taskTitle: activity.task?.title ?? task.title,
+  }));
 
   const commentActivities: Activity[] =
-    (task.comments ?? []).map((comment): Activity => ({
-      id: comment.id,
-      type: "comment",
-      user: comment.user.name,
-      avatar: comment.user.avatar ?? undefined,
-      text: comment.text,
-      time: comment.createdAt,
-    }));
+  (task.comments ?? []).map((comment): Activity => ({
+    id: comment.id,
+    type: "comment",
+    user: comment.user.name,
+    avatar: comment.user.avatar ?? undefined,
+    text: comment.text,
+    time: comment.createdAt,
+
+    projectId: comment.project?.id ?? "",
+    projectName: comment.project?.name ?? "",
+
+    taskId: comment.task?.id ?? task.id,
+    taskTitle: comment.task?.title ?? task.title,
+  }));
 
   const activities: Activity[] = [
     ...systemActivities,
