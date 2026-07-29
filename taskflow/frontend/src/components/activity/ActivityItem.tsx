@@ -3,6 +3,7 @@ import { formatDistanceToNow} from "date-fns";
 import {useNavigate} from "react-router-dom";
 
 import type { ActivityItem as ActivityType} from "@/interfaces/activity";
+import { getAvatarUrl } from "@/lib/image";
 
 interface Props {
   activity: ActivityType;
@@ -37,11 +38,7 @@ function ActivityItem({
       "
     >
       <div className="flex gap-4">
-        <img
-          src={
-            activity.user.avatar ??
-            "/avatar.png"
-          }
+        <img  src={getAvatarUrl(activity.user.avatar ?? undefined)}
           className="
           h-10
           w-10
