@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {DashboardLayout, MetricCard, ProgressCard, ActivityCard, DeadlineCard, TeamMemberCard } from "../../components";
 import {metrics, deadlines} from "../../data/dashboarddata.ts";
@@ -12,9 +13,9 @@ function Dashboard() {
   const [teamMembers, setTeamMembers] =
   useState<TeamMember[]>([]);
 
-  const {
-    stats,
-  } = useDashboard();
+  const {stats,} = useDashboard();
+
+  const navigate = useNavigate();
   
   useEffect(() => {
     loadUsers();
@@ -152,19 +153,29 @@ function Dashboard() {
             </div>
 
             {/* Recent Activity */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-              <h2 className="mb-5 text-lg font-semibold text-slate-900">
-                Recent Activity
-              </h2>
-
+            <div
+              onClick={() => navigate("/activity")}
+              className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#0052cc] hover:shadow-md"
+            >
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Recent Activity
+                </h2>
+                        
+                <span className="text-sm font-medium text-[#0052cc]">
+                  View All →
+                </span>
+              </div>
+                        
               <div className="space-y-5">
-                {stats.recentActivities.map((activity)=>(
-                  <ActivityCard
-                    key={activity.id}
-                    activity={activity}
-                  />
-                ))}
+                {stats.recentActivities
+                  .slice(0, 4)
+                  .map((activity) => (
+                    <ActivityCard
+                      key={activity.id}
+                      activity={activity}
+                    />
+                  ))}
               </div>
             </div>
           </div>
