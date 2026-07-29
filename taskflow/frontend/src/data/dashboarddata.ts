@@ -1,4 +1,4 @@
-import type {SidebarItem, Activity, ChartPoint, Deadline, Metric} from "../interfaces/dashboard";
+import type {SidebarItem, ChartPoint, Deadline, Metric} from "../interfaces/dashboard";
 
 export const sidebarItems: SidebarItem[] = [
   {
@@ -68,33 +68,6 @@ export const metrics: Metric[] = [
   },
 ];
 
-
-export const activities: Activity[] = [
-  {
-    id: 1,
-    user: "Sarah",
-    action: "updated",
-    project: "Core Design System",
-    time: "2 hours ago",
-    icon: "file",
-  },
-  {
-    id: 2,
-    user: "James",
-    action: "completed",
-    project: "Authentication Module",
-    time: "4 hours ago",
-    icon: "check",
-  },
-  {
-    id: 3,
-    user: "You",
-    action: "added",
-    project: "Elena to Team",
-    time: "Yesterday",
-    icon: "user",
-  },
-];
 
 export const deadlines: Deadline[] = [
   {
