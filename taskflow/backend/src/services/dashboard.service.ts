@@ -118,11 +118,66 @@ export const getDashboardStats = async (
         color:"#0052cc",
       };
     });
+
+  const recentActivities =
+  await prisma.activity.findMany({
+    where: {
+      task: {
+        project: {
+          OR: [
+            {
+              ownerId: userId,
+            },
+            {
+              members: {
+                some: {
+                  userId,
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+        },
+      },
+      task: {
+        include: {
+          project: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 8,
+  });
+
   return {
     totalProjects,
     totalTasks,
     completedTasks,
     pendingTasks,
     projectProgress,
+    recentActivities: recentActivities.map(activity => ({
+    id: activity.id,
+    user: activity.user.name,
+    avatar: activity.user.avatar,
+    message: activity.message,
+    project: activity.task.project.name,
+    type: activity.type,
+    createdAt: activity.createdAt,
+  })),
   };
 };

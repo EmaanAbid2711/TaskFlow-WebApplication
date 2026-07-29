@@ -22,12 +22,13 @@ export interface ProjectProgress {
 }
 
 export interface Activity {
-  id: number;
+  id: string;
   user: string;
-  action: string;
+  avatar?: string | null;
+  message: string;
   project: string;
-  time: string;
-  icon: string;
+  type: string;
+  createdAt: string;
 }
 
 export interface Deadline {
@@ -56,4 +57,5 @@ export interface DashboardStats {
   completedTasks: number;
   pendingTasks: number;
   projectProgress: ProjectProgress[];
+  recentActivities: Activity[];
 }

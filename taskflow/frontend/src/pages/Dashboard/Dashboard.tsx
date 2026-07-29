@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 
 import {DashboardLayout, MetricCard, ProgressCard, ActivityCard, DeadlineCard, TeamMemberCard } from "../../components";
-import {metrics, activities, deadlines} from "../../data/dashboarddata.ts";
+import {metrics, deadlines} from "../../data/dashboarddata.ts";
 import { getAllUsersService } from "@/services/user.service";
 import { useDashboard } from "@/context/DashboardContext";
 import type { TeamMember } from "@/interfaces/dashboard";
@@ -159,7 +159,7 @@ function Dashboard() {
               </h2>
 
               <div className="space-y-5">
-                {activities.map((activity) => (
+                {stats.recentActivities.map((activity)=>(
                   <ActivityCard
                     key={activity.id}
                     activity={activity}
