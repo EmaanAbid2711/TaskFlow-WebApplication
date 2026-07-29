@@ -121,7 +121,15 @@ function Sidebar({
             </button>
 
             {/* Activity */}
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-slate-600 transition hover:bg-slate-100">
+            <button
+              onClick={() => goTo("/activity")}
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 transition
+                ${
+                  location.pathname === "/activity"
+                    ? "bg-[#0052cc] text-white"
+                    : "text-slate-600 hover:bg-slate-100"
+                }`}
+            >
               <Activity size={18} />
               Activity
             </button>

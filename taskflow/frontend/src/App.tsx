@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import {Login, ForgotPassword, ResetPassword, Signup, Dashboard, Projects, Landing, Profile, Account, Notifications, Billing, Team, UserProfile} from "./pages";
+import {Login, ForgotPassword, ResetPassword, Signup, Dashboard, Projects, Landing, Profile, Account, Notifications, Billing, Team, UserProfile, Activity} from "./pages";
 import { AppLayout } from "./components";
 import { Toaster } from "./components/ui/sonner";
 import { AuthProvider } from "./context/AuthContext";
@@ -82,6 +82,17 @@ function App() {
               <ProtectedRoute>
                 <AppLayout>
                   <UserProfile />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/activity"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Activity />
                 </AppLayout>
               </ProtectedRoute>
             }
