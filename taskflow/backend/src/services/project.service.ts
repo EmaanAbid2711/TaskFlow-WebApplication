@@ -110,7 +110,7 @@ export const getProjects = async (
     },
 
     orderBy: {
-      createdAt: "desc",
+      createdAt: "asc",
     },
   });
   return Promise.all(
