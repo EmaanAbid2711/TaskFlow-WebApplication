@@ -1,10 +1,70 @@
 # TaskFlow
 
-TaskFlow is a modern and responsive task management web application that helps teams organize projects, assign tasks, track progress, and collaborate efficiently.
+## Project Overview
 
-## Features
+TaskFlow is a modern, full-stack task management web application designed to help individuals and teams organize projects, manage tasks, track progress, and collaborate efficiently.
+
+The application provides a Kanban-style workflow where users can create projects, assign tasks to team members, update task progress using drag-and-drop functionality, add comments, upload attachments, and monitor project activities.
+
+TaskFlow focuses on improving team productivity by providing a centralized platform for project planning, task tracking, and collaboration.
+
+---
+
+# How TaskFlow Works
+
+The workflow of TaskFlow is based on project and task management:
+
+1. **User Authentication**
+   - Users can create an account and securely log in using JWT-based authentication.
+   - Users can reset the password from the forget password button in the login page
+
+2. **Project Management**
+   - Users can create and manage projects.
+   - Project owners can add team members and assign tasks.
+
+3. **Task Management**
+   - Users can create tasks inside projects.
+   - Tasks contain:
+     - Title
+     - Description
+     - Priority
+     - Due Date
+     - Assignee
+     - Attachments
+     - Comments
+
+4. **Kanban Workflow**
+   - Tasks are organized into different stages:
+     - To Do
+     - In Progress
+     - Review
+     - Completed
+
+   - Users can move tasks between stages using drag-and-drop.
+
+5. **Collaboration**
+   - Team members can:
+     - Comment on tasks
+     - Upload attachments
+     - View activity history
+     - Track project progress
+
+6. **Dashboard Analytics**
+   - Users can monitor:
+     - Total projects
+     - Total tasks
+     - Completed tasks
+     - Upcoming deadlines
+     - Project progress
+     - Recent activities
+
+---
+
+# Features
 
 - User Authentication (Signup/Login)
+- JWT-based Authentication
+- Forget password feature
 - Project Management
 - Task Management
 - Kanban Board
@@ -13,13 +73,20 @@ TaskFlow is a modern and responsive task management web application that helps t
 - Task Comments
 - Task Attachments
 - User Profile Management
+- Account Management
+- Notification Management
 - Project Statistics
+- Activity Timeline
+- Dashboard Analytics
 - Role-Based Permissions (Owner & Assignee)
-- Responsive UI
+- Responsive User Interface
 
-## Tech Stack
+---
 
-### Frontend
+# Technology Stack
+
+## Frontend
+
 - React
 - TypeScript
 - Vite
@@ -27,8 +94,10 @@ TaskFlow is a modern and responsive task management web application that helps t
 - React Router
 - Axios
 - DnD Kit
+- Recharts
 
-### Backend
+## Backend
+
 - Node.js
 - Express.js
 - TypeScript
@@ -37,108 +106,222 @@ TaskFlow is a modern and responsive task management web application that helps t
 - JWT Authentication
 - Swagger API Documentation
 
+---
 
-## Installation
+# System Requirements / Prerequisites
 
-### 1. Clone the repository
+Before running TaskFlow locally, make sure the following software is installed.
+
+## Required Software
+
+- Node.js (v18 or above recommended)
+- npm (installed with Node.js)
+- PostgreSQL (v14 or above recommended)
+- Git
+
+## Recommended Hardware
+
+- RAM: Minimum 4GB (8GB recommended)
+- Storage: At least 1GB free space
+- Processor: Modern dual-core processor or above
+
+## Supported Operating Systems
+
+- Windows 10/11
+- Linux
+- macOS
+
+---
+
+# Installation and Local Setup
+
+## 1. Clone the Repository
 
 ```bash
 git clone https://github.com/EmaanAbid2711/TaskFlow-Frontend.git
-cd TaskFlow
+
+cd TaskFlow-Frontend
 ```
 
-### 2. Backend Setup
+Project structure:
+
+```
+TaskFlow
+│
+├── frontend
+│
+└── backend
+```
+
+---
+
+# Backend Setup
+
+Navigate to the backend folder:
 
 ```bash
+cd taskflow
 cd backend
+```
+
+Install dependencies:
+
+```bash
 npm install
 ```
 
-Create a `.env` file and configure the required environment variables.
+## Configure Environment Variables
 
-Run Prisma migrations:
+Create a `.env` file inside the backend folder.
+
+Example:
+
+```env
+DATABASE_URL="postgresql://postgres:password@localhost:5432/taskflow"
+
+JWT_SECRET="your_secret_key"
+
+PORT=5000
+```
+
+### Database Setup
+
+Create a PostgreSQL database:
+
+```
+taskflow
+```
+
+Run Prisma migration:
 
 ```bash
 npx prisma migrate dev
 ```
 
-Start the backend:
+Generate Prisma Client:
+
+```bash
+npx prisma generate
+```
+
+Start backend server:
 
 ```bash
 npm run dev
 ```
 
+Backend will run at:
+
+```
+http://localhost:5000
+```
+
 ---
 
-### 3. Frontend Setup
+# Frontend Setup
+
+Open another terminal.
+
+Navigate to frontend:
 
 ```bash
+cd taskflow
 cd frontend
+```
+
+Install dependencies:
+
+```bash
 npm install
 ```
 
-Create a `.env` file and configure the API URL.
+Create a `.env` file inside the frontend folder.
 
-Start the frontend:
+Add:
+
+```env
+VITE_API_URL=http://localhost:5000
+```
+
+Start frontend:
 
 ```bash
 npm run dev
 ```
 
----
-
-## Environment Variables
-
-### Backend
+Frontend will run at:
 
 ```
-DATABASE_URL=
-JWT_SECRET=
-PORT=
-```
-
-### Frontend
-
-```
-VITE_API_URL=
+http://localhost:5173
 ```
 
 ---
 
-## API Documentation
+# Running the Application
 
-Swagger documentation is available after starting the backend:
+You need two terminals:
+
+## Backend
+
+```bash
+cd backend
+
+npm run dev
+```
+
+## Frontend
+
+```bash
+cd frontend
+
+npm run dev
+```
+
+Open your browser:
+
+```
+http://localhost:5173
+```
+
+---
+
+# API Documentation
+
+Swagger API documentation is available after starting the backend:
 
 ```
 http://localhost:5000/api-docs
 ```
 
+Swagger provides documentation and testing access for all backend APIs.
+
 ---
 
-## Current Features
+# Current Implemented Features
 
 - Authentication
+- Forget password feature
 - Project CRUD
 - Task CRUD
-- Drag & Drop Kanban Board
+- Kanban Board
+- Drag & Drop Task Management
 - Task Assignment
 - Comments
-- Attachments
+- File Attachments
+- Activity Timeline
+- Dashboard Statistics
 - Project Progress Tracking
 - Owner & Assignee Permissions
 
 ---
 
-## Future Improvements
+# Future Improvements
 
-- Notifications
+- In app Notifications
 - Email Invitations
-- Real-time Updates
-- Activity Dashboard
-- Dark Mode
 
 ---
 
-## Author
+# Author
 
 Developed by **Emaan Abid**
