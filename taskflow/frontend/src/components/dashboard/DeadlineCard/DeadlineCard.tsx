@@ -1,4 +1,5 @@
 import type { Deadline } from "../../../interfaces/dashboard";
+import { useNavigate } from "react-router-dom";
 
 interface DeadlineCardProps {
   deadline: Deadline;
@@ -7,6 +8,8 @@ interface DeadlineCardProps {
 function DeadlineCard({
   deadline,
 }: DeadlineCardProps) {
+  const navigate = useNavigate();
+
   const getBadgeClasses = (color: string) => {
     switch (color) {
       case "red":
@@ -27,7 +30,15 @@ function DeadlineCard({
   };
 
   return (
-    <div className="rounded-xl border border-slate-200 p-4 transition hover:border-[#0052cc]/30 hover:shadow-sm">
+    
+    <button
+      onClick={() =>
+        navigate(
+          `/projects?project=${deadline.projectId}&task=${deadline.id}`
+        )
+      }
+      className="w-full rounded-xl border border-slate-200 p-4 text-left transition hover:border-[#0052cc]/30 hover:shadow-sm"
+    >
       <span
         className={`inline-block rounded-md px-2 py-1 text-[10px] font-bold ${getBadgeClasses(
           deadline.badgeColor
@@ -43,7 +54,7 @@ function DeadlineCard({
       <p className="mt-1 text-xs text-slate-500">
         {deadline.project}
       </p>
-    </div>
+    </button>
   );
 }
 
