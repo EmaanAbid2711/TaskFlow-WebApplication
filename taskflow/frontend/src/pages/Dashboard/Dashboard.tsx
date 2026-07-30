@@ -199,7 +199,7 @@ function Dashboard() {
               </h2>
             </div>
 
-            <div className="max-h-[420px] space-y-4 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+            <div className="max-h-[300px] overflow-y-auto">
               {stats.upcomingDeadlines.map((deadline) => (
                 <DeadlineCard
                   key={deadline.id}
