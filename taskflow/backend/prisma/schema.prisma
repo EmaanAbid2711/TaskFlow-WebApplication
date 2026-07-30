@@ -166,6 +166,7 @@ model Task {
   status       TaskStatus       @default(TODO)
   priority     TaskPriority     @default(MEDIUM)
   dueDate      DateTime?
+  completedAt  DateTime?
   progress     Int?
   reviewStatus String?
   projectId    String

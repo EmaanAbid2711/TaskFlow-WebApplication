@@ -262,6 +262,8 @@ async (
 
 };
 
+
+
 // Update Task
 export const updateTask = async (
   userId: string,
@@ -452,20 +454,26 @@ if (
 
     data: {
 
-      ...data,
+  ...data,
 
-      status:
-        data.status as TaskStatus,
+  status:
+    data.status as TaskStatus,
 
-      priority:
-        data.priority as TaskPriority,
+  priority:
+    data.priority as TaskPriority,
 
-      dueDate:
-        data.dueDate
-          ? new Date(data.dueDate)
-          : undefined,
+  dueDate:
+    data.dueDate
+      ? new Date(data.dueDate)
+      : undefined,
 
-    },
+  completedAt:
+    data.status === "COMPLETED"
+      ? new Date()
+      : data.status
+      ? null
+      : undefined,
+},
 
     include: {
 

@@ -271,6 +271,74 @@ const upcomingDeadlines =
 
   });
 
+  const completedTasksTrend =
+  await prisma.task.findMany({
+
+    where: {
+
+      status: "COMPLETED",
+
+      completedAt: {
+        not: null,
+      },
+
+      project: {
+        OR: [
+          {
+            ownerId: userId,
+          },
+          {
+            members: {
+              some: {
+                userId,
+              },
+            },
+          },
+        ],
+      },
+
+    },
+
+    select: {
+      completedAt: true,
+    },
+
+    orderBy: {
+      completedAt: "asc",
+    },
+
+  });
+
+  const trendMap = new Map<
+  string,
+  number
+>();
+
+completedTasksTrend.forEach(task => {
+
+  const date =
+    task.completedAt!
+      .toISOString()
+      .split("T")[0];
+
+  trendMap.set(
+    date,
+    (trendMap.get(date) ?? 0) + 1
+  );
+
+});
+
+const taskCompletionTrend =
+  Array.from(trendMap.entries()).map(
+    ([date, completed]) => ({
+
+      date,
+
+      completed,
+
+    })
+  );
+
   return {
     totalProjects,
     totalTasks,
@@ -278,6 +346,7 @@ const upcomingDeadlines =
     pendingTasks,
     projectProgress,
     upcomingDeadlines,
+    taskCompletionTrend,
     recentActivities: recentActivities.map(activity => ({
   id:
     activity.id,
