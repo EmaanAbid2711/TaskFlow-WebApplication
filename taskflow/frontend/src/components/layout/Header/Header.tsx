@@ -24,11 +24,10 @@ function Header() {
   return (
     <header className="flex h-20 items-center justify-between border-b border-slate-200 bg-white px-6 md:px-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">
+        <h1 className="  text-xl  sm:text-2xl  font-bold  text-slate-900">
           Dashboard Overview
         </h1>
-
-        <p className="text-sm text-slate-500">
+        <p className="  mt-1  text-xs  sm:text-sm  text-slate-500">
           Welcome back, check your team's latest progress.
         </p>
       </div>
