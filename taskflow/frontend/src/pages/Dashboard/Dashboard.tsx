@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip} from "recharts";
 
 import {DashboardLayout, MetricCard, ProgressCard, ActivityCard, DeadlineCard, TeamMemberCard } from "../../components";
 import {metrics} from "../../data/dashboarddata.ts";
@@ -32,9 +33,6 @@ function Dashboard() {
     }
   };
 
-  const [timeframe, setTimeframe] = useState<
-    "weekly" | "monthly"
-  >("weekly");
 
   const liveMetrics = useMemo(() => {
     return metrics.map((metric) => {
@@ -92,41 +90,50 @@ function Dashboard() {
 
           {/* Chart */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-10 flex items-center justify-between">
+            <div className="mb-6">
               <h2 className="text-lg font-semibold text-slate-900">
                 Task Completion Trend
               </h2>
 
-              <div className="flex rounded-lg bg-slate-100 p-1">
-                <button
-                  onClick={() => setTimeframe("weekly")}
-                  className={`rounded-md px-4 py-1 text-sm transition ${
-                    timeframe === "weekly"
-                      ? "bg-white shadow text-slate-900"
-                      : "text-slate-500"
-                  }`}
-                >
-                  Weekly
-                </button>
-
-                <button
-                  onClick={() => setTimeframe("monthly")}
-                  className={`rounded-md px-4 py-1 text-sm transition ${
-                    timeframe === "monthly"
-                      ? "bg-white shadow text-slate-900"
-                      : "text-slate-500"
-                  }`}
-                >
-                  Monthly
-                </button>
-              </div>
             </div>
 
             {/* Chart Placeholder */}
-            <div className="flex h-56 items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50">
-              <p className="text-sm text-slate-400">
-                Chart will be added later using Recharts
-              </p>
+            <div className="h-64">
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+              >
+                <LineChart
+                  data={stats.taskCompletionTrend}
+                  margin={{
+                    top: 10,
+                    right: 20,
+                    left: -20,
+                    bottom: 10,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 12 }}
+                  />
+            
+                  <YAxis
+                    allowDecimals={false}
+                  />
+            
+                  <Tooltip />
+                
+                  <Line
+                    type="monotone"
+                    dataKey="completed"
+                    stroke="#0052cc"
+                    strokeWidth={3}
+                    dot={{ r: 5 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
 
           </div>

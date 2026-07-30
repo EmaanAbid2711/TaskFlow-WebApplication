@@ -61,4 +61,5 @@ export interface DashboardStats {
   projectProgress: ProjectProgress[];
   recentActivities: Activity[];
   upcomingDeadlines: Deadline[];
+  taskCompletionTrend: ChartPoint[];
 }

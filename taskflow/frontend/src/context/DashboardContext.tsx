@@ -36,6 +36,7 @@ export function DashboardProvider({
   projectProgress:[],
   recentActivities:[],
   upcomingDeadlines:[],
+  taskCompletionTrend: [],
 };
 
   const [stats, setStats] =
