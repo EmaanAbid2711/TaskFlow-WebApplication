@@ -126,6 +126,23 @@ function mapPriority(
   }
 }
 
+function formatActivityTime(
+  date: string
+) {
+  const activityDate = new Date(date);
+
+  return activityDate.toLocaleString(
+    "en-US",
+    {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }
+  );
+}
+
 /*
 |--------------------------------------------------------------------------
 | Task Mapper
@@ -143,7 +160,7 @@ export function mapTask(
     user: activity.user?.name,
     avatar: activity.user?.avatar ?? undefined,
     text: activity.message,
-    time: activity.createdAt,
+    time: formatActivityTime(activity.createdAt),
 
     projectId: activity.project?.id ?? "",
     projectName: activity.project?.name ?? "",
@@ -159,7 +176,7 @@ export function mapTask(
     user: comment.user.name,
     avatar: comment.user.avatar ?? undefined,
     text: comment.text,
-    time: comment.createdAt,
+    time: formatActivityTime(comment.createdAt),
 
     projectId: comment.project?.id ?? "",
     projectName: comment.project?.name ?? "",
