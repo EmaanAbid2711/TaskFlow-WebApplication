@@ -190,12 +190,9 @@ function Dashboard() {
               <h2 className="text-lg font-semibold text-slate-900">
                 Upcoming Deadlines
               </h2>
-              <button className="text-sm font-medium text-[#0052cc] hover:underline">
-                View All
-              </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="max-h-[420px] space-y-4 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
               {stats.upcomingDeadlines.map((deadline) => (
                 <DeadlineCard
                   key={deadline.id}
