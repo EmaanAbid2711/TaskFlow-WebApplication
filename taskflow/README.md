@@ -128,8 +128,6 @@ Before running TaskFlow locally, make sure the following software is installed.
 ## Supported Operating Systems
 
 - Windows 10/11
-- Linux
-- macOS
 
 ---
 
