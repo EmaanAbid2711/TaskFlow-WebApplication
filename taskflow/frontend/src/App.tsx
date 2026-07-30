@@ -5,12 +5,14 @@ import { AppLayout } from "./components";
 import { Toaster } from "./components/ui/sonner";
 import { AuthProvider } from "./context/AuthContext";
 import { DashboardProvider } from "@/context/DashboardContext";
+import { NotificationProvider} from "@/context/NotificationBarContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 
 function App() {
   return ( 
     <AuthProvider>
+      <NotificationProvider>
       <DashboardProvider>
       <BrowserRouter>
         <Toaster richColors />
@@ -145,6 +147,7 @@ function App() {
         </Routes>
       </BrowserRouter>
       </DashboardProvider>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

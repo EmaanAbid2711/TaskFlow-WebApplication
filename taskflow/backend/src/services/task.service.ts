@@ -1,9 +1,10 @@
 import prisma from "../config/prisma";
+import fs from "fs/promises";
+import path from "path";
 
 import type { CreateTaskInput, UpdateTaskInput, CreateCommentInput} from "../validations/task.validation";
 import {TaskStatus, TaskPriority, Prisma} from "@prisma/client";
-import fs from "fs/promises";
-import path from "path";
+import { createNotificationBar } from "./notificationBar.service";
 
 
 const createActivity = async (
@@ -129,6 +130,20 @@ export const createTask = async (
   "Task created"
 );
 
+if (
+  task.assigneeId &&
+  task.assigneeId !== userId
+) {
+  await createNotificationBar(
+    task.assigneeId,
+    "New Task Assigned",
+    `You have been assigned "${task.title}"`,
+    "TASK_ASSIGNED",
+    task.projectId,
+    task.id
+  );
+}
+
 return task;
 
 };
@@ -253,6 +268,14 @@ async (
       activities: {
         include: {
           user: true,
+        },
+      },
+
+      project: {
+        select: {
+          id: true,
+          ownerId: true,
+          name: true,
         },
       },
 
@@ -439,6 +462,22 @@ if (
     `Assigned to ${assigneeName}`
   );
 
+  if (
+  data.assigneeId &&
+  data.assigneeId !== task.assigneeId
+) {
+
+  await createNotificationBar(
+    data.assigneeId,
+    "New Task Assigned",
+    `You have been assigned "${task.title}"`,
+    "TASK_ASSIGNED",
+    task.projectId,
+    task.id
+  );
+
+}
+
 }
 
   //------------------------------------------------------------------
@@ -525,6 +564,28 @@ await getTaskById(
   taskId
 );
 
+if (
+  data.status === "COMPLETED"
+) {
+
+  await createNotificationBar(
+
+    task.project.ownerId,
+
+    "Task Completed",
+
+    `"${task.title}" has been completed.`,
+
+    "TASK_COMPLETED",
+
+    task.projectId,
+
+    task.id
+
+  );
+
+}
+
 
 return finalTask;
 
@@ -607,6 +668,21 @@ export const uploadTaskAttachment = async (
     `Attachment uploaded: ${file.fileName}`
 
   );
+
+  if (
+  task.assignee &&
+  task.assignee.id !== userId
+) {
+  await createNotificationBar(
+    task.assignee.id,
+    "Attachment Uploaded",
+    `A new attachment was added to "${task.title}"`,
+    "ATTACHMENT",
+    task.projectId,
+    task.id
+  );
+}
+
   return attachment;
 
 };
@@ -687,6 +763,20 @@ export const deleteTaskAttachment = async (
     `Attachment deleted: ${attachment.fileName}`
   );
 
+  if (
+  task.assignee &&
+  task.assignee.id !== userId
+) {
+  await createNotificationBar(
+    task.assignee.id,
+    "Attachment Deleted",
+    `An attachment was removed from "${task.title}"`,
+    "ATTACHMENT",
+    task.projectId,
+    task.id
+  );
+}
+
   return {
     success: true,
   };
@@ -725,16 +815,27 @@ export const createTaskComment = async (
     });
 
   await createActivity(
-
     userId,
-
     taskId,
-
     "comment",
-
     "Added a comment"
 
   );
+
+  if (
+  task.assignee &&
+  task.assignee.id !== userId
+) {
+
+  await createNotificationBar(
+    task.assignee.id,
+    "New Comment",
+    `Someone commented on "${task.title}"`,
+    "COMMENT",
+    task.projectId,
+    task.id
+  );
+}
 
   return comment;
 

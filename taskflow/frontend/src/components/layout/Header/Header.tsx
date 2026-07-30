@@ -2,9 +2,12 @@ import { Bell, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/context/AuthContext";
+import { useNotifications} from "@/context/NotificationBarContext";
 
 function Header() {
   const navigate = useNavigate();
+
+  const { unreadCount} = useNotifications();
 
   const { user } = useAuth();
 
@@ -48,7 +51,14 @@ function Header() {
 
         {/* Notifications */}
         <button className="rounded-xl border border-slate-200 p-2 transition hover:bg-slate-100">
-          <Bell size={18} />
+          <div className="relative">
+            <Bell size={22} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white">
+                {unreadCount}
+              </span>
+            )}
+          </div>
         </button>
 
         {/* Profile Avatar */}

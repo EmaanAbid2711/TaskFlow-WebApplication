@@ -29,6 +29,8 @@ model User {
   resetPasswordExpiry DateTime?
   twoFactorEnabled    Boolean   @default(false)
 
+  notifications Notification[]
+  
   notificationSettings NotificationSettings?
   billing              Billing?
 
@@ -141,6 +143,7 @@ model Project {
   owner       User            @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   members     ProjectMember[]
   tasks       Task[]
+  notifications Notification[]
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 }
@@ -176,6 +179,7 @@ model Task {
   attachments  TaskAttachment[]
   comments     Comment[]
   activities   Activity[]
+  notifications Notification[]
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 }
@@ -227,4 +231,19 @@ enum TaskPriority {
   HIGH
   MEDIUM
   LOW
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String
+  isRead    Boolean  @default(false)
+  projectId String?
+  taskId    String?
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId],  references: [id],  onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id],  onDelete: Cascade )
+  task Task? @relation(fields: [taskId],  references: [id],  onDelete: Cascade )
 }
