@@ -164,12 +164,120 @@ export const getDashboardStats = async (
     take: 8,
   });
 
+  const upcomingTasks =
+  await prisma.task.findMany({
+    where: {
+      dueDate: {
+        not: null,
+      },
+
+      status: {
+        not: "COMPLETED",
+      },
+
+      project: {
+        OR: [
+          {
+            ownerId: userId,
+          },
+          {
+            members: {
+              some: {
+                userId,
+              },
+            },
+          },
+        ],
+      },
+    },
+
+    include: {
+      project: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+
+    orderBy: {
+      dueDate: "asc",
+    },
+
+    take: 5,
+  });
+
+const today = new Date();
+
+const upcomingDeadlines =
+  upcomingTasks.map(task => {
+
+    const due =
+      task.dueDate!;
+
+    const difference =
+      Math.ceil(
+        (due.getTime() -
+          today.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+
+    let badgeColor:
+      | "red"
+      | "orange"
+      | "green"
+      | "gray";
+
+    let dueText: string;
+
+    if (difference < 0) {
+      badgeColor = "red";
+      dueText = "Overdue";
+    }
+    else if (difference === 0) {
+      badgeColor = "red";
+      dueText = "Today";
+    }
+
+    else if (difference === 1) {
+      badgeColor = "orange";
+      dueText = "Tomorrow";
+    }
+
+    else if (difference <= 3) {
+      badgeColor = "orange";
+      dueText = `${difference} days`;
+    }
+
+    else if (difference <= 7) {
+      badgeColor = "green";
+      dueText = `${difference} days`;
+    }
+
+    else {
+      badgeColor = "gray";
+      dueText = `${difference} days`;
+    }
+
+    return {
+      id: task.id,
+      title: task.title,
+      project: task.project.name,
+      due: dueText,
+      badgeColor,
+      dueDate: task.dueDate,
+      projectId: task.project.id,
+    };
+
+  });
+
   return {
     totalProjects,
     totalTasks,
     completedTasks,
     pendingTasks,
     projectProgress,
+    upcomingDeadlines,
     recentActivities: recentActivities.map(activity => ({
   id:
     activity.id,

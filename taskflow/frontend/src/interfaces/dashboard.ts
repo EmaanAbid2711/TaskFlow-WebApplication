@@ -32,11 +32,13 @@ export interface Activity {
 }
 
 export interface Deadline {
-  id: number;
+  id: string;
   title: string;
   project: string;
   due: string;
   badgeColor: "red" | "orange" | "green" | "gray";
+  dueDate: string;
+  projectId: string;
 }
 
 export interface TeamMember {
@@ -58,4 +60,5 @@ export interface DashboardStats {
   pendingTasks: number;
   projectProgress: ProjectProgress[];
   recentActivities: Activity[];
+  upcomingDeadlines: Deadline[];
 }

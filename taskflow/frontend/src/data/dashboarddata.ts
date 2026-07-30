@@ -1,4 +1,4 @@
-import type {SidebarItem, ChartPoint, Deadline, Metric} from "../interfaces/dashboard";
+import type {SidebarItem, ChartPoint, Metric} from "../interfaces/dashboard";
 
 export const sidebarItems: SidebarItem[] = [
   {
@@ -68,30 +68,6 @@ export const metrics: Metric[] = [
   },
 ];
 
-
-export const deadlines: Deadline[] = [
-  {
-    id: 1,
-    title: "Q4 Financial Reporting",
-    project: "Finance",
-    due: "In 2 days",
-    badgeColor: "red",
-  },
-  {
-    id: 2,
-    title: "Website Launch",
-    project: "Marketing",
-    due: "In 5 days",
-    badgeColor: "orange",
-  },
-  {
-    id: 3,
-    title: "Cloud Migration",
-    project: "DevOps",
-    due: "Oct 12",
-    badgeColor: "gray",
-  },
-];
 
 
 export const weeklyChart: ChartPoint[] = [
