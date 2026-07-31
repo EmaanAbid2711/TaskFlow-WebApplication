@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
 import { useNotificationBar } from "@/context/NotificationBarContext";
-import NotificationBarDropdown from "./temp"
+import NotificationBarDropdown from "./NotifyBarDropdown"
 
 function Header() {
   const navigate = useNavigate();

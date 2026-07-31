@@ -46,4 +46,4 @@ export { default as PaymentMethodCard } from "./settings/Billing/PaymentMethodCa
 export { default as AssigneeSelector} from "./projects/TaskDrawer/AssigneeSelector"
 export { default as ProjectDrawer } from "./projects/ProjectDrawer/ProjectDrawer"
 export { default as ActivityItem } from "./activity/ActivityItem"
-export { default as NotificationBarDropdown} from "./layout/Header/temp"
+export { default as NotificationBarDropdown} from "./layout/Header/NotifyBarDropdown"
