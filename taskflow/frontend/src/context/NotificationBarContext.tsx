@@ -4,6 +4,7 @@ import type { NotificationBar } from "@/interfaces/notificationBar";
 import { getNotificationBarService, getUnreadNotificationBarCountService, markNotificationBarReadService, markAllNotificationBarReadService, deleteNotificationBarService} from "@/services/notificationBar.service";
 
 interface NotificationBarContextType {
+
   notifications: NotificationBar[];
   unreadCount: number;
   loading: boolean;
@@ -26,9 +27,7 @@ export function NotificationBarProvider({
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  //---------------------------------------------------
-  // Refresh
-  //---------------------------------------------------
+ 
   const refreshNotifications = useCallback(async () => {
     try {
       const [notificationData, unread] = await Promise.all([
