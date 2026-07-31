@@ -1,10 +1,20 @@
-import { getNotificationsBarApi, markNotificationBarReadApi} from "@/api/notificationBar.api";
+import {getNotificationBarApi, getUnreadNotificationBarCountApi, markNotificationBarReadApi, markAllNotificationBarReadApi, deleteNotificationBarApi} from "@/api/notificationBar.api";
 
-export const getNotificationsBarService =
+export const getNotificationBarService =
 async () => {
 
   const response =
-    await getNotificationsBarApi();
+    await getNotificationBarApi();
+
+  return response.data;
+
+};
+
+export const getUnreadNotificationBarCountService =
+async () => {
+
+  const response =
+    await getUnreadNotificationBarCountApi();
 
   return response.data;
 
@@ -12,9 +22,29 @@ async () => {
 
 export const markNotificationBarReadService =
 async (
-  id: string
+  notificationId: string
 ) => {
 
-  await markNotificationBarReadApi(id);
+  await markNotificationBarReadApi(
+    notificationId
+  );
+
+};
+
+export const markAllNotificationBarReadService =
+async () => {
+
+  await markAllNotificationBarReadApi();
+
+};
+
+export const deleteNotificationBarService =
+async (
+  notificationId: string
+) => {
+
+  await deleteNotificationBarApi(
+    notificationId
+  );
 
 };
