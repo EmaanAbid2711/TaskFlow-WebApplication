@@ -63,10 +63,10 @@ app.use("/api/users", userRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
-app.use("/api/notifications-bar", notificationRoutesbar);
+app.use("/api/notification-bar", notificationRoutesbar);
 app.use("/api/activity", activityRoutes);
 app.use("/api/account", accountRoutes);
-app.use("/api/notifications-setting", notificationRoutes);
+app.use("/api/notifications", notificationRoutes);
 app.use("/api/billing", billingRoutes );
 
 app.use(errorHandler);
