@@ -8,10 +8,15 @@ import NotificationBarDropdown from "./NotificationBarDropdown"
 
 function Header() {
   const navigate = useNavigate();
+
   const { unreadCount } = useNotificationBar();
+
   const { user } = useAuth();
+
   const [open, setOpen] = useState(false);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
+
 
   //----------------------------------------------------
   // Close dropdown when clicking outside
