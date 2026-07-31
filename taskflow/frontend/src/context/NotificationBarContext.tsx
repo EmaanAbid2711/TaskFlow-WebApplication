@@ -1,41 +1,74 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {createContext, useContext, useEffect, useState, useCallback} from "react";
 
-import type { Notification } from "@/interfaces/notificationBar";
-import { getNotificationsBarService, markNotificationBarReadService} from "@/services/notificationBar.service";
+import type { NotificationBar } from "@/interfaces/notificationBar";
+import { getNotificationBarService, getUnreadNotificationBarCountService, markNotificationBarReadService, markAllNotificationBarReadService, deleteNotificationBarService} from "@/services/notificationBar.service";
 
 interface NotificationBarContextType {
-  notifications: Notification[];
+  notifications: NotificationBar[];
   unreadCount: number;
+  loading: boolean;
   refreshNotifications: () => Promise<void>;
   markAsRead: (id: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
+  deleteNotification: (id: string) => Promise<void>;
 }
 
-const NotificationContext = createContext<NotificationBarContextType | null>(null);
+const NotificationBarContext = createContext<NotificationBarContextType | null>(
+  null
+);
 
-export function NotificationProvider({ children }: { children: React.ReactNode }) {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+export function NotificationBarProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [notifications, setNotifications] = useState<NotificationBar[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const refreshNotifications = async () => {
+  //---------------------------------------------------
+  // Refresh
+  //---------------------------------------------------
+  const refreshNotifications = useCallback(async () => {
     try {
-      const data = await getNotificationsBarService();
-      setNotifications(data);
+      const [notificationData, unread] = await Promise.all([
+        getNotificationBarService(),
+        getUnreadNotificationBarCountService(),
+      ]);
+
+      setNotifications(notificationData);
+      setUnreadCount(unread);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
+  //---------------------------------------------------
+  // Initial Load
+  //---------------------------------------------------
   useEffect(() => {
-  refreshNotifications();
-  const interval = setInterval(
-    refreshNotifications,
-    30000
-  );
-  return () => clearInterval(interval);
-}, []);
+    refreshNotifications();
+  }, [refreshNotifications]);
 
+  //---------------------------------------------------
+  // Poll every 30 seconds
+  //---------------------------------------------------
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshNotifications();
+    }, 30000);
 
+    return () => clearInterval(interval);
+  }, [refreshNotifications]);
+
+  //---------------------------------------------------
+  // Mark One Read
+  //---------------------------------------------------
   const markAsRead = async (id: string) => {
     await markNotificationBarReadService(id);
+
     setNotifications((previous) =>
       previous.map((notification) =>
         notification.id === id
@@ -43,28 +76,66 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           : notification
       )
     );
+
+    setUnreadCount((previous) => Math.max(previous - 1, 0));
   };
 
-  const unreadCount = notifications.filter((notification) => !notification.isRead).length;
+  //---------------------------------------------------
+  // Mark All
+  //---------------------------------------------------
+  const markAllAsRead = async () => {
+    await markAllNotificationBarReadService();
+
+    setNotifications((previous) =>
+      previous.map((notification) => ({
+        ...notification,
+        isRead: true,
+      }))
+    );
+
+    setUnreadCount(0);
+  };
+
+  //---------------------------------------------------
+  // Delete
+  //---------------------------------------------------
+  const deleteNotification = async (id: string) => {
+    const notification = notifications.find((n) => n.id === id);
+
+    await deleteNotificationBarService(id);
+
+    setNotifications((previous) => previous.filter((n) => n.id !== id));
+
+    if (notification && !notification.isRead) {
+      setUnreadCount((previous) => Math.max(previous - 1, 0));
+    }
+  };
 
   return (
-    <NotificationContext.Provider
+    <NotificationBarContext.Provider
       value={{
         notifications,
         unreadCount,
+        loading,
         refreshNotifications,
         markAsRead,
+        markAllAsRead,
+        deleteNotification,
       }}
     >
       {children}
-    </NotificationContext.Provider>
+    </NotificationBarContext.Provider>
   );
 }
 
-export function useNotifications() {
-  const context = useContext(NotificationContext);
+export function useNotificationBar() {
+  const context = useContext(NotificationBarContext);
+
   if (!context) {
-    throw new Error("useNotifications must be used inside NotificationProvider");
+    throw new Error(
+      "useNotificationBar must be used inside NotificationBarProvider"
+    );
   }
+
   return context;
 }
