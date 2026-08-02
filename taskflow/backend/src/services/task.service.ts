@@ -123,11 +123,25 @@ export const createTask = async (
     project.id,
     task.assigneeId
   );
-  await createActivity(
+
+  let activityMessage = "Task created";
+if (task.dueDate) {
+
+  const dueDate =
+    task.dueDate
+      .toISOString()
+      .split("T")[0];
+
+  activityMessage =
+    `Task created (Due: ${dueDate})`;
+
+}
+
+await createActivity(
   userId,
   task.id,
   "system",
-  "Task created"
+  activityMessage
 );
 
 if (
@@ -368,26 +382,32 @@ if (
 |--------------------------------------------------------------------------
 */
 
-if (
-  data.dueDate !== undefined
-) {
+if (data.dueDate !== undefined) {
 
   const oldDate =
     task.dueDate
-      ?.toISOString()
-      .split("T")[0];
+      ? task.dueDate.toISOString().split("T")[0]
+      : null;
 
   const newDate =
-    data.dueDate;
+    data.dueDate
+      ? new Date(data.dueDate)
+          .toISOString()
+          .split("T")[0]
+      : null;
 
   if (oldDate !== newDate) {
+    if (newDate) {
+      activities.push(
+        `Due date changed to ${newDate}`
+      );
+    } else {
 
-    activities.push(
-      `Due date changed to ${newDate}`
-    );
-
+      activities.push(
+        "Due date removed"
+      );
+    }
   }
-
 }
 
 /*
