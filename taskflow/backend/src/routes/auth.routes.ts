@@ -1,15 +1,29 @@
 import { Router } from "express";
-
-import { signup, login, forgotPasswordController, resetPasswordController , logoutController} from "../controllers/auth.controller";
+import {
+  signup,
+  login,
+  forgotPasswordController,
+  resetPasswordController,
+  logoutController,
+} from "../controllers/auth.controller";
 
 const router = Router();
 
 /**
  * @swagger
+ * tags:
+ *   name: Authentication
+ *   description: User authentication and account access management
+ */
+
+/**
+ * @swagger
  * /api/auth/signup:
  *   post:
- *     summary: Register a new user
- *     description: Creates a new TaskFlow user account.
+ *     summary: Create a new user account
+ *     description:
+ *       Registers a new TaskFlow user and automatically creates
+ *       a notification settings profile.
  *     tags:
  *       - Authentication
  *     requestBody:
@@ -31,24 +45,33 @@ const router = Router();
  *                 example: emaan@example.com
  *               password:
  *                 type: string
- *                 example: Password123
+ *                 example: Password123@
  *     responses:
  *       201:
- *         description: User registered successfully
+ *         description: Account created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/AuthResponse"
  *       400:
- *         description: Invalid input
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ErrorResponse"
+ *       409:
+ *         description: Email already exists
  *       500:
- *         description: Server error
+ *         description: Internal server error
  */
 router.post("/signup", signup);
-
 
 /**
  * @swagger
  * /api/auth/login:
  *   post:
  *     summary: Login user
- *     description: Authenticate user and return JWT token.
+ *     description: Authenticates a user and returns a JWT access token.
  *     tags:
  *       - Authentication
  *     requestBody:
@@ -66,23 +89,27 @@ router.post("/signup", signup);
  *                 example: emaan@example.com
  *               password:
  *                 type: string
- *                 example: Password123
+ *                 example: Password123@
  *     responses:
  *       200:
  *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/AuthResponse"
  *       401:
  *         description: Invalid email or password
  *       500:
- *         description: Server error
+ *         description: Internal server error
  */
 router.post("/login", login);
-
 
 /**
  * @swagger
  * /api/auth/forgot-password:
  *   post:
  *     summary: Generate password reset token
+ *     description: Generates a temporary password reset token for the provided email address.
  *     tags:
  *       - Authentication
  *     requestBody:
@@ -96,10 +123,10 @@ router.post("/login", login);
  *             properties:
  *               email:
  *                 type: string
- *                 example: user@gmail.com
+ *                 example: emaan@example.com
  *     responses:
  *       200:
- *         description: Reset token generated
+ *         description: Reset token generated successfully
  *       404:
  *         description: User not found
  */
@@ -109,7 +136,8 @@ router.post("/forgot-password", forgotPasswordController);
  * @swagger
  * /api/auth/reset-password/{token}:
  *   post:
- *     summary: Reset user password
+ *     summary: Reset password
+ *     description: Updates user password using a valid reset token.
  *     tags:
  *       - Authentication
  *     parameters:
@@ -127,12 +155,12 @@ router.post("/forgot-password", forgotPasswordController);
  *             properties:
  *               password:
  *                 type: string
- *                 example: password123
+ *                 example: NewPassword123@
  *     responses:
  *       200:
  *         description: Password reset successfully
  *       400:
- *         description: Invalid token or expired token
+ *         description: Invalid or expired token
  */
 router.post("/reset-password/:token", resetPasswordController);
 
@@ -140,7 +168,8 @@ router.post("/reset-password/:token", resetPasswordController);
  * @swagger
  * /api/auth/logout:
  *   post:
- *     summary: Logout user
+ *     summary: Logout current user
+ *     description: Invalidates the current JWT token and logs the user out.
  *     tags:
  *       - Authentication
  *     security:
@@ -149,7 +178,7 @@ router.post("/reset-password/:token", resetPasswordController);
  *       200:
  *         description: Logout successful
  *       401:
- *         description: Unauthorized
+ *         description: Missing or invalid JWT token
  */
 router.post("/logout", logoutController);
 

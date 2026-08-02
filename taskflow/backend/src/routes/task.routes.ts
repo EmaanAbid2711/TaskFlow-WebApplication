@@ -1,8 +1,16 @@
 import { Router } from "express";
-
 import authMiddleware from "../middleware/auth.middleware";
 import { attachmentUpload } from "../config/multer";
-import {createTaskController, getProjectTasksController, getTaskController, updateTaskController, deleteTaskController, uploadTaskAttachmentController, deleteTaskAttachmentController, createTaskCommentController} from "../controllers/task.controller";
+import {
+  createTaskController,
+  getProjectTasksController,
+  getTaskController,
+  updateTaskController,
+  deleteTaskController,
+  uploadTaskAttachmentController,
+  deleteTaskAttachmentController,
+  createTaskCommentController,
+} from "../controllers/task.controller";
 
 const router = Router();
 
@@ -10,7 +18,7 @@ const router = Router();
  * @swagger
  * tags:
  *   name: Tasks
- *   description: Task Management APIs
+ *   description: Task creation, management, attachments and comments
  */
 
 /**
@@ -18,6 +26,10 @@ const router = Router();
  * /api/tasks:
  *   post:
  *     summary: Create a new task
+ *     description:
+ *       Creates a task inside a project.
+ *       The authenticated user must have permission
+ *       to create tasks in the selected project.
  *     tags:
  *       - Tasks
  *     security:
@@ -37,7 +49,7 @@ const router = Router();
  *                 example: Design Login Screen
  *               description:
  *                 type: string
- *                 example: Create responsive login UI
+ *                 example: Create responsive login interface
  *               status:
  *                 type: string
  *                 example: TODO
@@ -47,6 +59,7 @@ const router = Router();
  *               dueDate:
  *                 type: string
  *                 format: date-time
+ *                 example: 2026-08-10T12:00:00Z
  *               projectId:
  *                 type: string
  *                 example: cmdd3l5lf0001abcxyz123
@@ -56,18 +69,21 @@ const router = Router();
  *     responses:
  *       201:
  *         description: Task created successfully
+ *       400:
+ *         description: Invalid task data
+ *       401:
+ *         description: Unauthorized request
+ *       404:
+ *         description: Project not found
  */
-router.post(
-  "/",
-  authMiddleware,
-  createTaskController
-);
+router.post("/", authMiddleware, createTaskController);
 
 /**
  * @swagger
  * /api/tasks/project/{projectId}:
  *   get:
  *     summary: Get all tasks of a project
+ *     description: Returns all tasks belonging to a specific project.
  *     tags:
  *       - Tasks
  *     security:
@@ -76,24 +92,26 @@ router.post(
  *       - in: path
  *         name: projectId
  *         required: true
+ *         description: Project unique identifier
  *         schema:
  *           type: string
- *         example: cmdd3l5lf0001abcxyz123
+ *           example: cmdd3l5lf0001abcxyz123
  *     responses:
  *       200:
  *         description: Tasks fetched successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Project not found
  */
-router.get(
-  "/project/:projectId",
-  authMiddleware,
-  getProjectTasksController
-);
+router.get("/project/:projectId", authMiddleware, getProjectTasksController);
 
 /**
  * @swagger
  * /api/tasks/{id}:
  *   get:
- *     summary: Get a task by ID
+ *     summary: Get task details
+ *     description: Fetches complete information about a task.
  *     tags:
  *       - Tasks
  *     security:
@@ -104,22 +122,25 @@ router.get(
  *         required: true
  *         schema:
  *           type: string
- *         example: cmdd4efgh0005xyz123456
+ *           example: cmdd4efgh0005xyz123456
  *     responses:
  *       200:
  *         description: Task fetched successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Task not found
  */
-router.get(
-  "/:id",
-  authMiddleware,
-  getTaskController
-);
+router.get("/:id", authMiddleware, getTaskController);
 
 /**
  * @swagger
  * /api/tasks/{id}:
  *   patch:
- *     summary: Update a task
+ *     summary: Update task
+ *     description:
+ *       Updates task information including status,
+ *       priority, due date and assignee.
  *     tags:
  *       - Tasks
  *     security:
@@ -130,7 +151,7 @@ router.get(
  *         required: true
  *         schema:
  *           type: string
- *         example: cmdd4efgh0005xyz123456
+ *           example: cmdd4efgh0005xyz123456
  *     requestBody:
  *       required: true
  *       content:
@@ -140,32 +161,31 @@ router.get(
  *             properties:
  *               title:
  *                 type: string
- *               description:
- *                 type: string
+ *                 example: Updated task title
  *               status:
  *                 type: string
+ *                 example: COMPLETED
  *               priority:
  *                 type: string
- *               dueDate:
- *                 type: string
- *                 format: date-time
- *               assigneeId:
- *                 type: string
+ *                 example: MEDIUM
  *     responses:
  *       200:
  *         description: Task updated successfully
+ *       400:
+ *         description: Invalid update data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Task not found
  */
-router.patch(
-  "/:id",
-  authMiddleware,
-  updateTaskController
-);
+router.patch("/:id", authMiddleware, updateTaskController);
 
 /**
  * @swagger
  * /api/tasks/{id}/attachments:
  *   post:
- *     summary: Upload attachment to task
+ *     summary: Upload task attachment
+ *     description: Uploads a file and attaches it to a task.
  *     tags:
  *       - Tasks
  *     security:
@@ -191,6 +211,10 @@ router.patch(
  *     responses:
  *       200:
  *         description: Attachment uploaded successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Task not found
  */
 router.post(
   "/:id/attachments",
@@ -199,12 +223,12 @@ router.post(
   uploadTaskAttachmentController
 );
 
-
 /**
  * @swagger
  * /api/tasks/{id}/attachments/{attachmentId}:
  *   delete:
- *     summary: Delete a task attachment
+ *     summary: Delete task attachment
+ *     description: Removes an uploaded file from a task.
  *     tags:
  *       - Tasks
  *     security:
@@ -215,35 +239,16 @@ router.post(
  *         required: true
  *         schema:
  *           type: string
- *         description: Task ID
- *         example: cmrvqf0q4000gma0pgo0xlzun
  *       - in: path
  *         name: attachmentId
  *         required: true
  *         schema:
  *           type: string
- *         description: Attachment ID
- *         example: cmrvts3hg0001waaw56ddogt3
  *     responses:
  *       200:
  *         description: Attachment deleted successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Attachment deleted successfully.
- *       401:
- *         description: Unauthorized
  *       404:
- *         description: Task or attachment not found
- *       500:
- *         description: Internal Server Error
+ *         description: Attachment not found
  */
 router.delete(
   "/:id/attachments/:attachmentId",
@@ -255,7 +260,8 @@ router.delete(
  * @swagger
  * /api/tasks/{id}/comments:
  *   post:
- *     summary: Add a comment to a task
+ *     summary: Add comment to task
+ *     description: Creates a new comment on a task.
  *     tags:
  *       - Tasks
  *     security:
@@ -266,8 +272,6 @@ router.delete(
  *         required: true
  *         schema:
  *           type: string
- *         description: Task ID
- *         example: cmrvqf0q4000gma0pgo0xlzun
  *     requestBody:
  *       required: true
  *       content:
@@ -279,36 +283,25 @@ router.delete(
  *             properties:
  *               text:
  *                 type: string
- *                 example: We should change the button color to blue.
+ *                 example: We should update the button design.
  *     responses:
  *       201:
  *         description: Comment created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
+ *       400:
+ *         description: Empty comment text
  *       401:
  *         description: Unauthorized
  *       404:
  *         description: Task not found
  */
-router.post(
-  "/:id/comments",
-  authMiddleware,
-  createTaskCommentController
-);
+router.post("/:id/comments", authMiddleware, createTaskCommentController);
 
 /**
  * @swagger
  * /api/tasks/{id}:
  *   delete:
- *     summary: Delete a task
+ *     summary: Delete task
+ *     description: Permanently deletes a task and related data.
  *     tags:
  *       - Tasks
  *     security:
@@ -319,15 +312,14 @@ router.post(
  *         required: true
  *         schema:
  *           type: string
- *         example: cmdd4efgh0005xyz123456
  *     responses:
  *       200:
  *         description: Task deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Task not found
  */
-router.delete(
-  "/:id",
-  authMiddleware,
-  deleteTaskController
-);
+router.delete("/:id", authMiddleware, deleteTaskController);
 
 export default router;
