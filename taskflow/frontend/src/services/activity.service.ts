@@ -1,11 +1,15 @@
-import { getActivitiesApi }
-from "@/api/activity.api";
+import { getActivitiesApi } from "@/api/activity.api";
 
-export const getActivitiesService =
-async () => {
+export const getActivitiesService = async (
+  page: number = 1,
+  limit: number = 20
+) => {
 
   const response =
-    await getActivitiesApi();
+    await getActivitiesApi(
+      page,
+      limit
+    );
 
   return response.data;
 
