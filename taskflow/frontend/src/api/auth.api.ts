@@ -105,3 +105,13 @@ export const resetPasswordApi = async (
 
   return response.data;
 };
+
+/* Logout */
+export const logoutApi = async (): Promise<SimpleResponse> => {
+  const response =
+    await api.post<SimpleResponse>(
+      "/api/auth/logout"
+    );
+
+  return response.data;
+};

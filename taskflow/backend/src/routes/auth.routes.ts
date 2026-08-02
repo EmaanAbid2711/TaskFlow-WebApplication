@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { signup, login, forgotPasswordController, resetPasswordController } from "../controllers/auth.controller";
+import { signup, login, forgotPasswordController, resetPasswordController , logoutController} from "../controllers/auth.controller";
 
 const router = Router();
 
@@ -135,5 +135,22 @@ router.post("/forgot-password", forgotPasswordController);
  *         description: Invalid token or expired token
  */
 router.post("/reset-password/:token", resetPasswordController);
+
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Logout user
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *       401:
+ *         description: Unauthorized
+ */
+router.post("/logout", logoutController);
 
 export default router;

@@ -26,7 +26,7 @@ interface AuthContextType {
     data: Partial<User>
   ) => void;
 
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 interface AuthProviderProps {
@@ -100,10 +100,10 @@ export function AuthProvider({
     });
   };
 
-  const logout = () => {
-    logoutService();
-    setUser(null);
-  };
+  const logout = async () => {
+  await logoutService();
+  setUser(null);
+};
 
   return (
     <AuthContext.Provider

@@ -3,6 +3,7 @@ import {LayoutDashboard, FolderKanban, Users, Activity, Settings, HelpCircle, Lo
 import {useNavigate, useLocation} from "react-router-dom";
 
 import Logo from "../../common/Logo/Logo";
+import { useAuth } from "@/context/AuthContext";
 
 interface SidebarProps {
   open: boolean;
@@ -14,14 +15,19 @@ function Sidebar({
   onClose,
 }: SidebarProps) {
   const navigate = useNavigate();
+
+  const { logout } = useAuth();
+
   const location = useLocation();
 
   const [settingsOpen, setSettingsOpen] =
     useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    navigate("/login");
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login", {
+      replace: true,
+    });
   };
 
   const goTo = (path: string) => {

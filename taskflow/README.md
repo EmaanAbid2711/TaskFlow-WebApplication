@@ -298,8 +298,8 @@ Swagger provides documentation and testing access for all backend APIs.
 # Deployment
 
 TaskFlow is live and fully deployed!
-Frontend is deployed on Vercel and backend and database is deployed on railway.
-The frontend and backend are connected, only opening the frontend deployed link will run the complete app.
+Frontend is deployed on Vercel and backend and database are deployed on railway.
+The frontend and backend are connected, only opening the deployed frontend link will run the complete app.
 You can access the live services using the links below:
 
 ## Live Links

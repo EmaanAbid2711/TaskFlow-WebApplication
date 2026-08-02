@@ -1,4 +1,4 @@
-import {loginApi, signupApi, forgotPasswordApi, resetPasswordApi, type LoginData, type SignupData, type ForgotPasswordData, type ResetPasswordData} from "../api/auth.api";
+import {loginApi, signupApi, forgotPasswordApi, resetPasswordApi, type LoginData, type SignupData, type ForgotPasswordData, type ResetPasswordData, logoutApi} from "../api/auth.api";
 
 /* Signup */
 export const signupService = async (
@@ -70,8 +70,12 @@ export const resetPasswordService =
 
 /* Logout  */
 export const logoutService =
-  (): void => {
-    localStorage.removeItem(
-      "token"
-    );
+  async () => {
+    try {
+      await logoutApi();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      localStorage.removeItem("token");
+    }
   };

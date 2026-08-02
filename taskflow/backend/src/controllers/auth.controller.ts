@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 
 import {signupSchema, loginSchema} from "../validations/auth.validation";
-import {signupUser, loginUser, forgotPassword, resetPassword} from "../services/auth.service";
+import {signupUser, loginUser, forgotPassword, resetPassword, logoutUser} from "../services/auth.service";
 import { generateToken } from "../utils/generateToken";
 
 export const signup = asyncHandler(
@@ -138,6 +138,36 @@ export const forgotPasswordController =
         success: true,
         message:
           "Password reset successfully.",
+      });
+    }
+  );
+
+  export const logoutController =
+  asyncHandler(
+    async (
+      req: Request,
+      res: Response
+    ): Promise<void> => {
+
+      const authHeader =
+        req.headers.authorization;
+
+      if (!authHeader) {
+        res.status(401).json({
+          success: false,
+          message: "Authorization token missing",
+        });
+        return;
+      }
+
+      const token =
+        authHeader.split(" ")[1];
+
+      await logoutUser(token);
+
+      res.status(200).json({
+        success: true,
+        message: "Logout successful.",
       });
     }
   );

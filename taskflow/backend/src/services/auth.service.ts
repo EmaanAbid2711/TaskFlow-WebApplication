@@ -5,6 +5,7 @@ import { addMinutes } from "date-fns";
 import prisma from "../config/prisma";
 import AppError from "../utils/AppError";
 import { hashPassword } from "../utils/hashPassword";
+import { blacklistToken } from "./tokenBlacklist.service";
 
 interface SignupData {
   name: string;
@@ -161,4 +162,13 @@ export async function resetPassword(
     });
 
   return updatedUser;
+}
+
+
+export async function logoutUser(
+  token: string
+) {
+  await blacklistToken(token);
+
+  return;
 }
