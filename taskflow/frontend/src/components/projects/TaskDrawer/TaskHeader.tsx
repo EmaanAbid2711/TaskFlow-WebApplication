@@ -1,4 +1,4 @@
-import {X, Trash2, FileText} from "lucide-react";
+import {X, Trash2, FileText, Loader2 } from "lucide-react";
 
 import type { DrawerMode } from "@/interfaces/projects";
 
@@ -8,6 +8,7 @@ interface Props {
   onClose: () => void;
   onSave: () => void;
   onDelete: () => void;
+  saving: boolean;
 }
 
 function TaskHeader({
@@ -16,6 +17,7 @@ function TaskHeader({
   onClose,
   onSave,
   onDelete,
+  saving,
 }: Props) {
   return (
     <header className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 md:px-6">
@@ -59,9 +61,31 @@ function TaskHeader({
       <div className="flex items-center gap-2">
         <button
           onClick={onSave}
-          className="rounded-lg bg-[#0052cc] px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+          disabled={saving}
+          className={`
+            flex items-center gap-2
+            rounded-lg
+            px-4
+            py-2
+            text-sm
+            font-semibold
+            text-white
+            transition
+            ${
+              saving
+                ? "cursor-wait bg-blue-400"
+                : "bg-[#0052cc] hover:bg-blue-700"
+            }
+          `}
         >
-          Save
+          {saving && (
+            <Loader2
+              size={16}
+              className="animate-spin"
+            />
+          )}
+        
+          {saving ? "Saving..." : "Save"}
         </button>
 
         {mode === "edit" && (

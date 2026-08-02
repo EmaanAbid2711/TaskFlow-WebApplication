@@ -15,6 +15,8 @@ import { useDashboard } from "@/context/DashboardContext";
 function Projects() {
   const navigate = useNavigate();
 
+  const [savingTask, setSavingTask] = useState(false);
+
   const location = useLocation();
 
   const { user } = useAuth();
@@ -398,143 +400,68 @@ async (): Promise<Task[]> => {
    */
 
   const handleSaveTask = async () => {
+  if (!selectedTask || !selectedProject) {
+    return;
+  }
 
-    if (!selectedTask || !selectedProject) {
-      return;
-    }
+  if (savingTask) return;
 
-    try{
-      // CREATE
-      if(drawerMode==="create"){
+  setSavingTask(true);
 
-        if(!selectedProject)
-          return;
-
-        if (
-          selectedTask.title.trim().length < 3
-        ) {
-          alert("Task title must be at least 3 characters.");
-          return;
-        }
-
-        const response =
-          await createTaskApi({
-            title:selectedTask.title,
-            description:
-              selectedTask.description,
-            status:
-              selectedTask.status,
-
-            priority:
-              selectedTask.priority,
-
-            dueDate:
-              selectedTask.dueDate || undefined,
-            progress:
-              selectedTask.progress,
-            reviewStatus:
-              selectedTask.reviewStatus,
-
-            projectId:
-              selectedProject.id,
-
-            assigneeId:
-              selectedTask.assignee.id || undefined,
-
-          });
-
-
-
-        setTasks(prev=>[
-          ...prev,
-          mapTask(response.data)
-        ]);
-        await refreshProjectStats(
-          selectedProject.id
-        );
-        await refreshDashboardStats();
-
+  try {
+    if (drawerMode === "create") {
+      if (selectedTask.title.trim().length < 3) {
+        alert("Task title must be at least 3 characters.");
+        return;
       }
 
+      const response = await createTaskApi({
+        title: selectedTask.title,
+        description: selectedTask.description,
+        status: selectedTask.status,
+        priority: selectedTask.priority,
+        dueDate: selectedTask.dueDate || undefined,
+        progress: selectedTask.progress,
+        reviewStatus: selectedTask.reviewStatus,
+        projectId: selectedProject.id,
+        assigneeId: selectedTask.assignee.id || undefined,
+      });
 
+      setTasks((prev) => [...prev, mapTask(response.data)]);
 
-      // UPDATE
-      else{
+      await refreshProjectStats(selectedProject.id);
+      await refreshDashboardStats();
+    } else {
+      const response = await updateTaskApi(selectedTask.id, {
+        title: selectedTask.title,
+        description: selectedTask.description,
+        status: selectedTask.status,
+        priority: selectedTask.priority,
+        dueDate: selectedTask.dueDate,
+        progress: selectedTask.progress,
+        reviewStatus: selectedTask.reviewStatus,
+        assigneeId: selectedTask.assignee.id,
+      });
 
-
-        const response =
-          await updateTaskApi(
-
-            selectedTask.id,
-
-            {
-
-              title:
-                selectedTask.title,
-
-
-              description:
-                selectedTask.description,
-
-
-              status:
-                selectedTask.status,
-
-
-              priority:
-                selectedTask.priority,
-
-
-              dueDate:
-                selectedTask.dueDate,
-
-
-              progress:
-                selectedTask.progress,
-
-
-              reviewStatus:
-                selectedTask.reviewStatus,
-
-
-              assigneeId:
-                selectedTask.assignee.id
-
-            }
-
-          );
-
-        setTasks(prev=>
-          prev.map(task=>
-            task.id===selectedTask.id
-            ?
-            mapTask(response.data)
-            :
-            task
-          )
-        );
-        await refreshProjectStats(selectedProject.id);
-        await refreshDashboardStats();
-
-      }
-
-
-
-      setDrawerOpen(false);
-
-
-
-    }
-    catch(error){
-
-      console.log(
-        "Task save error",
-        error
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === selectedTask.id
+            ? mapTask(response.data)
+            : task
+        )
       );
 
+      await refreshProjectStats(selectedProject.id);
+      await refreshDashboardStats();
     }
 
-  };
+    setDrawerOpen(false);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setSavingTask(false);
+  }
+};
 
   /**
    * ------------------------------------------------------------------
@@ -748,20 +675,15 @@ async (): Promise<Task[]> => {
 
         <TaskDrawer
           open={drawerOpen}
-          onClose={() =>
-            setDrawerOpen(false)
-          }
-          mode={drawerMode}
-          task={selectedTask}
-          onChangeTask={
-            handleTaskChange
-          }
-          onSave={handleSaveTask}
-          onDelete={
-            handleDeleteTask
-          }
-          refreshTasks={refreshCurrentProject}
-          canChangeAssignee={isOwner}
+            onClose={() => setDrawerOpen(false)}
+            mode={drawerMode}
+            task={selectedTask}
+            onChangeTask={handleTaskChange}
+            onSave={handleSaveTask}
+            onDelete={handleDeleteTask}
+            refreshTasks={refreshCurrentProject}
+            canChangeAssignee={isOwner}
+            saving={savingTask}
         />
 
         <ProjectDrawer
