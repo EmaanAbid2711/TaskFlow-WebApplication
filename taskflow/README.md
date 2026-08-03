@@ -169,18 +169,23 @@ npm install
 ```
 
 ## Configure Environment Variables
+A sample environment configuration is already provided.
 
-Create a `.env` file inside the backend folder.
-
-Example:
-
-```env
-DATABASE_URL="postgresql://postgres:password@localhost:5432/taskflow"
-
-JWT_SECRET="your_secret_key"
-
-PORT=5000
+Copy the example file:
+```bash
+cp .env.example .env
 ```
+
+Windows Command Prompt:
+```cmd
+copy .env.example .env
+```
+
+Windows PowerShell:
+```powershell
+Copy-Item .env.example .env
+```
+Then update the values inside `.env` according to your local environment.
 
 ### Database Setup
 
@@ -233,15 +238,25 @@ Install dependencies:
 npm install
 ```
 
-Create a `.env` file inside the frontend folder.
-
-Add:
-
-```env
-VITE_API_URL=http://localhost:5000
+## Configure Environment Variables
+A sample environment configuration is already provided.
+Copy the example file:
+```bash
+cp .env.example .env
 ```
 
-Start frontend:
+Windows Command Prompt:
+```cmd
+copy .env.example .env
+```
+
+Windows PowerShell:
+```powershell
+Copy-Item .env.example .env
+```
+Then update the values inside `.env` according to your local environment.
+
+## Start frontend:
 
 ```bash
 npm run dev
@@ -325,12 +340,12 @@ You can access the live services using the links below:
 - Dashboard Statistics
 - Project Progress Tracking
 - Owner & Assignee Permissions
+- In app Notifications
 
 ---
 
 # Future Improvements
 
-- In app Notifications
 - Email Invitations
 
 ---
