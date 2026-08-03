@@ -151,9 +151,7 @@ export const getAllUsersController =
       return;
     }
 
-    const users = await getAllUsers(
-      req.user.id
-    );
+    const users = await getAllUsers();
 
     res.status(200).json({
       success: true,
