@@ -30,6 +30,9 @@ model User {
   twoFactorEnabled    Boolean   @default(false)
 
   notifications Notification[]
+
+  // Notifications sent by this user
+  sentNotifications Notification[] @relation("NotificationSender")
   
   notificationSettings NotificationSettings?
   billing              Billing?
@@ -37,6 +40,13 @@ model User {
   // Project relations
   ownedProjects  Project[]       @relation("ProjectOwner")
   projectMembers ProjectMember[]
+
+  // Team relations
+  sentInvitations     TeamInvitation[] @relation("InvitationSender")
+  receivedInvitations TeamInvitation[] @relation("InvitationReceiver")
+
+  teamMembers         TeamMember[] @relation("UserTeamMembers")
+  memberOfTeams       TeamMember[] @relation("MemberOfUsers")
 
   // Task relations
   assignedTasks Task[]     @relation("TaskAssignee")
@@ -236,16 +246,20 @@ enum TaskPriority {
 model Notification {
   id        String   @id @default(cuid())
   userId    String
+  senderId  String?
   title     String
   message   String
   type      String
   isRead    Boolean  @default(false)
   projectId String?
   taskId    String?
+  invitationId String?
   createdAt DateTime @default(now())
   user User @relation(fields: [userId],  references: [id],  onDelete: Cascade)
+  sender User? @relation("NotificationSender", fields: [senderId],  references: [id], onDelete: SetNull)
   project Project? @relation(fields: [projectId], references: [id],  onDelete: Cascade )
   task Task? @relation(fields: [taskId],  references: [id],  onDelete: Cascade )
+  invitation TeamInvitation? @relation( fields: [invitationId],  references: [id],  onDelete: Cascade)
 }
 
 model TokenBlacklist {
@@ -253,4 +267,41 @@ model TokenBlacklist {
   token      String   @unique
   expiresAt  DateTime
   createdAt  DateTime @default(now())
+}
+
+enum TeamInvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model TeamInvitation {
+  id String @id @default(cuid())
+
+  senderId String
+  receiverId String
+
+  status TeamInvitationStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sender User @relation("InvitationSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("InvitationReceiver", fields: [receiverId],  references: [id], onDelete: Cascade)
+  notifications Notification[]
+  @@unique([senderId, receiverId])
+}
+
+
+model TeamMember {
+  id String @id @default(cuid())
+
+  userId String
+  memberId String
+
+  user User @relation( "UserTeamMembers", fields: [userId], references: [id],  onDelete: Cascade)
+  member User @relation( "MemberOfUsers", fields: [memberId], references: [id],  onDelete: Cascade  )
+
+  createdAt DateTime @default(now())
+  @@unique([userId, memberId])
 }
