@@ -1,4 +1,5 @@
 import prisma from "../config/prisma";
+import { createNotificationBar} from "./notificationBar.service";
 
 // Send invitation
 export const sendTeamInvitation = async (senderId: string, receiverEmail: string) => {
@@ -36,16 +37,16 @@ export const sendTeamInvitation = async (senderId: string, receiverEmail: string
     },
   });
 
-  await prisma.notification.create({
-    data: {
-      userId: receiver.id,
-      senderId,
-      title: "Team Invitation",
-      message: "You received a new team invitation",
-      type: "TEAM_INVITATION",
-      invitationId: invitation.id,
-    },
-  });
+  await createNotificationBar(
+  receiver.id,
+  "Team Invitation",
+  "You received a new team invitation",
+  "TEAM_INVITATION",
+  undefined,
+  undefined,
+  senderId,
+  invitation.id
+);
 
   return invitation;
 };
@@ -126,15 +127,16 @@ export const acceptTeamInvitation = async (invitationId: string, userId: string)
   });
 
   // notification to sender
-  await prisma.notification.create({
-    data: {
-      userId: invitation.senderId,
-      senderId: userId,
-      title: "Invitation Accepted",
-      message: "Your team invitation was accepted",
-      type: "TEAM_INVITATION_ACCEPTED",
-    },
-  });
+  await createNotificationBar(
+  invitation.senderId,
+  "Invitation Accepted",
+  "Your team invitation was accepted",
+  "TEAM_INVITATION_ACCEPTED",
+  undefined,
+  undefined,
+  userId,
+  invitation.id
+);
 
   return true;
 };
@@ -160,15 +162,16 @@ export const rejectTeamInvitation = async (invitationId: string, userId: string)
     },
   });
 
-  await prisma.notification.create({
-    data: {
-      userId: invitation.senderId,
-      senderId: userId,
-      title: "Invitation Rejected",
-      message: "Your team invitation was rejected",
-      type: "TEAM_INVITATION_REJECTED",
-    },
-  });
+  await createNotificationBar(
+  invitation.senderId,
+  "Invitation Rejected",
+  "Your team invitation was rejected",
+  "TEAM_INVITATION_REJECTED",
+  undefined,
+  undefined,
+  userId,
+  invitation.id
+);
 
   return true;
 };

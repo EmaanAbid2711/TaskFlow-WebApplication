@@ -6,16 +6,20 @@ export const createNotificationBar = async (
   message: string,
   type: string,
   projectId?: string,
-  taskId?: string
+  taskId?: string,
+  senderId?: string,
+  invitationId?: string
 ) => {
   return prisma.notification.create({
     data: {
       userId,
+      senderId,
       title,
       message,
       type,
       projectId,
       taskId,
+      invitationId,
     },
   });
 };
@@ -29,6 +33,16 @@ export const getNotificationsBar = async (userId: string) => {
       createdAt: "desc",
     },
     take: 20,
+    include: {
+      sender: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+        },
+      },
+      invitation: true,
+    },
   });
 };
 
