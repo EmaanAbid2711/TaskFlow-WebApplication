@@ -4,7 +4,7 @@ import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tool
 
 import {DashboardLayout, MetricCard, ProgressCard, ActivityCard, DeadlineCard, TeamMemberCard } from "../../components";
 import {metrics} from "../../data/dashboarddata.ts";
-import { getAllUsersService } from "@/services/user.service";
+import { getTeamMembersService } from "@/services/team.service";
 import { useDashboard } from "@/context/DashboardContext";
 import type { TeamMember } from "@/interfaces/dashboard";
 
@@ -19,19 +19,32 @@ function Dashboard() {
   const navigate = useNavigate();
   
   useEffect(() => {
-    loadUsers();
-  }, []);
-  const loadUsers = async () => {
-    try {
-      const users = await getAllUsersService();
-    
-      console.log("Users Array:", users);
-    
-      setTeamMembers(users);
-    } catch (error) {
-      console.error("Failed to load users:", error);
-    }
-  };
+  loadTeamMembers();
+}, []);
+const loadTeamMembers = async () => {
+  try {
+    const data =
+      await getTeamMembersService();
+    const formattedMembers =
+      data.map(
+        (item:any)=>({
+          id:item.member.id,
+          name:item.member.name,
+          email:item.member.email,
+          avatar:item.member.avatar,
+          username:item.member.username,
+          role:"Member",
+
+        })
+      );
+    setTeamMembers(formattedMembers);
+  } catch(error){
+    console.error(
+      "Failed to load team members:",
+      error
+    );
+  }
+};
 
 
   const liveMetrics = useMemo(() => {
@@ -217,12 +230,19 @@ function Dashboard() {
             </h2>
 
             <div className="space-y-4">
-              {teamMembers.map((member) => (
-                <TeamMemberCard
-                  key={member.id}
-                  member={member}
-                />
-              ))}
+            {
+            teamMembers.length === 0 ? (
+              <p className="text-sm text-slate-500">
+                No teammates yet.
+              </p>
+            ):(teamMembers.map((member)=>(
+              <TeamMemberCard
+                key={member.id}
+                member={member}
+              />
+            ))
+            )
+            }
             </div>
           </div>
         </div>
