@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { TeamMemberCard } from "@/components";
+import { toast } from "sonner";
 import type { TeamMember } from "@/interfaces/dashboard";
 import { getTeamMembersService, inviteTeamMemberService} from "@/services/team.service";
 
@@ -57,13 +58,13 @@ setMembers(formattedMembers);
         email,
       });
 
-      alert("Invitation sent successfully.");
+      toast.success("Invitation sent successfully.");
 
       setEmail("");
 
       setShowInviteModal(false);
     } catch (error: any) {
-      alert(
+      toast.error(
         error?.response?.data?.message ??
           "Failed to send invitation."
       );
