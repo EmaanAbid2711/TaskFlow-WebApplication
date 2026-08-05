@@ -1,6 +1,8 @@
-import { Bell, CheckCheck, Trash2 } from "lucide-react";
+import { Bell, CheckCheck, Trash2, Loader2, CheckCircle2, XCircle} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, } from "react-router-dom";
+import { useState } from "react";
+
 import { useNotificationBar } from "@/context/NotificationBarContext";
 import {acceptInvitationService, rejectInvitationService} from "@/services/notificationBar.service";
 
@@ -19,27 +21,39 @@ function NotificationBarDropdown({ closeDropdown }: Props) {
     refreshNotifications,
   } = useNotificationBar();
 
+  const [processingInvitation, setProcessingInvitation] =
+  useState<string | null>(null);
 
   const acceptInvitation = async (
   notification: any
 ) => {
   if (!notification.invitationId) return;
-  await acceptInvitationService(
-    notification.invitationId
-  );
-  await markAsRead(notification.id);
-  await refreshNotifications();
+  try {
+    setProcessingInvitation(notification.id);
+    await acceptInvitationService(
+      notification.invitationId
+    );
+    await markAsRead(notification.id);
+    await refreshNotifications();
+  } finally {
+    setProcessingInvitation(null);
+  }
 };
 
 const rejectInvitation = async (
   notification: any
 ) => {
   if (!notification.invitationId) return;
-  await rejectInvitationService(
-    notification.invitationId
-  );
-  await markAsRead(notification.id);
-  await refreshNotifications();
+  try {
+    setProcessingInvitation(notification.id);
+    await rejectInvitationService(
+      notification.invitationId
+    );
+    await markAsRead(notification.id);
+    await refreshNotifications();
+  } finally {
+    setProcessingInvitation(null);
+  }
 };
 
   //----------------------------------------------------
@@ -157,26 +171,60 @@ const rejectInvitation = async (
                 {notification.type === "TEAM_INVITATION" &&
                   notification.invitation?.id && (
                   
-                    <div className="mt-4 flex gap-2">
-                    
-                      <button
-                        onClick={() =>
-                          acceptInvitation(notification)
-                        }
-                        className="rounded-lg bg-[#0052cc] px-4 py-2 text-white text-sm hover:bg-blue-700"
-                      >
-                        Accept
-                      </button>
+                    <>
+                      {notification.invitation.status === "PENDING" ? (
                       
-                      <button
-                        onClick={() =>
-                          rejectInvitation(notification)
-                        }
-                        className="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-100"
-                      >
-                        Reject
-                      </button>
-                    </div>
+                        <div className="mt-4 flex gap-2">
+                        
+                          <button
+                            disabled={
+                              processingInvitation === notification.id
+                            }
+                            onClick={() =>
+                              acceptInvitation(notification)
+                            }
+                            className="flex items-center gap-2 rounded-lg bg-[#0052cc] px-4 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {processingInvitation === notification.id && (
+                              <Loader2
+                                size={15}
+                                className="animate-spin"
+                              />
+                            )}
+                
+                            Accept
+                          </button>
+                          
+                          <button
+                            disabled={
+                              processingInvitation === notification.id
+                            }
+                            onClick={() =>
+                              rejectInvitation(notification)
+                            }
+                            className="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            Reject
+                          </button>
+                          
+                        </div>
+                
+                      ) : notification.invitation.status === "ACCEPTED" ? (
+                      
+                        <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
+                          <CheckCircle2 size={16} />
+                          Invitation Accepted
+                        </div>
+                
+                      ) : (
+                      
+                        <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-700">
+                          <XCircle size={16} />
+                          Invitation Rejected
+                        </div>
+                
+                      )}
+                    </>
                 )}
               
                 {notification.type !== "TEAM_INVITATION" && (
