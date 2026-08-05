@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotificationBar } from "@/context/NotificationBarContext";
 import NotificationBarDropdown from "./NotifyBarDropdown"
+import SearchDropdown from "./SearchDropdown";
+import { useSearch } from "@/context/SearchContext";
 
 function Header() {
   const navigate = useNavigate();
@@ -17,6 +19,13 @@ function Header() {
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const {search,} = useSearch();
+
+  const [searchText,setSearchText] = useState("");
+
+  const searchResults = search(searchText);
+
+  const openSearchResult = ( item:any)=>{ navigate(item.route); setSearchText("");};
 
   //----------------------------------------------------
   // Close dropdown when clicking outside
@@ -71,10 +80,20 @@ function Header() {
             size={18}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
           />
+
           <input
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
             placeholder="Search..."
             className="w-64 rounded-xl bg-slate-100 py-2 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-[#0052cc]/20"
           />
+
+          {searchText && (
+            <SearchDropdown
+              results={searchResults}
+              onSelect={openSearchResult}
+            />
+          )}
         </div>
 
         {/* Notification */}
