@@ -21,6 +21,21 @@ export const sendTeamInvitation = async (senderId: string, receiverEmail: string
     throw new AppError("You cannot invite yourself", 400);
   }
 
+  // Already teammates?
+const existingMember = await prisma.teamMember.findFirst({
+  where: {
+    userId: senderId,
+    memberId: receiver.id,
+  },
+});
+
+if (existingMember) {
+  throw new AppError(
+    "This user is already a member of your team",
+    400
+  );
+}
+
   const existing = await prisma.teamInvitation.findUnique({
     where: {
       senderId_receiverId: {
@@ -154,7 +169,7 @@ export const rejectTeamInvitation = async (invitationId: string, userId: string)
   });
 
   if (!invitation || invitation.receiverId !== userId) {
-    throw new Error("Invitation not found");
+    throw new AppError("Invitation not found", 404);
   }
 
   await prisma.teamInvitation.update({
