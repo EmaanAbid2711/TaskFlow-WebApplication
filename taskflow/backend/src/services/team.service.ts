@@ -1,5 +1,6 @@
 import prisma from "../config/prisma";
 import { createNotificationBar} from "./notificationBar.service";
+import AppError from "../utils/AppError";
 
 // Send invitation
 export const sendTeamInvitation = async (senderId: string, receiverEmail: string) => {
@@ -10,11 +11,14 @@ export const sendTeamInvitation = async (senderId: string, receiverEmail: string
   });
 
   if (!receiver) {
-    throw new Error("User with this email does not exist");
+    throw new AppError(
+  "User with this email does not exist",
+  404
+);
   }
 
   if (senderId === receiver.id) {
-    throw new Error("You cannot invite yourself");
+    throw new AppError("You cannot invite yourself", 400);
   }
 
   const existing = await prisma.teamInvitation.findUnique({
@@ -27,7 +31,7 @@ export const sendTeamInvitation = async (senderId: string, receiverEmail: string
   });
 
   if (existing?.status === "PENDING") {
-    throw new Error("Invitation already sent");
+    throw new AppError("Invitation already sent", 400);
   }
 
   const invitation = await prisma.teamInvitation.create({
@@ -100,7 +104,7 @@ export const acceptTeamInvitation = async (invitationId: string, userId: string)
   });
 
   if (!invitation || invitation.receiverId !== userId) {
-    throw new Error("Invitation not found");
+    throw new AppError("Invitation not found", 404);
   }
 
   await prisma.teamInvitation.update({
