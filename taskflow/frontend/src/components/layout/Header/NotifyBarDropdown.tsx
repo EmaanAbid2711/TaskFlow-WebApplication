@@ -60,17 +60,27 @@ const rejectInvitation = async (
   // Open Notification
   //----------------------------------------------------
   const openNotification = async (
-    id: string,
-    projectId?: string | null,
-    taskId?: string | null
-  ) => {
-    await markAsRead(id);
-    closeDropdown();
+  notification: any
+) => {
+  await markAsRead(notification.id);
 
-    if (projectId && taskId) {
-      navigate(`/projects?project=${projectId}&task=${taskId}`);
-    }
-  };
+  closeDropdown();
+
+  if (
+    notification.type === "TEAM_INVITATION" ||
+    notification.type === "TEAM_INVITATION_ACCEPTED" ||
+    notification.type === "TEAM_INVITATION_REJECTED"
+  ) {
+    navigate("/team");
+    return;
+  }
+
+  if (notification.projectId && notification.taskId) {
+    navigate(
+      `/projects?project=${notification.projectId}&task=${notification.taskId}`
+    );
+  }
+};
 
   //----------------------------------------------------
   return (
@@ -191,7 +201,7 @@ const rejectInvitation = async (
                                 className="animate-spin"
                               />
                             )}
-                
+
                             Accept
                           </button>
                           
@@ -208,21 +218,21 @@ const rejectInvitation = async (
                           </button>
                           
                         </div>
-                
+
                       ) : notification.invitation.status === "ACCEPTED" ? (
                       
                         <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
                           <CheckCircle2 size={16} />
                           Invitation Accepted
                         </div>
-                
+
                       ) : (
                       
                         <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-700">
                           <XCircle size={16} />
                           Invitation Rejected
                         </div>
-                
+
                       )}
                     </>
                 )}
@@ -231,11 +241,7 @@ const rejectInvitation = async (
                 
                   <button
                     onClick={() =>
-                      openNotification(
-                        notification.id,
-                        notification.projectId,
-                        notification.taskId
-                      )
+                      openNotification(notification)
                     }
                     className="mt-3 text-sm font-medium text-[#0052cc]"
                   >
