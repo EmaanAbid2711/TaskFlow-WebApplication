@@ -1,223 +1,209 @@
 import { Request, Response } from "express";
-import prisma from "../config/prisma";
+import asyncHandler from "express-async-handler";
+import bcrypt from "bcrypt";
 
-export const getAccount = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    const userId = req.user?.id;
+import prisma from "../config/prisma";
+import AppError from "../utils/AppError";
+
+export const getAccount = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError("Unauthorized", 401);
+    }
 
     const user = await prisma.user.findUnique({
       where: {
-        id: userId,
+        id: req.user.id,
       },
       select: {
         email: true,
       },
     });
 
-    return res.status(200).json(user);
-  } catch (error) {
-    return res.status(500).json({
-      message: "Failed to fetch account.",
+    if (!user) {
+      throw new AppError("User not found.", 404);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user,
     });
   }
-};
+);
 
-export const updateEmail = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    const userId = req.user?.id;
+export const updateEmail = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError("Unauthorized", 401);
+    }
+
     const { email } = req.body;
 
-    const existingUser =
-      await prisma.user.findUnique({
-        where: {
-          email,
-        },
-      });
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
 
     if (existingUser) {
-      return res.status(400).json({
-        message:
-          "Email already exists.",
-      });
+      throw new AppError(
+        "Email already exists.",
+        409
+      );
     }
 
-    const user =
-      await prisma.user.update({
-        where: {
-          id: userId,
-        },
-        data: {
-          email,
-        },
-      });
-
-    return res.status(200).json({
-      message:
-        "Email updated successfully.",
-      user,
+    const user = await prisma.user.update({
+      where: {
+        id: req.user.id,
+      },
+      data: {
+        email,
+      },
     });
-  } catch (error) {
-    return res.status(500).json({
-      message:
-        "Failed to update email.",
+
+    res.status(200).json({
+      success: true,
+      message: "Email updated successfully.",
+      data: user,
     });
   }
-};
+);
 
-export const updatePassword =
-  async (
-    req: Request,
-    res: Response
-  ) => {
-    try {
-      const userId = req.user?.id;
+export const updatePassword = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError("Unauthorized", 401);
+    }
 
-      const {
+    const {
+      currentPassword,
+      newPassword,
+    } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.user.id,
+      },
+    });
+
+    if (!user) {
+      throw new AppError(
+        "User not found.",
+        404
+      );
+    }
+
+    const isMatch =
+      await bcrypt.compare(
         currentPassword,
+        user.password
+      );
+
+    if (!isMatch) {
+      throw new AppError(
+        "Current password is incorrect.",
+        400
+      );
+    }
+
+    const hashedPassword =
+      await bcrypt.hash(
         newPassword,
-      } = req.body;
+        10
+      );
 
-      const user =
-        await prisma.user.findUnique({
-          where: {
-            id: userId,
-          },
-        });
+    await prisma.user.update({
+      where: {
+        id: req.user.id,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
 
-      if (!user) {
-        return res.status(404).json({
-          message:
-            "User not found.",
-        });
-      }
+    res.status(200).json({
+      success: true,
+      message:
+        "Password updated successfully.",
+    });
+  }
+);
 
-      const bcrypt =
-        await import("bcrypt");
-
-      const isMatch =
-        await bcrypt.compare(
-          currentPassword,
-          user.password
-        );
-
-      if (!isMatch) {
-        return res.status(400).json({
-          message:
-            "Current password is incorrect.",
-        });
-      }
-
-      const hashedPassword =
-        await bcrypt.hash(
-          newPassword,
-          10
-        );
-
-      await prisma.user.update({
-        where: {
-          id: userId,
-        },
-        data: {
-          password:
-            hashedPassword,
-        },
-      });
-
-      return res.status(200).json({
-        message:
-          "Password updated successfully.",
-      });
-    } catch (error) {
-      return res.status(500).json({
-        message:
-          "Failed to update password.",
-      });
+  export const deleteAccount = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError("Unauthorized", 401);
     }
-  };
 
-  export const deleteAccount =
-  async (
-    req: Request,
-    res: Response
-  ) => {
-    try {
-      const userId =
-        req.user?.id;
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.user.id,
+      },
+    });
 
-      const user =
-        await prisma.user.findUnique({
-          where: {
-            id: userId,
-          },
-        });
-
-      if (!user) {
-        return res.status(404).json({
-          message:
-            "User not found.",
-        });
-      }
-
-      await prisma.user.delete({
-        where: {
-          id: userId,
-        },
-      });
-
-      return res.status(200).json({
-        message:
-          "Account deleted successfully.",
-      });
-    } catch (error) {
-      console.error(error);
-
-      return res.status(500).json({
-        message:
-          "Failed to delete account.",
-      });
+    if (!user) {
+      throw new AppError(
+        "User not found.",
+        404
+      );
     }
-  };
 
-  export const getSecurity = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    const userId = req.user?.id;
+    await prisma.user.delete({
+      where: {
+        id: req.user.id,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message:
+        "Account deleted successfully.",
+    });
+  }
+);
+
+  export const getSecurity = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError("Unauthorized", 401);
+    }
 
     const user =
       await prisma.user.findUnique({
         where: {
-          id: userId,
+          id: req.user.id,
         },
         select: {
           twoFactorEnabled: true,
         },
       });
 
-    return res.status(200).json(user);
-  } catch {
-    return res.status(500).json({
-      message:
-        "Failed to fetch security settings.",
+    if (!user) {
+      throw new AppError(
+        "User not found.",
+        404
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user,
     });
   }
-};
+);
 
 export const updateSecurity =
-  async (
-    req: Request,
-    res: Response
-  ) => {
-    try {
-      const userId =
-        req.user?.id;
+  asyncHandler(
+    async (
+      req: Request,
+      res: Response
+    ) => {
+      if (!req.user) {
+        throw new AppError(
+          "Unauthorized",
+          401
+        );
+      }
 
       const {
         twoFactorEnabled,
@@ -226,26 +212,21 @@ export const updateSecurity =
       const user =
         await prisma.user.update({
           where: {
-            id: userId,
+            id: req.user.id,
           },
           data: {
             twoFactorEnabled,
           },
           select: {
-            twoFactorEnabled:
-              true,
+            twoFactorEnabled: true,
           },
         });
 
-      return res.status(200).json({
+      res.status(200).json({
+        success: true,
         message:
           "Security settings updated.",
         data: user,
       });
-    } catch {
-      return res.status(500).json({
-        message:
-          "Failed to update security settings.",
-      });
     }
-  };
+  );

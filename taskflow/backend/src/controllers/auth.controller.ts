@@ -114,9 +114,7 @@ export const logoutController = asyncHandler(
     }
 
     const token = authHeader.split(" ")[1];
-
     await logoutUser(token);
-
     res.status(200).json({
       success: true,
       message: "Logout successful.",

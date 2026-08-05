@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
+
 import {
   sendTeamInvitation,
   getTeamMembers,
@@ -9,8 +10,24 @@ import {
 } from "../services/team.service";
 
 export const sendInvitationController = asyncHandler(
-  async (req: Request, res: Response) => {
-    const result = await sendTeamInvitation(req.user!.id, req.body.email);
+  async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+      return;
+    }
+
+    const result = await sendTeamInvitation(
+      userId,
+      req.body.email
+    );
 
     res.status(201).json({
       success: true,
@@ -20,10 +37,23 @@ export const sendInvitationController = asyncHandler(
 );
 
 export const getTeamMembersController = asyncHandler(
-  async (req: Request, res: Response) => {
-    const members = await getTeamMembers(req.user!.id);
+  async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    const userId = req.user?.id;
 
-    res.json({
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+      return;
+    }
+
+    const members = await getTeamMembers(userId);
+
+    res.status(200).json({
       success: true,
       data: members,
     });
@@ -31,10 +61,24 @@ export const getTeamMembersController = asyncHandler(
 );
 
 export const getInvitationsController = asyncHandler(
-  async (req: Request, res: Response) => {
-    const invitations = await getReceivedInvitations(req.user!.id);
+  async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    const userId = req.user?.id;
 
-    res.json({
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+      return;
+    }
+
+    const invitations =
+      await getReceivedInvitations(userId);
+
+    res.status(200).json({
       success: true,
       data: invitations,
     });
@@ -42,10 +86,26 @@ export const getInvitationsController = asyncHandler(
 );
 
 export const acceptInvitationController = asyncHandler(
-  async (req: Request, res: Response) => {
-    await acceptTeamInvitation(String(req.params.id), req.user!.id);
+  async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    const userId = req.user?.id;
 
-    res.json({
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+      return;
+    }
+
+    await acceptTeamInvitation(
+      String(req.params.id),
+      userId
+    );
+
+    res.status(200).json({
       success: true,
       message: "Invitation accepted",
     });
@@ -53,10 +113,26 @@ export const acceptInvitationController = asyncHandler(
 );
 
 export const rejectInvitationController = asyncHandler(
-  async (req: Request, res: Response) => {
-    await rejectTeamInvitation(String(req.params.id), req.user!.id);
+  async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    const userId = req.user?.id;
 
-    res.json({
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+      return;
+    }
+
+    await rejectTeamInvitation(
+      String(req.params.id),
+      userId
+    );
+
+    res.status(200).json({
       success: true,
       message: "Invitation rejected",
     });

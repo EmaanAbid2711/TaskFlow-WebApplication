@@ -1,8 +1,22 @@
 import prisma from "../config/prisma";
+import AppError from "../utils/AppError";
 
 export const getDashboardStats = async (
   userId: string
 ) => {
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      id: true,
+    },
+  });
+  
+  if (!user) {
+    throw new AppError("User not found.", 404);
+  }
 
   const totalProjects =
     await prisma.project.count({

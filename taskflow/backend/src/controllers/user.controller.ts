@@ -44,9 +44,7 @@ export const getUserByIdController =
       }
 
       const { id } = req.params;
-
       const user = await getUserById(id);
-
       res.status(200).json({
         success: true,
         data: user,

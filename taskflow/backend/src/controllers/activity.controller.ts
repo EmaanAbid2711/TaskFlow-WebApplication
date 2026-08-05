@@ -1,16 +1,16 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { getActivities } from "../services/activity.service";
+import AppError from "../utils/AppError";
 
 export const getActivitiesController = asyncHandler(
   async (req: Request, res: Response) => {
     if (!req.user) {
-      res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
-      return;
-    }
+  throw new AppError(
+    "Unauthorized",
+    401
+  );
+}
 
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 20;

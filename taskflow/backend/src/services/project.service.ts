@@ -1,5 +1,6 @@
 import prisma from "../config/prisma";
 import type {CreateProjectInput, UpdateProjectInput} from "../validations/project.validation";
+import AppError from "../utils/AppError";
 
 
 async function buildProjectResponse(projectId: string) {
@@ -125,7 +126,7 @@ export const getProjectById = async (
   userId: string,
   projectId: string
 ) => {
-  return prisma.project.findFirst({
+  const project = await prisma.project.findFirst({
     where: {
       id: projectId,
       OR: [
@@ -156,6 +157,10 @@ export const getProjectById = async (
       tasks: true,
     },
   });
+  if (!project) {
+    throw new AppError("Project not found", 404);
+  }
+  return project;
 };
 
 // Update Project
@@ -174,7 +179,10 @@ export const updateProject = async (
     });
 
   if (!project) {
-    return null;
+    throw new AppError(
+      "Project not found",
+      404
+    );
   }
 
   await prisma.project.update({
@@ -203,7 +211,10 @@ export const deleteProject = async (
     });
 
   if (!project) {
-    return null;
+    throw new AppError(
+      "Project not found",
+      404
+    );
   }
 
   await prisma.project.delete({

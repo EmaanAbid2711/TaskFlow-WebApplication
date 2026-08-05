@@ -61,7 +61,6 @@ export async function loginUser(data: LoginData) {
   if (!passwordMatched) {
     throw new AppError("Invalid email or password.", 401);
   }
-
   return user;
 }
 
@@ -88,7 +87,6 @@ export async function forgotPassword(email: string) {
       resetPasswordExpiry: expiry,
     },
   });
-
   return {
     token,
     expiry,

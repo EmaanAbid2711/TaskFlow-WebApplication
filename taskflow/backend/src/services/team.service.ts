@@ -36,18 +36,20 @@ if (existingMember) {
   );
 }
 
-  const existing = await prisma.teamInvitation.findUnique({
-    where: {
-      senderId_receiverId: {
-        senderId,
-        receiverId: receiver.id,
-      },
-    },
-  });
+  const existing = await prisma.teamInvitation.findFirst({
+  where: {
+    senderId,
+    receiverId: receiver.id,
+    status: "PENDING",
+  },
+});
 
-  if (existing?.status === "PENDING") {
-    throw new AppError("Invitation already sent", 400);
-  }
+  if (existing) {
+  throw new AppError(
+    "Invitation already sent",
+    400
+  );
+}
 
   const invitation = await prisma.teamInvitation.create({
     data: {
@@ -117,10 +119,18 @@ export const acceptTeamInvitation = async (invitationId: string, userId: string)
       id: invitationId,
     },
   });
+  
 
   if (!invitation || invitation.receiverId !== userId) {
     throw new AppError("Invitation not found", 404);
   }
+
+  if (invitation.status !== "PENDING") {
+  throw new AppError(
+    "Invitation has already been processed",
+    400
+  );
+}
 
   await prisma.teamInvitation.update({
     where: {
@@ -143,6 +153,7 @@ export const acceptTeamInvitation = async (invitationId: string, userId: string)
         memberId: invitation.senderId,
       },
     ],
+    skipDuplicates: true,
   });
 
   // notification to sender
@@ -171,6 +182,13 @@ export const rejectTeamInvitation = async (invitationId: string, userId: string)
   if (!invitation || invitation.receiverId !== userId) {
     throw new AppError("Invitation not found", 404);
   }
+
+  if (invitation.status !== "PENDING") {
+  throw new AppError(
+    "Invitation has already been processed",
+    400
+  );
+}
 
   await prisma.teamInvitation.update({
     where: {

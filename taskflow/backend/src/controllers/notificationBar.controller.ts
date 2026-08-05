@@ -7,10 +7,19 @@ import {
   markAllNotificationBarRead,
   deleteNotificationBar,
 } from "../services/notificationBar.service";
+import AppError from "../utils/AppError";
 
 export const getNotificationBarController = asyncHandler(
   async (req: Request, res: Response) => {
-    const notifications = await getNotificationsBar(req.user!.id);
+    if (!req.user) {
+  throw new AppError(
+    "Unauthorized",
+    401
+  );
+}
+
+const notifications =
+  await getNotificationsBar(req.user.id);
 
     res.json({
       success: true,
@@ -21,7 +30,17 @@ export const getNotificationBarController = asyncHandler(
 
 export const getUnreadNotificationBarCountController = asyncHandler(
   async (req: Request, res: Response) => {
-    const unreadCount = await getUnreadNotificationBarCount(req.user!.id);
+    if (!req.user) {
+  throw new AppError(
+    "Unauthorized",
+    401
+  );
+}
+
+const unreadCount =
+  await getUnreadNotificationBarCount(
+    req.user.id
+  );
 
     res.json({
       success: true,
@@ -32,7 +51,17 @@ export const getUnreadNotificationBarCountController = asyncHandler(
 
 export const markNotificationBarReadController = asyncHandler(
   async (req: Request, res: Response) => {
-    await markNotificationBarRead(req.user!.id, String(req.params.id));
+    if (!req.user) {
+  throw new AppError(
+    "Unauthorized",
+    401
+  );
+}
+
+await markNotificationBarRead(
+  req.user.id,
+  String(req.params.id)
+);
 
     res.json({
       success: true,
@@ -40,10 +69,22 @@ export const markNotificationBarReadController = asyncHandler(
   }
 );
 
-export const markAllNotificationBarReadController = asyncHandler(
-  async (_req: Request, res: Response) => {
-    await markAllNotificationBarRead(_req.user!.id);
+export const markAllNotificationBarReadController =
+asyncHandler(
+  async (
+    req: Request,
+    res: Response
+  ) => {
 
+    if (!req.user) {
+      throw new AppError(
+        "Unauthorized",
+        401
+      );
+    }
+    await markAllNotificationBarRead(
+      req.user.id
+    );
     res.json({
       success: true,
     });
@@ -52,7 +93,17 @@ export const markAllNotificationBarReadController = asyncHandler(
 
 export const deleteNotificationBarController = asyncHandler(
   async (req: Request, res: Response) => {
-    await deleteNotificationBar(req.user!.id, String(req.params.id));
+    if (!req.user) {
+  throw new AppError(
+    "Unauthorized",
+    401
+  );
+}
+
+await deleteNotificationBar(
+  req.user.id,
+  String(req.params.id)
+);
 
     res.json({
       success: true,

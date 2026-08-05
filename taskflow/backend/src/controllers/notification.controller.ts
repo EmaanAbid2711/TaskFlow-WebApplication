@@ -1,12 +1,22 @@
 import { Request, Response } from "express";
+import asyncHandler from "express-async-handler";
+
+import AppError from "../utils/AppError";
 import prisma from "../config/prisma";
 
-export const getNotifications = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    const userId = req.user!.id;
+export const getNotifications = asyncHandler(
+  async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new AppError(
+        "Unauthorized",
+        401
+      );
+    }
 
     const notifications =
       await prisma.notificationSettings.findUnique({
@@ -15,44 +25,40 @@ export const getNotifications = async (
         },
       });
 
-    res.status(200).json(notifications);
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message:
-        "Failed to fetch notification settings.",
+    res.status(200).json({
+      success: true,
+      data: notifications,
     });
   }
-};
+);
 
-export const updateNotifications =
+export const updateNotifications = asyncHandler(
   async (
     req: Request,
     res: Response
-  ) => {
-    try {
-      const userId = req.user!.id;
+  ): Promise<void> => {
+    const userId = req.user?.id;
 
-      const notifications =
-        await prisma.notificationSettings.update({
-          where: {
-            userId,
-          },
-          data: req.body,
-        });
-
-      res.status(200).json({
-        message:
-          "Notification settings updated successfully.",
-        data: notifications,
-      });
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
-        message:
-          "Failed to update notification settings.",
-      });
+    if (!userId) {
+      throw new AppError(
+        "Unauthorized",
+        401
+      );
     }
-  };
+
+    const notifications =
+      await prisma.notificationSettings.update({
+        where: {
+          userId,
+        },
+        data: req.body,
+      });
+
+    res.status(200).json({
+      success: true,
+      message:
+        "Notification settings updated successfully.",
+      data: notifications,
+    });
+  }
+);

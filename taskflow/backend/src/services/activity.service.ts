@@ -1,10 +1,28 @@
 import prisma from "../config/prisma";
+import AppError from "../utils/AppError";
 
 export const getActivities = async (
   userId: string,
   page: number,
   limit: number
 ) => {
+
+  const user = await prisma.user.findUnique({
+  where: {
+    id: userId,
+  },
+  select: {
+    id: true,
+  },
+});
+
+if (!user) {
+  throw new AppError(
+    "User not found.",
+    404
+  );
+}
+
   const skip = (page - 1) * limit;
 
   const where = {

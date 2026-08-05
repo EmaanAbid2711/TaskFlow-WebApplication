@@ -4,19 +4,17 @@ import asyncHandler from "express-async-handler";
 
 import {createTask, getProjectTasks, getTaskById, updateTask, deleteTask, uploadTaskAttachment,deleteTaskAttachment, createTaskComment} from "../services/task.service";
 import {createTaskSchema, updateTaskSchema, createCommentSchema} from "../validations/task.validation";
+import AppError from "../utils/AppError";
 
 export const createTaskController =
 asyncHandler(async (req: Request, res: Response) => {
 
   if (!req.user) {
-
-    res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-
-    return;
-  }
+  throw new AppError(
+    "Unauthorized",
+    401
+  );
+}
 
   const data =
     createTaskSchema.parse(req.body);
@@ -38,14 +36,11 @@ export const getProjectTasksController =
 asyncHandler(async (req: Request, res: Response) => {
 
   if (!req.user) {
-
-    res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-
-    return;
-  }
+  throw new AppError(
+    "Unauthorized",
+    401
+  );
+}
 
   const projectId = String(req.params.projectId);
 
@@ -66,31 +61,17 @@ export const getTaskController =
 asyncHandler(async (req: Request, res: Response) => {
 
   if (!req.user) {
-
-    res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-
-    return;
-  }
+  throw new AppError(
+    "Unauthorized",
+    401
+  );
+}
 
   const task =
     await getTaskById(
       req.user.id,
       String(req.params.id)
     );
-
-  if (!task) {
-
-    res.status(404).json({
-      success: false,
-      message: "Task not found",
-    });
-
-    return;
-
-  }
 
   res.status(200).json({
     success: true,
@@ -103,14 +84,11 @@ export const updateTaskController =
 asyncHandler(async (req: Request, res: Response) => {
 
   if (!req.user) {
-
-    res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-
-    return;
-  }
+  throw new AppError(
+    "Unauthorized",
+    401
+  );
+}
 
   const data =
     updateTaskSchema.parse(req.body);
@@ -134,24 +112,18 @@ export const uploadTaskAttachmentController =
 asyncHandler(async (req: Request, res: Response) => {
 
   if (!req.user) {
-
-    res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-
-    return;
-  }
+  throw new AppError(
+    "Unauthorized",
+    401
+  );
+}
 
   if (!req.file) {
-
-    res.status(400).json({
-      success: false,
-      message: "No file uploaded.",
-    });
-
-    return;
-  }
+  throw new AppError(
+    "No file uploaded.",
+    400
+  );
+}
 
   const attachment =
     await uploadTaskAttachment(
@@ -197,18 +169,11 @@ asyncHandler(async (
 ) => {
 
   if (!req.user) {
-
-    res.status(401).json({
-
-      success: false,
-
-      message: "Unauthorized",
-
-    });
-
-    return;
-
-  }
+  throw new AppError(
+    "Unauthorized",
+    401
+  );
+}
 
   await deleteTaskAttachment(
 
@@ -234,14 +199,11 @@ export const deleteTaskController =
 asyncHandler(async (req: Request, res: Response) => {
 
   if (!req.user) {
-
-    res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-
-    return;
-  }
+  throw new AppError(
+    "Unauthorized",
+    401
+  );
+}
 
   await deleteTask(
     req.user.id,
@@ -262,14 +224,11 @@ asyncHandler(async (
 ) => {
 
   if (!req.user) {
-
-    res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-
-    return;
-  }
+  throw new AppError(
+    "Unauthorized",
+    401
+  );
+}
 
   const data =
     createCommentSchema.parse(

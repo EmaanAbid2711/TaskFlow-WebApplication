@@ -1,80 +1,74 @@
 import { Request, Response } from "express";
+import asyncHandler from "express-async-handler";
 
-import {getBilling, updatePlan, updatePaymentMethod} from "../services/billing.service";
+import AppError from "../utils/AppError";
+import { getBilling, updatePlan,  updatePaymentMethod} from "../services/billing.service";
 import { formatBilling } from "../utils/billingFormatter";
 
-export const getBillingController = async (
-  req: Request,
-  res: Response
-) => {
-  try {
+export const getBillingController = asyncHandler(
+  async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
+      throw new AppError(
+        "Unauthorized",
+        401
+      );
     }
 
-    const billing = await getBilling(userId);
+    const billing =
+      await getBilling(userId);
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       data: formatBilling(billing),
     });
-  } catch {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch billing.",
-    });
   }
-};
+);
 
-export const updatePlanController = async (
-  req: Request,
-  res: Response
-) => {
-  try {
+export const updatePlanController = asyncHandler(
+  async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
+      throw new AppError(
+        "Unauthorized",
+        401
+      );
     }
 
     const { plan } = req.body;
 
     await updatePlan(userId, plan);
 
-    const billing = await getBilling(userId);
+    const billing =
+      await getBilling(userId);
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       data: formatBilling(billing),
     });
-  } catch {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to update plan.",
-    });
   }
-};
+);
 
-export const updatePaymentController = async (
-  req: Request,
-  res: Response
-) => {
-  try {
+export const updatePaymentController = asyncHandler(
+  async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
+      throw new AppError(
+        "Unauthorized",
+        401
+      );
     }
 
     const {
@@ -90,16 +84,12 @@ export const updatePaymentController = async (
       cardExpiry
     );
 
-    const billing = await getBilling(userId);
+    const billing =
+      await getBilling(userId);
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       data: formatBilling(billing),
     });
-  } catch {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to update payment method.",
-    });
   }
-};
+);

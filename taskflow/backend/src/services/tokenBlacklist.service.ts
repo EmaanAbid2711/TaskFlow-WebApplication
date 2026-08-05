@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 
 import prisma from "../config/prisma";
+import AppError from "../utils/AppError";
 
 interface JwtPayload {
   id: string;
@@ -22,7 +23,7 @@ export const blacklistToken = async (
     jwt.decode(token) as JwtPayload | null;
 
   if (!decoded?.exp) {
-    throw new Error("Invalid token.");
+    throw new AppError("Invalid token.", 400);
   }
 
   await prisma.tokenBlacklist.create({

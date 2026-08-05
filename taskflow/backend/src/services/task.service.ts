@@ -5,6 +5,7 @@ import path from "path";
 import type { CreateTaskInput, UpdateTaskInput, CreateCommentInput} from "../validations/task.validation";
 import {TaskStatus, TaskPriority, Prisma} from "@prisma/client";
 import { createNotificationBar } from "./notificationBar.service";
+import AppError from "../utils/AppError";
 
 
 const createActivity = async (
@@ -82,8 +83,9 @@ export const createTask = async (
 
   if (!project) {
 
-    throw new Error(
-      "Project not found."
+    throw new AppError(
+      "Project not found.",
+      404
     );
 
   }
@@ -239,7 +241,7 @@ async (
   taskId: string
 ) => {
 
-  return prisma.task.findFirst({
+  const task = await prisma.task.findFirst({
 
     where: {
 
@@ -297,6 +299,14 @@ async (
 
   });
 
+if (!task) {
+  throw new AppError(
+    "Task not found.",
+    404
+  );
+}
+return task;
+
 };
 
 
@@ -313,10 +323,6 @@ export const updateTask = async (
       userId,
       taskId
     );
-
-  if (!task) {
-    throw new Error("Task not found.");
-  }
 
   const activities: string[] = [];
 
@@ -624,14 +630,6 @@ async (
       taskId
     );
 
-  if (!task) {
-
-    throw new Error(
-      "Task not found."
-    );
-
-  }
-
   await prisma.task.delete({
 
     where: {
@@ -660,10 +658,6 @@ export const uploadTaskAttachment = async (
     userId,
     taskId
   );
-
-  if (!task) {
-    throw new Error("Task not found.");
-  }
 
   // Save attachment
  
@@ -719,10 +713,6 @@ export const deleteTaskAttachment = async (
     taskId
   );
 
-  if (!task) {
-    throw new Error("Task not found.");
-  }
-
   // Find attachment
   const attachment =
     await prisma.taskAttachment.findFirst({
@@ -735,7 +725,10 @@ export const deleteTaskAttachment = async (
     });
 
   if (!attachment) {
-    throw new Error("Attachment not found.");
+    throw new AppError(
+      "Attachment not found.",
+      404
+    );
   }
 
   //----------------------------------------------------
@@ -814,10 +807,6 @@ export const createTaskComment = async (
       userId,
       taskId
     );
-
-  if (!task) {
-    throw new Error("Task not found.");
-  }
 
   const comment =
     await prisma.comment.create({

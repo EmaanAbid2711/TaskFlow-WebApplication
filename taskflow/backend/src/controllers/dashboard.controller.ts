@@ -23,7 +23,6 @@ export const dashboardStats =
         await getDashboardStats(
           req.user.id
         );
-
       res.status(200).json({
         success: true,
         data: stats,
