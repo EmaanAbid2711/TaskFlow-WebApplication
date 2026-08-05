@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { getUsersApi } from "@/api/user.api";
+import { getTeamMembersService } from "@/services/team.service";
 
 export interface UserOption {
   id: string;
@@ -10,7 +10,6 @@ export interface UserOption {
 }
 
 export function useUsers() {
-
   const [users, setUsers] =
     useState<UserOption[]>([]);
 
@@ -22,18 +21,20 @@ export function useUsers() {
   }, []);
 
   async function loadUsers() {
-
     try {
-      const response =
-        await getUsersApi();
-      setUsers(response.data);
-    }
+      const members =
+        await getTeamMembersService();
 
-    catch (error) {
+      setUsers(
+        members.map((item: any) => ({
+          id: item.member.id,
+          name: item.member.name,
+          avatar: item.member.avatar ?? "",
+        }))
+      );
+    } catch (error) {
       console.log(error);
-    }
-
-    finally {
+    } finally {
       setLoading(false);
     }
   }
@@ -43,5 +44,4 @@ export function useUsers() {
     loading,
     refreshUsers: loadUsers,
   };
-
 }
