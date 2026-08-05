@@ -42,8 +42,10 @@ export interface Deadline {
 }
 
 export interface TeamMember {
-  id: number;
+  id: string;
   name: string;
+  email?: string;
+  username?: string | null;
   role?: string | null;
   avatar?: string | null;
 }

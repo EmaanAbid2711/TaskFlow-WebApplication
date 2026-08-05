@@ -47,3 +47,23 @@ async (
     );
   return response.data;
 };
+
+export const acceptInvitationApi = async (
+  invitationId: string
+) => {
+  const response = await api.patch(
+    `/api/team/invitations/${invitationId}/accept`
+  );
+
+  return response.data;
+};
+
+export const rejectInvitationApi = async (
+  invitationId: string
+) => {
+  const response = await api.patch(
+    `/api/team/invitations/${invitationId}/reject`
+  );
+
+  return response.data;
+};

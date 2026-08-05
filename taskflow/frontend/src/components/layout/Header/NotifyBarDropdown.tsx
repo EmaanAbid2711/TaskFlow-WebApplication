@@ -2,6 +2,7 @@ import { Bell, CheckCheck, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useNotificationBar } from "@/context/NotificationBarContext";
+import {acceptInvitationService, rejectInvitationService} from "@/services/notificationBar.service";
 
 interface Props {
   closeDropdown: () => void;
@@ -15,7 +16,31 @@ function NotificationBarDropdown({ closeDropdown }: Props) {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    refreshNotifications,
   } = useNotificationBar();
+
+
+  const acceptInvitation = async (
+  notification: any
+) => {
+  if (!notification.invitationId) return;
+  await acceptInvitationService(
+    notification.invitationId
+  );
+  await markAsRead(notification.id);
+  await refreshNotifications();
+};
+
+const rejectInvitation = async (
+  notification: any
+) => {
+  if (!notification.invitationId) return;
+  await rejectInvitationService(
+    notification.invitationId
+  );
+  await markAsRead(notification.id);
+  await refreshNotifications();
+};
 
   //----------------------------------------------------
   // Open Notification
@@ -89,28 +114,87 @@ function NotificationBarDropdown({ closeDropdown }: Props) {
               </div>
 
               {/* Content */}
-              <button
-                onClick={() =>
-                  openNotification(
-                    notification.id,
-                    notification.projectId,
-                    notification.taskId
-                  )
-                }
-                className="flex-1 text-left"
-              >
-                <p className="font-medium text-slate-800">
-                  {notification.title}
-                </p>
-                <p className="mt-1 text-sm text-slate-500">
-                  {notification.message}
-                </p>
-                <p className="mt-2 text-xs text-slate-400">
-                  {formatDistanceToNow(new Date(notification.createdAt), {
-                    addSuffix: true,
-                  })}
-                </p>
-              </button>
+              <div className="flex-1">
+                <div className="flex items-center gap-3">
+                  {notification.sender?.avatar ? (
+                    <img
+                      src={`${import.meta.env.VITE_API_URL}${notification.sender.avatar}`}
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                  ) : (
+                  
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0052cc] font-semibold text-white">
+                    
+                      {notification.sender?.name
+                        ?.split(" ")
+                        .map((word: string) => word[0])
+                        .join("")
+                        .slice(0,2)
+                        .toUpperCase()}
+                    </div>
+                  )}
+              
+                  <div>
+                    <p className="font-medium">
+                      {notification.title}
+                    </p>
+                
+                    <p className="text-sm text-slate-500">
+                      {notification.message}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      {formatDistanceToNow(
+                        new Date(notification.createdAt),
+                        {
+                          addSuffix:true,
+                        }
+                      )}
+                    </p>
+                  </div>
+                </div>
+                    
+                {/* Invitation buttons */}
+                {notification.type === "TEAM_INVITATION" &&
+                  notification.invitation?.id && (
+                  
+                    <div className="mt-4 flex gap-2">
+                    
+                      <button
+                        onClick={() =>
+                          acceptInvitation(notification)
+                        }
+                        className="rounded-lg bg-[#0052cc] px-4 py-2 text-white text-sm hover:bg-blue-700"
+                      >
+                        Accept
+                      </button>
+                      
+                      <button
+                        onClick={() =>
+                          rejectInvitation(notification)
+                        }
+                        className="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-100"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                )}
+              
+                {notification.type !== "TEAM_INVITATION" && (
+                
+                  <button
+                    onClick={() =>
+                      openNotification(
+                        notification.id,
+                        notification.projectId,
+                        notification.taskId
+                      )
+                    }
+                    className="mt-3 text-sm font-medium text-[#0052cc]"
+                  >
+                    Open
+                  </button>
+                )}
+              </div>
 
               {/* Delete */}
               <button

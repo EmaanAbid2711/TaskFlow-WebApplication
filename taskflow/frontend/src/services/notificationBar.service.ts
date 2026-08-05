@@ -1,4 +1,4 @@
-import {getNotificationBarApi, getUnreadNotificationBarCountApi, markNotificationBarReadApi, markAllNotificationBarReadApi, deleteNotificationBarApi} from "@/api/notificationBar.api";
+import {getNotificationBarApi, getUnreadNotificationBarCountApi, markNotificationBarReadApi, markAllNotificationBarReadApi, deleteNotificationBarApi, acceptInvitationApi, rejectInvitationApi} from "@/api/notificationBar.api";
 
 export const getNotificationBarService =
 async () => {
@@ -47,4 +47,16 @@ async (
     notificationId
   );
 
+};
+
+export const acceptInvitationService = async (
+  invitationId: string
+) => {
+  await acceptInvitationApi(invitationId);
+};
+
+export const rejectInvitationService = async (
+  invitationId: string
+) => {
+  await rejectInvitationApi(invitationId);
 };
