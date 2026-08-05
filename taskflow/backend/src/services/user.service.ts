@@ -2,55 +2,67 @@ import fs from "fs";
 import path from "path";
 
 import prisma from "../config/prisma";
+import AppError from "../utils/AppError";
 
 export const getUserProfile =
   async (
     userId: string
   ) => {
-    return prisma.user.findUnique({
-      where: {
-        id: userId,
+    const user =
+      await prisma.user.findUnique({
+      where:{
+        id:userId,
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        avatar: true,
-        username: true,
-        bio: true,
-        location: true,
-        website: true,
-        role: true,
-        timezone: true,
+      select:{
+        id:true,
+        name:true,
+        email:true,
+        avatar:true,
+        username:true,
+        bio:true,
+        location:true,
+        website:true,
+        role:true,
+        timezone:true,
       },
     });
-  };
+    if(!user){
+      throw new AppError(
+        "User not found.",
+        404
+      );
+    }
+    return user;
+};
 
 export const getUserById = async (
-  userId: string
-) => {
+  userId:string
+)=>{ const user =
+ await prisma.user.findUnique({
+  where:{
+    id:userId,
+  },
+  select:{
+    id:true,
+    name:true,
+    email:true,
+    avatar:true,
+    username:true,
+    bio:true,
+    location:true,
+    website:true,
+    role:true,
+    timezone:true,
+  },
+ });
 
-  return prisma.user.findUnique({
-
-    where: {
-      id: userId,
-    },
-
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      avatar: true,
-      username: true,
-      bio: true,
-      location: true,
-      website: true,
-      role: true,
-      timezone: true,
-    },
-
-  });
-
+ if(!user){
+   throw new AppError(
+    "User not found.",
+    404
+   );
+ }
+ return user;
 };
 
 
@@ -93,6 +105,13 @@ export const updateUserProfile =
           avatar: true,
         },
       });
+
+      if(!existingUser){
+       throw new AppError(
+         "User not found.",
+         404
+       );
+      }
 
     /*
      * User removed avatar.

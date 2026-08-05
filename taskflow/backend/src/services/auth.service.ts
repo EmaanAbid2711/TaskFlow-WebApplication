@@ -26,10 +26,7 @@ export async function signupUser(data: SignupData) {
   });
 
   if (existingUser) {
-    throw new AppError(
-      "Email already exists",
-      409
-    );
+    throw new AppError("Email already exists.", 409);
   }
 
   const hashedPassword = await hashPassword(data.password);
@@ -39,11 +36,9 @@ export async function signupUser(data: SignupData) {
       name: data.name,
       email: data.email,
       password: hashedPassword,
-
       notificationSettings: {
         create: {},
       },
-
     },
   });
 
@@ -58,30 +53,19 @@ export async function loginUser(data: LoginData) {
   });
 
   if (!user) {
-    throw new AppError(
-      "Invalid email or password",
-      401
-    );
+    throw new AppError("Invalid email or password.", 401);
   }
 
-  const passwordMatched = await bcrypt.compare(
-    data.password,
-    user.password
-  );
+  const passwordMatched = await bcrypt.compare(data.password, user.password);
 
   if (!passwordMatched) {
-    throw new AppError(
-      "Invalid email or password",
-      401
-    );
+    throw new AppError("Invalid email or password.", 401);
   }
 
   return user;
 }
 
-export async function forgotPassword(
-  email: string
-) {
+export async function forgotPassword(email: string) {
   const user = await prisma.user.findUnique({
     where: {
       email,
@@ -89,19 +73,11 @@ export async function forgotPassword(
   });
 
   if (!user) {
-    throw new AppError(
-      "No account found with this email.",
-      404
-    );
+    throw new AppError("No account found with this email.", 404);
   }
 
-  const token =
-    crypto.randomBytes(32).toString("hex");
-
-  const expiry = addMinutes(
-    new Date(),
-    15
-  );
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiry = addMinutes(new Date(), 15);
 
   await prisma.user.update({
     where: {
@@ -119,10 +95,7 @@ export async function forgotPassword(
   };
 }
 
-export async function resetPassword(
-  token: string,
-  newPassword: string
-) {
+export async function resetPassword(token: string, newPassword: string) {
   const user = await prisma.user.findFirst({
     where: {
       resetPasswordToken: token,
@@ -130,45 +103,27 @@ export async function resetPassword(
   });
 
   if (!user) {
-    throw new AppError(
-      "Invalid reset token.",
-      400
-    );
+    throw new AppError("Invalid reset token.", 400);
   }
 
-  if (
-    !user.resetPasswordExpiry ||
-    user.resetPasswordExpiry < new Date()
-  ) {
-    throw new AppError(
-      "Reset token has expired.",
-      400
-    );
+  if (!user.resetPasswordExpiry || user.resetPasswordExpiry < new Date()) {
+    throw new AppError("Reset token has expired.", 400);
   }
 
-  const hashedPassword =
-    await hashPassword(newPassword);
+  const hashedPassword = await hashPassword(newPassword);
 
-  const updatedUser =
-    await prisma.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        password: hashedPassword,
-        resetPasswordToken: null,
-        resetPasswordExpiry: null,
-      },
-    });
-
-  return updatedUser;
+  return await prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      password: hashedPassword,
+      resetPasswordToken: null,
+      resetPasswordExpiry: null,
+    },
+  });
 }
 
-
-export async function logoutUser(
-  token: string
-) {
+export async function logoutUser(token: string) {
   await blacklistToken(token);
-
-  return;
 }

@@ -2,7 +2,7 @@ import {Request, Response} from "express";
 import asyncHandler from "express-async-handler";
 
 import {getUserProfile, updateUserProfile, getAllUsers, getUserById} from "../services/user.service";
-import {updateProfileSchema} from "../validations/user.validation";
+import AppError from "../utils/AppError";
 
 export const profile =
   asyncHandler(
@@ -12,11 +12,10 @@ export const profile =
     ): Promise<void> => {
 
       if (!req.user) {
-        res.status(401).json({
-          success: false,
-          message: "Unauthorized",
-        });
-        return;
+       throw new AppError(
+        "Unauthorized.",
+        401
+       );
       }
 
       const userId = req.user.id;
@@ -38,24 +37,15 @@ export const getUserByIdController =
     ): Promise<void> => {
 
       if (!req.user) {
-        res.status(401).json({
-          success: false,
-          message: "Unauthorized",
-        });
-        return;
+       throw new AppError(
+        "Unauthorized.",
+        401
+       );
       }
 
       const { id } = req.params;
 
       const user = await getUserById(id);
-
-      if (!user) {
-        res.status(404).json({
-          success: false,
-          message: "User not found",
-        });
-        return;
-      }
 
       res.status(200).json({
         success: true,
@@ -72,13 +62,10 @@ export const updateProfile =
     ): Promise<void> => {
 
       if (!req.user) {
-        res.status(401).json({
-          success: false,
-          message:
-            "Unauthorized",
-        });
-
-        return;
+       throw new AppError(
+        "Unauthorized.",
+        401
+       );
       }
 
       const userId =
@@ -144,11 +131,10 @@ export const getAllUsersController =
   asyncHandler(async (req, res) => {
 
     if (!req.user) {
-      res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
-      return;
+     throw new AppError(
+      "Unauthorized.",
+      401
+     );
     }
 
     const users = await getAllUsers();
