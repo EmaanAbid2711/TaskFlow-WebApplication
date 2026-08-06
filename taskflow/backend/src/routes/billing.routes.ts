@@ -22,7 +22,7 @@ router.use(authMiddleware);
  * /api/billing:
  *   get:
  *     summary: Get billing information
- *     description:
+ *     description: |
  *       Retrieves the billing details of the currently authenticated user.
  *       This includes the current subscription plan, billing cycle,
  *       payment information, and invoices.
@@ -65,7 +65,7 @@ router.get("/", getBillingController);
  * /api/billing/plan:
  *   patch:
  *     summary: Update subscription plan
- *     description:
+ *     description: |
  *       Updates the current user's billing subscription plan.
  *       Available plans:
  *       - FREE
@@ -120,8 +120,7 @@ router.patch("/plan", updatePlanController);
  * /api/billing/payment:
  *   patch:
  *     summary: Update payment method
- *     description:
- *       Updates the payment card information associated with the user's billing account.
+ *     description: Updates the payment card information associated with the user's billing account.
  *     tags:
  *       - Billing
  *     security:
