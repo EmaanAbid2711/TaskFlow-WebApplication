@@ -80,6 +80,9 @@ The workflow of TaskFlow is based on project and task management:
 - Dashboard Analytics
 - Role-Based Permissions (Owner & Assignee)
 - Responsive User Interface
+- In app Notifications
+- In app Invitations
+- Automatic Database Setup
 
 ---
 
@@ -143,12 +146,12 @@ cd TaskFlow-Frontend
 
 Project structure:
 
-```
-TaskFlow
+```text
+TaskFlow-Frontend
 │
-├── frontend
-│
-└── backend
+└── taskflow
+    ├── frontend
+    └── backend
 ```
 
 ---
@@ -188,38 +191,36 @@ Copy-Item .env.example .env
 Then update the values inside `.env` according to your local environment.
 
 ### Database Setup
+Create a PostgreSQL database named:
 
-Create a PostgreSQL database:
-
+```text
+taskflow_db
 ```
-taskflow
-```
+(or any name you prefer, then update the `DATABASE_URL` inside `.env` accordingly.)
 
-Run Prisma migration:
+TaskFlow includes an automated database setup script.
+Run:
 
 ```bash
-npx prisma migrate dev
+npm run setup
 ```
 
-Generate Prisma Client:
+This command will automatically:
+- Generate the Prisma Client
+- Create all database tables from the Prisma schema
+- Synchronize your database with the latest schema
 
-```bash
-npx prisma generate
-```
-
-Start backend server:
+No manual Prisma commands are required.
+Finally, start the backend server:
 
 ```bash
 npm run dev
 ```
 
 Backend will run at:
-
-```
+```text
 http://localhost:5000
 ```
-
----
 
 # Frontend Setup
 
@@ -271,32 +272,31 @@ http://localhost:5173
 ---
 
 # Running the Application
+You need two terminals.
 
-You need two terminals:
-
-## Backend
+## Terminal 1 – Backend
 
 ```bash
-cd backend
+cd taskflow/backend
 
+npm install
+npm run setup
 npm run dev
 ```
 
-## Frontend
+## Terminal 2 – Frontend
 
 ```bash
-cd frontend
+cd taskflow/frontend
 
+npm install
 npm run dev
 ```
 
-Open your browser:
-
-```
+Open:
+```text
 http://localhost:5173
 ```
-
----
 
 # API Documentation
 
@@ -313,8 +313,7 @@ Swagger provides documentation and testing access for all backend APIs.
 # Deployment
 
 TaskFlow is live and fully deployed!
-Frontend is deployed on Vercel and backend and database are deployed on railway.
-The frontend and backend are connected, only opening the deployed frontend link will run the complete app.
+Frontend is deployed on Vercel, while the backend and PostgreSQL database are deployed on Railway. The deployed frontend communicates directly with the deployed backend, providing a complete production-ready experience.
 You can access the live services using the links below:
 
 ## Live Links
@@ -341,6 +340,8 @@ You can access the live services using the links below:
 - Project Progress Tracking
 - Owner & Assignee Permissions
 - In app Notifications
+- In app Invitations
+- Automatic Database Setup
 
 ---
 
