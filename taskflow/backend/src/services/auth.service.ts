@@ -2,126 +2,156 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { addMinutes } from "date-fns";
 
-import prisma from "../config/prisma";
 import AppError from "../utils/AppError";
 import { hashPassword } from "../utils/hashPassword";
 import { blacklistToken } from "./tokenBlacklist.service";
+import { findUserByEmail, createUser, findUserByResetToken, updateResetToken, updatePassword} from "../repositories/auth.repository";
+import type {SignupInput, LoginInput} from "../validations/auth.validation";
 
-interface SignupData {
-  name: string;
-  email: string;
-  password: string;
-}
+//--------------------------------------------------
+// Signup
+//--------------------------------------------------
 
-interface LoginData {
-  email: string;
-  password: string;
-}
-
-export async function signupUser(data: SignupData) {
-  const existingUser = await prisma.user.findUnique({
-    where: {
-      email: data.email,
-    },
-  });
+export async function signupUser(
+  data: SignupInput
+) {
+  const existingUser =
+    await findUserByEmail(data.email);
 
   if (existingUser) {
-    throw new AppError("Email already exists.", 409);
+    throw new AppError(
+      "Email already exists.",
+      409
+    );
   }
 
-  const hashedPassword = await hashPassword(data.password);
+  const hashedPassword =
+    await hashPassword(data.password);
 
-  const user = await prisma.user.create({
-    data: {
-      name: data.name,
-      email: data.email,
-      password: hashedPassword,
-      notificationSettings: {
-        create: {},
-      },
-    },
-  });
+  const user =
+    await createUser(
+      data.name,
+      data.email,
+      hashedPassword
+    );
 
   return user;
 }
 
-export async function loginUser(data: LoginData) {
-  const user = await prisma.user.findUnique({
-    where: {
-      email: data.email,
-    },
-  });
+//--------------------------------------------------
+// Login
+//--------------------------------------------------
+
+export async function loginUser(
+  data: LoginInput
+) {
+  const user =
+    await findUserByEmail(data.email);
 
   if (!user) {
-    throw new AppError("Invalid email or password.", 401);
+    throw new AppError(
+      "Invalid email or password.",
+      401
+    );
   }
 
-  const passwordMatched = await bcrypt.compare(data.password, user.password);
+  const passwordMatched =
+    await bcrypt.compare(
+      data.password,
+      user.password
+    );
 
   if (!passwordMatched) {
-    throw new AppError("Invalid email or password.", 401);
+    throw new AppError(
+      "Invalid email or password.",
+      401
+    );
   }
+
   return user;
 }
 
-export async function forgotPassword(email: string) {
-  const user = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-  });
+//--------------------------------------------------
+// Forgot Password
+//--------------------------------------------------
+
+export async function forgotPassword(
+  email: string
+) {
+  const user =
+    await findUserByEmail(email);
 
   if (!user) {
-    throw new AppError("No account found with this email.", 404);
+    throw new AppError(
+      "No account found with this email.",
+      404
+    );
   }
 
-  const token = crypto.randomBytes(32).toString("hex");
-  const expiry = addMinutes(new Date(), 15);
+  const token =
+    crypto.randomBytes(32).toString("hex");
 
-  await prisma.user.update({
-    where: {
-      id: user.id,
-    },
-    data: {
-      resetPasswordToken: token,
-      resetPasswordExpiry: expiry,
-    },
-  });
+  const expiry =
+    addMinutes(
+      new Date(),
+      15
+    );
+
+  await updateResetToken(
+    user.id,
+    token,
+    expiry
+  );
+
   return {
     token,
     expiry,
   };
 }
 
-export async function resetPassword(token: string, newPassword: string) {
-  const user = await prisma.user.findFirst({
-    where: {
-      resetPasswordToken: token,
-    },
-  });
+//--------------------------------------------------
+// Reset Password
+//--------------------------------------------------
+
+export async function resetPassword(
+  token: string,
+  newPassword: string
+) {
+  const user =
+    await findUserByResetToken(token);
 
   if (!user) {
-    throw new AppError("Invalid reset token.", 400);
+    throw new AppError(
+      "Invalid reset token.",
+      400
+    );
   }
 
-  if (!user.resetPasswordExpiry || user.resetPasswordExpiry < new Date()) {
-    throw new AppError("Reset token has expired.", 400);
+  if (
+    !user.resetPasswordExpiry ||
+    user.resetPasswordExpiry < new Date()
+  ) {
+    throw new AppError(
+      "Reset token has expired.",
+      400
+    );
   }
 
-  const hashedPassword = await hashPassword(newPassword);
+  const hashedPassword =
+    await hashPassword(newPassword);
 
-  return await prisma.user.update({
-    where: {
-      id: user.id,
-    },
-    data: {
-      password: hashedPassword,
-      resetPasswordToken: null,
-      resetPasswordExpiry: null,
-    },
-  });
+  return updatePassword(
+    user.id,
+    hashedPassword
+  );
 }
 
-export async function logoutUser(token: string) {
+//--------------------------------------------------
+// Logout
+//--------------------------------------------------
+
+export async function logoutUser(
+  token: string
+) {
   await blacklistToken(token);
 }

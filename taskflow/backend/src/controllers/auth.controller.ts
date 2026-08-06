@@ -1,19 +1,12 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 
-import { signupSchema, loginSchema } from "../validations/auth.validation";
-import {
-  signupUser,
-  loginUser,
-  forgotPassword,
-  resetPassword,
-  logoutUser,
-} from "../services/auth.service";
+import { signupUser, loginUser, forgotPassword, resetPassword, logoutUser} from "../services/auth.service";
 import { generateToken } from "../utils/generateToken";
 import AppError from "../utils/AppError";
 
 export const signup = asyncHandler(async (req: Request, res: Response) => {
-  const data = signupSchema.parse(req.body);
+  const data = req.body;
 
   const user = await signupUser(data);
 
@@ -38,7 +31,7 @@ export const signup = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
-  const data = loginSchema.parse(req.body);
+  const data = req.body;
 
   const user = await loginUser(data);
 

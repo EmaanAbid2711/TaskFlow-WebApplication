@@ -1,11 +1,7 @@
 import { Router } from "express";
-import {
-  signup,
-  login,
-  forgotPasswordController,
-  resetPasswordController,
-  logoutController,
-} from "../controllers/auth.controller";
+import {signup, login, forgotPasswordController, resetPasswordController, logoutController} from "../controllers/auth.controller";
+import validate from "../middleware/validate.middleware";
+import { signupSchema, loginSchema} from "../validations/auth.validation";
 
 const router = Router();
 
@@ -64,7 +60,11 @@ const router = Router();
  *       500:
  *         description: Internal server error
  */
-router.post("/signup", signup);
+router.post(
+  "/signup",
+  validate(signupSchema),
+  signup
+);
 
 /**
  * @swagger
@@ -102,7 +102,11 @@ router.post("/signup", signup);
  *       500:
  *         description: Internal server error
  */
-router.post("/login", login);
+router.post(
+  "/login",
+  validate(loginSchema),
+  login
+);
 
 /**
  * @swagger
