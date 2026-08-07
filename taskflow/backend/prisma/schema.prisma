@@ -13,10 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ======================================================
-// USER
-// ======================================================
-
 model User {
   id                  String    @id @default(cuid())
   name                String
@@ -33,7 +29,9 @@ model User {
   resetPasswordExpiry DateTime?
   twoFactorEnabled    Boolean   @default(false)
 
-  notifications     Notification[]
+  notifications Notification[]
+
+  // Notifications sent by this user
   sentNotifications Notification[] @relation("NotificationSender")
 
   notificationSettings NotificationSettings?
@@ -55,22 +53,16 @@ model User {
   comments      Comment[]
   activities    Activity[]
 
-  // Media relations
-  uploadedMedia Media[]     @relation("MediaUploader")
-  taskMedia     TaskMedia[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-// ======================================================
-// NOTIFICATION SETTINGS
-// ======================================================
-
 model NotificationSettings {
-  id     String @id @default(uuid())
+  id String @id @default(uuid())
+
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Activity
   taskAssignedEmail Boolean @default(false)
@@ -106,10 +98,6 @@ model NotificationSettings {
   updatedAt DateTime @updatedAt
 }
 
-// ======================================================
-// BILLING
-// ======================================================
-
 enum PlanType {
   FREE
   PRO
@@ -142,220 +130,105 @@ model Billing {
 }
 
 model Invoice {
-  id          String        @id @default(cuid())
-  billingId   String
-  billing     Billing       @relation(fields: [billingId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
+
+  billingId String
+  billing   Billing @relation(fields: [billingId], references: [id], onDelete: Cascade)
+
   amount      Float
   status      InvoiceStatus @default(PAID)
   invoiceDate DateTime
+
   downloadUrl String?
 
   createdAt DateTime @default(now())
 }
 
-// ======================================================
 // PROJECT
-// ======================================================
-
 model Project {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-
-  ownerId String
-
-  owner User @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-
+  id            String          @id @default(cuid())
+  name          String
+  description   String?
+  ownerId       String
+  owner         User            @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   members       ProjectMember[]
   tasks         Task[]
   notifications Notification[]
-
-  // Media scoped to this project
-  media Media[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 }
 
-// ======================================================
 // PROJECT MEMBERS
-// ======================================================
-
 model ProjectMember {
-  id String @id @default(cuid())
-
+  id        String   @id @default(cuid())
   projectId String
   userId    String
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   role      String?
   createdAt DateTime @default(now())
 
   @@unique([projectId, userId])
 }
 
-// ======================================================
 // TASK
-// ======================================================
-
 model Task {
-  id          String  @id @default(cuid())
-  title       String
-  description String?
-
-  status   TaskStatus   @default(TODO)
-  priority TaskPriority @default(MEDIUM)
-
-  dueDate      DateTime?
-  completedAt  DateTime?
-  progress     Int?
-  reviewStatus String?
-
-  projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  assigneeId String?
-  assignee   User?   @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
-
-  // New media relationship
-  media TaskMedia[]
-
+  id            String           @id @default(cuid())
+  title         String
+  description   String?
+  status        TaskStatus       @default(TODO)
+  priority      TaskPriority     @default(MEDIUM)
+  dueDate       DateTime?
+  completedAt   DateTime?
+  progress      Int?
+  reviewStatus  String?
+  projectId     String
+  project       Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assigneeId    String?
+  assignee      User?            @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  attachments   TaskAttachment[]
   comments      Comment[]
   activities    Activity[]
   notifications Notification[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
 
+// TASK ATTACHMENTS
+model TaskAttachment {
+  id        String   @id @default(cuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  fileName  String
+  fileUrl   String
+  fileType  String
+  fileSize  String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
-// ======================================================
-// MEDIA
-// ======================================================
-
-enum MediaStatus {
-  TEMP
-  ACTIVE
-  DELETED
-}
-
-enum MediaVisibility {
-  PRIVATE
-  PROJECT
-  PUBLIC
-}
-
-model Media {
-  id String @id @default(cuid())
-
-  // User who uploaded the file
-  uploadedByUserId String
-  uploadedByUser   User   @relation("MediaUploader", fields: [uploadedByUserId], references: [id], onDelete: Cascade)
-
-  // Optional project association
-  projectId String?
-  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  // Storage information
-  storageProvider String @default("LOCAL")
-
-  // Unique filename/key used on the local filesystem
-  storageKey String @unique
-
-  // URL/path exposed to the frontend
-  url String
-
-  // Original file information
-  originalName String
-  mimeType     String
-  sizeBytes    Int
-
-  checksum String?
-
-  status     MediaStatus     @default(TEMP)
-  visibility MediaVisibility @default(PRIVATE)
-
-  expiresAt DateTime?
-  deletedAt DateTime?
-
-  // Task relationships
-  taskMedia TaskMedia[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([uploadedByUserId])
-  @@index([projectId])
-  @@index([status])
-}
-
-// ======================================================
-// TASK MEDIA
-// ======================================================
-
-model TaskMedia {
-  id String @id @default(cuid())
-
-  taskId  String
-  mediaId String
-
-  task  Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-
-  createdByUserId String
-  createdByUser   User   @relation(fields: [createdByUserId], references: [id], onDelete: Cascade)
-
-  sortOrder Int?
-  caption   String?
-
-  createdAt DateTime @default(now())
-
-  @@unique([taskId, mediaId])
-  @@index([taskId])
-  @@index([mediaId])
-}
-
-// ======================================================
 // COMMENTS
-// ======================================================
-
 model Comment {
-  id String @id @default(cuid())
-
-  text String
-
-  taskId String
-  userId String
-
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  id        String   @id @default(cuid())
+  text      String
+  taskId    String
+  userId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }
 
-// ======================================================
 // ACTIVITY TIMELINE
-// ======================================================
 
 model Activity {
-  id String @id @default(cuid())
-
-  type    String
-  message String
-
-  taskId String
-  userId String
-
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  id        String   @id @default(cuid())
+  type      String
+  message   String
+  taskId    String
+  userId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }
-
-// ======================================================
-// TASK ENUMS
-// ======================================================
 
 enum TaskStatus {
   TODO
@@ -370,52 +243,31 @@ enum TaskPriority {
   LOW
 }
 
-// ======================================================
-// NOTIFICATIONS
-// ======================================================
-
 model Notification {
-  id String @id @default(cuid())
-
-  userId   String
-  senderId String?
-
-  title   String
-  message String
-  type    String
-
-  isRead Boolean @default(false)
-
+  id           String          @id @default(cuid())
+  userId       String
+  senderId     String?
+  title        String
+  message      String
+  type         String
+  isRead       Boolean         @default(false)
   projectId    String?
   taskId       String?
   invitationId String?
-
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  sender     User?           @relation("NotificationSender", fields: [senderId], references: [id], onDelete: SetNull)
-  project    Project?        @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  task       Task?           @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  invitation TeamInvitation? @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  createdAt    DateTime        @default(now())
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sender       User?           @relation("NotificationSender", fields: [senderId], references: [id], onDelete: SetNull)
+  project      Project?        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task         Task?           @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  invitation   TeamInvitation? @relation(fields: [invitationId], references: [id], onDelete: Cascade)
 }
-
-// ======================================================
-// TOKEN BLACKLIST
-// ======================================================
 
 model TokenBlacklist {
-  id String @id @default(cuid())
-
+  id        String   @id @default(cuid())
   token     String   @unique
   expiresAt DateTime
-
   createdAt DateTime @default(now())
 }
-
-// ======================================================
-// TEAM INVITATIONS
-// ======================================================
 
 enum TeamInvitationStatus {
   PENDING
@@ -434,17 +286,12 @@ model TeamInvitation {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  sender   User @relation("InvitationSender", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver User @relation("InvitationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
-
+  sender        User           @relation("InvitationSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver      User           @relation("InvitationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
   notifications Notification[]
 
   @@unique([senderId, receiverId])
 }
-
-// ======================================================
-// TEAM MEMBERS
-// ======================================================
 
 model TeamMember {
   id String @id @default(cuid())
@@ -452,8 +299,7 @@ model TeamMember {
   userId   String
   memberId String
 
-  user User @relation("UserTeamMembers", fields: [userId], references: [id], onDelete: Cascade)
-
+  user   User @relation("UserTeamMembers", fields: [userId], references: [id], onDelete: Cascade)
   member User @relation("MemberOfUsers", fields: [memberId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
