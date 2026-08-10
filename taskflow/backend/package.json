@@ -21,6 +21,7 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "@upstash/redis": "^1.38.2",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "date-fns": "^4.4.0",
