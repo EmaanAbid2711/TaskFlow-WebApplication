@@ -1,45 +1,45 @@
 import prisma from "../config/prisma";
-import type {CreateProjectInput, UpdateProjectInput} from "../validations/project.validation";
+import type {
+  CreateProjectInput,
+  UpdateProjectInput,
+} from "../validations/project.validation";
 import AppError from "../utils/AppError";
-
+import {
+  invalidateDashboardCache,
+  invalidateDashboardCacheForUsers,
+} from "./cache.service";
 
 async function buildProjectResponse(projectId: string) {
   const project = await prisma.project.findUnique({
-  where: {
-    id: projectId,
-  },
-  include: {
-    tasks: {
-      select: {
-        id: true,
-        status: true,
+    where: {
+      id: projectId,
+    },
+    include: {
+      tasks: {
+        select: {
+          id: true,
+          status: true,
+        },
+      },
+      owner: {
+        select: {
+          id: true,
+          name: true,
+        },
       },
     },
-    owner: {
-      select: {
-        id: true,
-        name: true,
-      },
-    },
-  },
-});
+  });
 
   if (!project) {
     return null;
   }
 
   const totalTasks = project.tasks.length;
-
   const completedTasks = project.tasks.filter(
     (task) => task.status === "COMPLETED"
   ).length;
-
   const progress =
-    totalTasks === 0
-      ? 0
-      : Math.round(
-          (completedTasks / totalTasks) * 100
-        );
+    totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
 
   return {
     id: project.id,
@@ -54,8 +54,9 @@ async function buildProjectResponse(projectId: string) {
   };
 }
 
+// --------------------------------------------------------------------------
 // Create Project
-
+// --------------------------------------------------------------------------
 export const createProject = async (
   ownerId: string,
   data: CreateProjectInput
@@ -63,32 +64,27 @@ export const createProject = async (
   const project = await prisma.project.create({
     data: {
       name: data.name,
-
       description: data.description,
-
       ownerId,
-
       members: {
         create: {
           userId: ownerId,
-
           role: "Owner",
         },
       },
     },
   });
 
+  // Invalidate owner's dashboard cache because
+  // total project count has changed.
+  await invalidateDashboardCache(ownerId);
+
   return buildProjectResponse(project.id);
 };
 
-// Get Projects
-
-export const getProjects = async (
-  userId: string
-) => {
+export const getProjects = async (userId: string) => {
   const projects = await prisma.project.findMany({
     where: {
-
       OR: [
         // User created the project
         {
@@ -103,29 +99,24 @@ export const getProjects = async (
           },
         },
       ],
-
     },
-
     select: {
       id: true,
     },
-
     orderBy: {
       createdAt: "asc",
     },
   });
+
   return Promise.all(
-    projects.map((project) =>
-      buildProjectResponse(project.id)
-    )
+    projects.map((project) => buildProjectResponse(project.id))
   );
 };
 
+// --------------------------------------------------------------------------
 // Get Single Project
-export const getProjectById = async (
-  userId: string,
-  projectId: string
-) => {
+// --------------------------------------------------------------------------
+export const getProjectById = async (userId: string, projectId: string) => {
   const project = await prisma.project.findFirst({
     where: {
       id: projectId,
@@ -134,9 +125,9 @@ export const getProjectById = async (
           ownerId: userId,
         },
         {
-          tasks:{
-            some:{
-              assigneeId:userId
+          tasks: {
+            some: {
+              assigneeId: userId,
             },
           },
         },
@@ -157,71 +148,83 @@ export const getProjectById = async (
       tasks: true,
     },
   });
+
   if (!project) {
     throw new AppError("Project not found", 404);
   }
+
   return project;
 };
 
+// --------------------------------------------------------------------------
 // Update Project
-
+// --------------------------------------------------------------------------
 export const updateProject = async (
   ownerId: string,
   projectId: string,
   data: UpdateProjectInput
 ) => {
-  const project =
-    await prisma.project.findFirst({
-      where: {
-        id: projectId,
-        ownerId,
-      },
-    });
+  const project = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+      ownerId,
+    },
+  });
 
   if (!project) {
-    throw new AppError(
-      "Project not found",
-      404
-    );
+    throw new AppError("Project not found", 404);
   }
 
   await prisma.project.update({
     where: {
       id: projectId,
     },
-
     data,
   });
+
+  // Invalidate the owner's dashboard cache because
+  // project data may have changed.
+  await invalidateDashboardCache(ownerId);
 
   return buildProjectResponse(projectId);
 };
 
+// --------------------------------------------------------------------------
 // Delete Project
-
-export const deleteProject = async (
-  ownerId: string,
-  projectId: string
-) => {
-  const project =
-    await prisma.project.findFirst({
-      where: {
-        id: projectId,
-        ownerId,
+// --------------------------------------------------------------------------
+export const deleteProject = async (ownerId: string, projectId: string) => {
+  const project = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+      ownerId,
+    },
+    include: {
+      tasks: {
+        select: {
+          assigneeId: true,
+        },
       },
-    });
+    },
+  });
 
   if (!project) {
-    throw new AppError(
-      "Project not found",
-      404
-    );
+    throw new AppError("Project not found", 404);
   }
+
+  const affectedUserIds = [
+    ownerId,
+    ...project.tasks.map((task) => task.assigneeId),
+  ];
 
   await prisma.project.delete({
     where: {
       id: projectId,
     },
   });
+
+  // The deleted project may affect both the owner
+  // and users assigned to tasks inside this project.
+  await invalidateDashboardCacheForUsers(affectedUserIds);
 
   return {
     success: true,
