@@ -52,12 +52,6 @@ export const getDashboardStats = async (
     );
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Total Projects
-  |--------------------------------------------------------------------------
-  */
-
   const totalProjects =
     await prisma.project.count({
       where: {
