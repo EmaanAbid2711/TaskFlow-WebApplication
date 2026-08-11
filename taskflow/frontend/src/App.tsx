@@ -103,7 +103,7 @@ function App() {
           />
 
           <Route
-            path="/recycleBin"
+            path="/recycle-bin"
             element={
               <ProtectedRoute>
                 <AppLayout>
