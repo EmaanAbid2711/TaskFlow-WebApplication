@@ -1,14 +1,6 @@
-import {
-  FolderKanban,
-  CheckSquare,
-  RotateCcw,
-  Trash2,
-  Clock,
-} from "lucide-react";
+import { FolderKanban, CheckSquare, RotateCcw, Trash2, Clock} from "lucide-react";
 
-import type {
-  RecycleBinItem as RecycleBinItemType,
-} from "@/interfaces/recycleBin";
+import type { RecycleBinItem as RecycleBinItemType} from "@/interfaces/recycleBin";
 
 interface Props {
   item: RecycleBinItemType;
@@ -55,7 +47,8 @@ function RecycleBinItem({
     >
       <div
         className="
-          flex flex-col
+          flex
+          flex-col
           gap-5
           sm:flex-row
           sm:items-center
@@ -66,14 +59,17 @@ function RecycleBinItem({
 
         <div
           className="
-            flex min-w-0
+            flex
+            min-w-0
             items-start
             gap-4
           "
         >
           <div
             className="
-              flex h-11 w-11
+              flex
+              h-11
+              w-11
               flex-shrink-0
               items-center
               justify-center
@@ -117,7 +113,8 @@ function RecycleBinItem({
                 className="
                   rounded-full
                   bg-slate-100
-                  px-2.5 py-1
+                  px-2.5
+                  py-1
                   text-xs
                   font-medium
                   text-slate-600
@@ -144,7 +141,8 @@ function RecycleBinItem({
             <div
               className="
                 mt-2
-                flex items-center
+                flex
+                items-center
                 gap-1.5
                 text-xs
                 text-slate-400
@@ -168,6 +166,7 @@ function RecycleBinItem({
           "
         >
           <button
+            type="button"
             onClick={() =>
               onRestore(
                 item.recycleId
@@ -180,7 +179,8 @@ function RecycleBinItem({
               rounded-lg
               border
               border-slate-200
-              px-4 py-2
+              px-4
+              py-2
               text-sm
               font-medium
               text-slate-700
@@ -188,14 +188,13 @@ function RecycleBinItem({
               hover:bg-slate-100
             "
           >
-            <RotateCcw
-              size={16}
-            />
+            <RotateCcw size={16} />
 
             Restore
           </button>
 
           <button
+            type="button"
             onClick={() =>
               onPermanentDelete(
                 item.recycleId
@@ -207,7 +206,8 @@ function RecycleBinItem({
               gap-2
               rounded-lg
               bg-red-600
-              px-4 py-2
+              px-4
+              py-2
               text-sm
               font-medium
               text-white
@@ -215,9 +215,7 @@ function RecycleBinItem({
               hover:bg-red-700
             "
           >
-            <Trash2
-              size={16}
-            />
+            <Trash2 size={16} />
 
             Delete
           </button>

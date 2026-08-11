@@ -1,9 +1,25 @@
-import {createContext, useContext, useEffect, useState, type ReactNode} from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  type ReactNode,
+} from "react";
 
-import { useAuth } from "@/context/AuthContext";
 import type { Project } from "@/interfaces/project";
 import type { Task } from "@/interfaces/projects";
 import type { RecycleBinItem } from "@/interfaces/recycleBin";
+
+import {
+  moveProjectToRecycleBinApi,
+  restoreProjectApi,
+  permanentlyDeleteProjectApi,
+} from "@/api/project.api";
+
+import {
+  moveTaskToRecycleBinApi,
+  restoreTaskApi,
+  permanentlyDeleteTaskApi,
+} from "@/api/task.api";
 
 interface RecycleBinContextType {
   items: RecycleBinItem[];
@@ -14,193 +30,53 @@ interface RecycleBinContextType {
   moveProjectToRecycleBin: (
     project: Project,
     originalPosition: number
-  ) => void;
+  ) => Promise<void>;
 
   moveTaskToRecycleBin: (
     task: Task,
     projectId: string,
     originalPosition: number
-  ) => void;
+  ) => Promise<void>;
 
   restoreItem: (
     recycleId: string
-  ) => RecycleBinItem | null;
+  ) => Promise<RecycleBinItem | null>;
 
   permanentlyDeleteItem: (
     recycleId: string
-  ) => void;
+  ) => Promise<void>;
 }
 
 const RecycleBinContext =
-  createContext<RecycleBinContextType | undefined>(
-    undefined
-  );
+  createContext<
+    RecycleBinContextType | undefined
+  >(undefined);
 
 interface Props {
   children: ReactNode;
 }
 
-interface StoredRecycleBinData {
-  items: RecycleBinItem[];
-  permanentlyDeletedProjectIds: string[];
-  permanentlyDeletedTaskIds: string[];
-}
-
-const STORAGE_PREFIX =
-  "taskflow-recycle-bin";
-
 export function RecycleBinProvider({
   children,
 }: Props) {
-  const { user } = useAuth();
-
   const [items, setItems] =
     useState<RecycleBinItem[]>([]);
 
-  const [
-    permanentlyDeletedProjectIds,
-    setPermanentlyDeletedProjectIds,
-  ] = useState<string[]>([]);
-
-  const [
-    permanentlyDeletedTaskIds,
-    setPermanentlyDeletedTaskIds,
-  ] = useState<string[]>([]);
-
-  const [loadedUserId, setLoadedUserId] =
-    useState<string | null>(null);
-
-  const storageKey = user?.id
-    ? `${STORAGE_PREFIX}:${user.id}`
-    : null;
-
-  /*
+  /**
    * ------------------------------------------------------------
-   * Load recycle bin when user changes
+   * Move Project To Recycle Bin
    * ------------------------------------------------------------
    */
-
-  useEffect(() => {
-    if (!user?.id) {
-      setItems([]);
-      setPermanentlyDeletedProjectIds([]);
-      setPermanentlyDeletedTaskIds([]);
-      setLoadedUserId(null);
-
-      return;
-    }
-
-    setLoadedUserId(null);
-
-    const key =
-      `${STORAGE_PREFIX}:${user.id}`;
-
-    try {
-      const stored =
-        localStorage.getItem(key);
-
-      if (!stored) {
-        setItems([]);
-        setPermanentlyDeletedProjectIds([]);
-        setPermanentlyDeletedTaskIds([]);
-      } else {
-        const parsed =
-          JSON.parse(
-            stored
-          ) as StoredRecycleBinData;
-
-        setItems(
-          Array.isArray(parsed.items)
-            ? parsed.items
-            : []
-        );
-
-        setPermanentlyDeletedProjectIds(
-          Array.isArray(
-            parsed.permanentlyDeletedProjectIds
-          )
-            ? parsed.permanentlyDeletedProjectIds
-            : []
-        );
-
-        setPermanentlyDeletedTaskIds(
-          Array.isArray(
-            parsed.permanentlyDeletedTaskIds
-          )
-            ? parsed.permanentlyDeletedTaskIds
-            : []
-        );
-      }
-    } catch (error) {
-      console.error(
-        "Failed to load recycle bin",
-        error
-      );
-
-      setItems([]);
-      setPermanentlyDeletedProjectIds([]);
-      setPermanentlyDeletedTaskIds([]);
-    }
-
-    setLoadedUserId(user.id);
-  }, [user?.id]);
-
-  /*
-   * ------------------------------------------------------------
-   * Save recycle bin
-   * ------------------------------------------------------------
-   */
-
-  useEffect(() => {
-    if (
-      !storageKey ||
-      !user?.id ||
-      loadedUserId !== user.id
-    ) {
-      return;
-    }
-
-    const data: StoredRecycleBinData = {
-      items,
-      permanentlyDeletedProjectIds,
-      permanentlyDeletedTaskIds,
-    };
-
-    try {
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify(data)
-      );
-    } catch (error) {
-      console.error(
-        "Failed to save recycle bin",
-        error
-      );
-    }
-  }, [
-    items,
-    permanentlyDeletedProjectIds,
-    permanentlyDeletedTaskIds,
-    storageKey,
-    user?.id,
-    loadedUserId,
-  ]);
-
-  /*
-   * ------------------------------------------------------------
-   * Move project to recycle bin
-   * ------------------------------------------------------------
-   */
-
-  const moveProjectToRecycleBin = (
+  const moveProjectToRecycleBin = async (
     project: Project,
     originalPosition: number
   ) => {
-    const recycleId =
-      `project:${project.id}`;
+    await moveProjectToRecycleBinApi(
+      project.id
+    );
 
     const recycleItem: RecycleBinItem = {
-      recycleId,
+      recycleId: `project:${project.id}`,
       type: "project",
       item: project,
       originalPosition,
@@ -212,7 +88,8 @@ export function RecycleBinProvider({
       const withoutExisting =
         previous.filter(
           (item) =>
-            item.recycleId !== recycleId
+            item.recycleId !==
+            recycleItem.recycleId
         );
 
       return [
@@ -222,22 +99,22 @@ export function RecycleBinProvider({
     });
   };
 
-  /*
+  /**
    * ------------------------------------------------------------
-   * Move task to recycle bin
+   * Move Task To Recycle Bin
    * ------------------------------------------------------------
    */
-
-  const moveTaskToRecycleBin = (
+  const moveTaskToRecycleBin = async (
     task: Task,
     projectId: string,
     originalPosition: number
   ) => {
-    const recycleId =
-      `task:${task.id}`;
+    await moveTaskToRecycleBinApi(
+      task.id
+    );
 
     const recycleItem: RecycleBinItem = {
-      recycleId,
+      recycleId: `task:${task.id}`,
       type: "task",
       item: task,
       projectId,
@@ -250,7 +127,8 @@ export function RecycleBinProvider({
       const withoutExisting =
         previous.filter(
           (item) =>
-            item.recycleId !== recycleId
+            item.recycleId !==
+            recycleItem.recycleId
         );
 
       return [
@@ -260,23 +138,31 @@ export function RecycleBinProvider({
     });
   };
 
-  /*
+  /**
    * ------------------------------------------------------------
-   * Restore item
+   * Restore Item
    * ------------------------------------------------------------
    */
-
-  const restoreItem = (
+  const restoreItem = async (
     recycleId: string
-  ): RecycleBinItem | null => {
-    const item =
-      items.find(
-        (entry) =>
-          entry.recycleId === recycleId
-      );
+  ): Promise<RecycleBinItem | null> => {
+    const item = items.find(
+      (entry) =>
+        entry.recycleId === recycleId
+    );
 
     if (!item) {
       return null;
+    }
+
+    if (item.type === "project") {
+      await restoreProjectApi(
+        item.item.id
+      );
+    } else {
+      await restoreTaskApi(
+        item.item.id
+      );
     }
 
     setItems((previous) =>
@@ -289,29 +175,31 @@ export function RecycleBinProvider({
     return item;
   };
 
-  /*
+  /**
    * ------------------------------------------------------------
-   * Permanently delete item
-   *
-   * Phase 1:
-   * This removes it permanently from frontend state.
-   *
-   * Phase 2:
-   * This will call the backend permanent-delete API.
+   * Permanently Delete Item
    * ------------------------------------------------------------
    */
-
-  const permanentlyDeleteItem = (
+  const permanentlyDeleteItem = async (
     recycleId: string
   ) => {
-    const item =
-      items.find(
-        (entry) =>
-          entry.recycleId === recycleId
-      );
+    const item = items.find(
+      (entry) =>
+        entry.recycleId === recycleId
+    );
 
     if (!item) {
       return;
+    }
+
+    if (item.type === "project") {
+      await permanentlyDeleteProjectApi(
+        item.item.id
+      );
+    } else {
+      await permanentlyDeleteTaskApi(
+        item.item.id
+      );
     }
 
     setItems((previous) =>
@@ -320,61 +208,32 @@ export function RecycleBinProvider({
           entry.recycleId !== recycleId
       )
     );
-
-    if (item.type === "project") {
-      setPermanentlyDeletedProjectIds(
-        (previous) =>
-          previous.includes(item.item.id)
-            ? previous
-            : [
-                ...previous,
-                item.item.id,
-              ]
-      );
-    } else {
-      setPermanentlyDeletedTaskIds(
-        (previous) =>
-          previous.includes(item.item.id)
-            ? previous
-            : [
-                ...previous,
-                item.item.id,
-              ]
-      );
-    }
   };
 
-  /*
+  /**
    * ------------------------------------------------------------
-   * IDs hidden from normal project/task views
+   * IDs currently hidden from normal views
    * ------------------------------------------------------------
    */
+  const deletedProjectIds = items
+    .filter(
+      (item) =>
+        item.type === "project"
+    )
+    .map(
+      (item) =>
+        item.item.id
+    );
 
-  const deletedProjectIds = [
-    ...items
-      .filter(
-        (item) =>
-          item.type === "project"
-      )
-      .map(
-        (item) =>
-          item.item.id
-      ),
-    ...permanentlyDeletedProjectIds,
-  ];
-
-  const deletedTaskIds = [
-    ...items
-      .filter(
-        (item) =>
-          item.type === "task"
-      )
-      .map(
-        (item) =>
-          item.item.id
-      ),
-    ...permanentlyDeletedTaskIds,
-  ];
+  const deletedTaskIds = items
+    .filter(
+      (item) =>
+        item.type === "task"
+    )
+    .map(
+      (item) =>
+        item.item.id
+    );
 
   return (
     <RecycleBinContext.Provider
