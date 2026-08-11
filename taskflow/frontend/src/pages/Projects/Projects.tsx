@@ -7,10 +7,12 @@ import { toast } from "sonner";
 import {ProjectHeader, KanbanBoard, TaskDrawer, ProjectDrawer} from "@/components";
 import type {DrawerMode,Task, TaskType} from "@/interfaces/projects";
 import { useProjects } from "@/hooks/useProjects";
-import {createTaskApi, updateTaskApi, deleteTaskApi, getProjectTasksApi} from "@/api/task.api";
+import {createTaskApi, updateTaskApi, getProjectTasksApi} from "@/api/task.api";
 import {mapTask, mapTasks} from "@/mappers/task.mapper";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboard } from "@/context/DashboardContext";
+import { useRecycleBin} from "@/context/RecycleBinContext";
+import type { RecycleBinNavigationState} from "@/interfaces/recycleBin";
 
 function Projects() {
   const navigate = useNavigate();
@@ -45,24 +47,196 @@ function Projects() {
 
   const {
       projects,
+      setProjects,
       selectedProject,
       setSelectedProject,
       tasks,
       setTasks,
+      tasksLoading,
       refreshProjectStats,
       createProject,
       updateProject,
       deleteProject,
+      removeTaskLocally,
   } = useProjects();
 
 const isOwner =
   selectedProject?.owner.id === user?.id;
+
+const { moveTaskToRecycleBin} = useRecycleBin();
 
 const canOpenTask = (task: Task) => {
   if (isOwner) return true;
 
   return task.assignee.id === user?.id;
 };
+
+useEffect(() => {
+  const navigationState =
+    location.state as
+      | RecycleBinNavigationState
+      | null;
+
+  const restoredItem =
+    navigationState?.restoredItem;
+
+  if (!restoredItem) {
+    return;
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * Restore Project
+   * ------------------------------------------------------------
+   */
+
+  if (
+    restoredItem.type ===
+    "project"
+  ) {
+    const restoredProject =
+      projects.find(
+        (project) =>
+          project.id ===
+          restoredItem.item.id
+      );
+
+    if (!restoredProject) {
+      return;
+    }
+
+    setProjects(
+      (previous) => {
+        const withoutProject =
+          previous.filter(
+            (project) =>
+              project.id !==
+              restoredProject.id
+          );
+
+        const position =
+          Math.min(
+            restoredItem.originalPosition,
+            withoutProject.length
+          );
+
+        return [
+          ...withoutProject.slice(
+            0,
+            position
+          ),
+          restoredProject,
+          ...withoutProject.slice(
+            position
+          ),
+        ];
+      }
+    );
+
+    setSelectedProject(
+      restoredProject
+    );
+
+    navigate(
+      "/projects",
+      {
+        replace: true,
+        state: null,
+      }
+    );
+
+    return;
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * Restore Task
+   * ------------------------------------------------------------
+   */
+
+  if (
+    restoredItem.type ===
+    "task"
+  ) {
+    if (
+      selectedProject?.id !==
+      restoredItem.projectId
+    ) {
+      return;
+    }
+
+    if (tasksLoading) {
+      return;
+    }
+
+    const restoredTask =
+      restoredItem.item;
+
+    const existingIndex =
+      tasks.findIndex(
+        (task) =>
+          task.id ===
+          restoredTask.id
+      );
+
+    if (
+      existingIndex === -1
+    ) {
+      return;
+    }
+
+    const targetPosition =
+      Math.min(
+        restoredItem.originalPosition,
+        tasks.length - 1
+      );
+
+    if (
+      existingIndex !==
+      targetPosition
+    ) {
+      setTasks(
+        (previous) => {
+          const copy = [
+            ...previous,
+          ];
+
+          const [movedTask] = copy.splice(
+            existingIndex,
+            1
+          );
+
+          copy.splice(
+            targetPosition,
+            0,
+            movedTask
+          );
+
+          return copy;
+        }
+      );
+    }
+
+    navigate(
+      "/projects",
+      {
+        replace: true,
+        state: null,
+      }
+    );
+  }
+}, [
+  location.state,
+  projects,
+  tasks,
+  tasksLoading,
+  selectedProject,
+  navigate,
+  setProjects,
+  setSelectedProject,
+  setTasks,
+]);
+
 
 useEffect(() => {
   const params =
@@ -251,15 +425,17 @@ const handleSaveProject = async (
 }
 
 const handleDeleteProject =
-async () => {
-  if(!selectedProject)
-    return;
-  await deleteProject(
-    selectedProject.id
-  );
-  await refreshDashboardStats();
-  setProjectDrawerOpen(false);
-};
+  async () => {
+    if (!selectedProject) {
+      return;
+    }
+
+    await deleteProject(
+      selectedProject.id
+    );
+
+    setProjectDrawerOpen(false);
+  };
 
 
   const refreshCurrentProject =
@@ -469,33 +645,40 @@ async (): Promise<Task[]> => {
    * ------------------------------------------------------------------
    */
 
-  const handleDeleteTask = async()=>{
-   if(!selectedTask)
+  const handleDeleteTask = async () => {
+  if (
+    !selectedTask ||
+    !selectedProject
+  ) {
     return;
+  }
 
-   try{
-     await deleteTaskApi(
-      selectedTask.id
-     );
-     setTasks(prev=>
-      prev.filter(
-        task=>
-        task.id!==selectedTask.id
-      )
-     );
-     if (selectedProject) {await refreshProjectStats(
-          selectedProject.id
-        );
-      }
-      await refreshDashboardStats();
-      setDrawerOpen(false);
-   }
-   catch(error){
-    console.log(
-      error
+  const originalPosition =
+    tasks.findIndex(
+      (task) =>
+        task.id === selectedTask.id
     );
-   }
-  };
+
+  if (
+    originalPosition === -1
+  ) {
+    return;
+  }
+
+  moveTaskToRecycleBin(
+    selectedTask,
+    selectedProject.id,
+    originalPosition
+  );
+
+  removeTaskLocally(
+    selectedTask.id,
+    selectedProject.id
+  );
+
+  setDrawerOpen(false);
+  setSelectedTask(null);
+};
 
   // Drag End
 

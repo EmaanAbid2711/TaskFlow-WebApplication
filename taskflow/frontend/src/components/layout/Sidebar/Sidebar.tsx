@@ -1,5 +1,5 @@
 import { useState } from "react";
-import {LayoutDashboard, FolderKanban, Users, Activity, Settings, HelpCircle, LogOut, Plus, X, User, Bell, CreditCard, ChevronDown, ChevronRight} from "lucide-react";
+import {LayoutDashboard, FolderKanban, Users, Activity, Settings, HelpCircle, LogOut, Plus, X, User, Bell, CreditCard, ChevronDown, ChevronRight, Trash2} from "lucide-react";
 import {useNavigate, useLocation} from "react-router-dom";
 
 import Logo from "../../common/Logo/Logo";
@@ -138,6 +138,32 @@ function Sidebar({
             >
               <Activity size={18} />
               Activity
+            </button>
+
+            {/* Recycle Bin */}
+            <button
+              onClick={() =>
+                goTo("/recycle-bin")
+              }
+              className={`
+                flex w-full
+                items-center
+                gap-3
+                rounded-lg
+                px-3 py-3
+                transition
+              
+                ${
+                  location.pathname ===
+                  "/recycle-bin"
+                    ? "bg-[#0052cc] text-white"
+                    : "text-slate-600 hover:bg-slate-100"
+                }
+              `}
+            >
+              <Trash2 size={18} />
+              
+              Recycle Bin
             </button>
 
             {/* Settings Dropdown */}

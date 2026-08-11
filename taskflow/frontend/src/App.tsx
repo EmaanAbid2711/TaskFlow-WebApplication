@@ -1,11 +1,12 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import {Login, ForgotPassword, ResetPassword, Signup, Dashboard, Projects, Landing, Profile, Account, Notifications, Billing, Team, UserProfile, Activity} from "./pages";
+import {Login, ForgotPassword, ResetPassword, Signup, Dashboard, Projects, Landing, Profile, Account, Notifications, Billing, Team, UserProfile, Activity, RecycleBin} from "./pages";
 import { AppLayout } from "./components";
 import { Toaster } from "./components/ui/sonner";
 import { AuthProvider } from "./context/AuthContext";
 import { DashboardProvider } from "@/context/DashboardContext";
 import { NotificationBarProvider} from "@/context/NotificationBarContext";
+import { RecycleBinProvider } from "@/context/RecycleBinContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 
@@ -13,6 +14,7 @@ function App() {
   return ( 
     <AuthProvider>
       <NotificationBarProvider>
+      <RecycleBinProvider>
       <DashboardProvider>
       <BrowserRouter>
         <Toaster richColors />
@@ -101,6 +103,17 @@ function App() {
           />
 
           <Route
+            path="/recycleBin"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <RecycleBin />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/settings/profile"
             element={
               <ProtectedRoute>
@@ -147,6 +160,7 @@ function App() {
         </Routes>
       </BrowserRouter>
       </DashboardProvider>
+      </RecycleBinProvider>
       </NotificationBarProvider>
     </AuthProvider>
   );

@@ -17,7 +17,7 @@ interface Props {
       updatedTask: Task
     ) => void;
   onSave: () => void;
-  onDelete: () => void;
+  onDelete: () => Promise<void>;
   refreshTasks: () => Promise<Task[]>;
   canChangeAssignee: boolean;
   saving: boolean;

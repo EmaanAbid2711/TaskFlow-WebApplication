@@ -12,3 +12,4 @@ export { default as Billing} from "./Settings/Billing"
 export { default as Team } from "./Team/Team"
 export { default as UserProfile } from "./UserProfile/UserProfile";
 export { default as Activity } from "./Activity/Activity"
+export { default as RecycleBin } from "./RecycleBin/RecycleBin"

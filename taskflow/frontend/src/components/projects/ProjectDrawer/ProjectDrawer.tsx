@@ -309,12 +309,12 @@ function ProjectDrawer({
       </div>
       <ConfirmModal
         open={confirmOpen}
-        title="Delete Project?"
-        message="This project and all of its tasks will be permanently deleted. This action cannot be undone."
+        title="Move Project to Recycle Bin?"
+        message="This project will be moved to the Recycle Bin. You can restore it later."
         confirmText={
           deleting
-            ? "Deleting..."
-            : "Delete"
+            ? "Moving..."
+            : "Move to Recycle Bin"
         }
         cancelText="Cancel"
         onCancel={() => {

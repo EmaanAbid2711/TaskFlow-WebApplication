@@ -47,3 +47,4 @@ export { default as AssigneeSelector} from "./projects/TaskDrawer/AssigneeSelect
 export { default as ProjectDrawer } from "./projects/ProjectDrawer/ProjectDrawer"
 export { default as ActivityItem } from "./activity/ActivityItem"
 export { default as NotificationBarDropdown} from "./layout/Header/NotifyBarDropdown"
+export { default as RecycleBinItem } from "./recycleBin/RecycleBinItem"
