@@ -14,6 +14,7 @@ import taskRoutes from "./routes/task.routes";
 import notificationRoutesbar from "./routes/notificationBar.routes";
 import activityRoutes from "./routes/activity.routes";
 import teamRoutes from "./routes/team.routes";
+import recycleBinRoutes from "./routes/recycleBin.routes";
 
 import swaggerSpec from "./config/swagger";
 import errorHandler from "./middleware/ErrorHandler";
@@ -77,6 +78,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/team", teamRoutes);
+app.use("/api/recycle-bin", recycleBinRoutes);
 app.use("/api/notification-bar", notificationRoutesbar);
 app.use("/api/activity", activityRoutes);
 app.use("/api/account", accountRoutes);
