@@ -154,8 +154,12 @@ model Project {
   members       ProjectMember[]
   tasks         Task[]
   notifications Notification[]
+  deletedAt     DateTime?
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
+
+  @@index([ownerId])
+  @@index([deletedAt])
 }
 
 // PROJECT MEMBERS
@@ -190,8 +194,13 @@ model Task {
   comments      Comment[]
   activities    Activity[]
   notifications Notification[]
+  deletedAt     DateTime?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
+
+  @@index([projectId])
+  @@index([assigneeId])
+  @@index([deletedAt])
 }
 
 // TASK ATTACHMENTS
