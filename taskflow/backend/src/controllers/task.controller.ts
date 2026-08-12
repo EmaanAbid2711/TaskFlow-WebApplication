@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import path from "path";
 import asyncHandler from "express-async-handler";
 
-import {createTask, getProjectTasks, getTaskById, updateTask, deleteTask, uploadTaskAttachment,deleteTaskAttachment, createTaskComment} from "../services/task.service";
+import {createTask, getProjectTasks, getTaskById, updateTask, deleteTask, uploadTaskAttachment,deleteTaskAttachment, createTaskComment, moveTaskToRecycleBin, restoreTask, permanentlyDeleteTask} from "../services/task.service";
 import {createTaskSchema, updateTaskSchema, createCommentSchema} from "../validations/task.validation";
 import AppError from "../utils/AppError";
 
@@ -248,3 +248,71 @@ asyncHandler(async (
   });
 
 });
+
+// --------------------------------------------------------------------------
+// Move Task To Recycle Bin
+// --------------------------------------------------------------------------
+
+export const moveTaskToRecycleBinController = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError("Unauthorized", 401);
+    }
+
+    const task = await moveTaskToRecycleBin(
+      req.user.id,
+      String(req.params.id)
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Task moved to recycle bin",
+      data: task,
+    });
+  }
+);
+
+// --------------------------------------------------------------------------
+// Restore Task
+// --------------------------------------------------------------------------
+
+export const restoreTaskController = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError("Unauthorized", 401);
+    }
+
+    const task = await restoreTask(
+      req.user.id,
+      String(req.params.id)
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Task restored successfully",
+      data: task,
+    });
+  }
+);
+
+// --------------------------------------------------------------------------
+// Permanently Delete Task
+// --------------------------------------------------------------------------
+
+export const permanentlyDeleteTaskController = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new AppError("Unauthorized", 401);
+    }
+
+    await permanentlyDeleteTask(
+      req.user.id,
+      String(req.params.id)
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Task permanently deleted",
+    });
+  }
+);

@@ -6,6 +6,9 @@ import {
   getProjectController,
   updateProjectController,
   deleteProjectController,
+  moveProjectToRecycleBinController,
+  restoreProjectController,
+  permanentlyDeleteProjectController,
 } from "../controllers/project.controller";
 
 const router = Router();
@@ -85,6 +88,29 @@ router.post("/", authMiddleware, createProjectController);
  *         description: Internal server error
  */
 router.get("/", authMiddleware, getProjectsController);
+
+
+  // --------------------------------------------------------------------------
+// Recycle Bin Routes
+// --------------------------------------------------------------------------
+
+router.patch(
+  "/:id/trash",
+  authMiddleware,
+  moveProjectToRecycleBinController
+);
+
+router.patch(
+  "/:id/restore",
+  authMiddleware,
+  restoreProjectController
+);
+
+router.delete(
+  "/:id/permanent",
+  authMiddleware,
+  permanentlyDeleteProjectController
+);
 
 /**
  * @swagger

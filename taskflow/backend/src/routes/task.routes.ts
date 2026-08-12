@@ -10,6 +10,9 @@ import {
   uploadTaskAttachmentController,
   deleteTaskAttachmentController,
   createTaskCommentController,
+  moveTaskToRecycleBinController,
+  restoreTaskController,
+  permanentlyDeleteTaskController,
 } from "../controllers/task.controller";
 
 const router = Router();
@@ -105,6 +108,29 @@ router.post("/", authMiddleware, createTaskController);
  *         description: Project not found
  */
 router.get("/project/:projectId", authMiddleware, getProjectTasksController);
+
+
+// --------------------------------------------------------------------------
+// Recycle Bin Routes
+// --------------------------------------------------------------------------
+
+router.patch(
+  "/:id/trash",
+  authMiddleware,
+  moveTaskToRecycleBinController
+);
+
+router.patch(
+  "/:id/restore",
+  authMiddleware,
+  restoreTaskController
+);
+
+router.delete(
+  "/:id/permanent",
+  authMiddleware,
+  permanentlyDeleteTaskController
+);
 
 /**
  * @swagger
