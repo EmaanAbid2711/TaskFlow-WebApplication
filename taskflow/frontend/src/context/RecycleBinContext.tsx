@@ -1,265 +1,322 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode} from "react";
 
-import type { Project } from "@/interfaces/project";
-import type { Task } from "@/interfaces/projects";
-import type { RecycleBinItem } from "@/interfaces/recycleBin";
+import { getRecycleBinApi, type RecycleBinProject, type RecycleBinTask} from "@/api/recycle-bin.api";
+import { restoreProjectApi,  permanentlyDeleteProjectApi} from "@/api/project.api";
+import { restoreTaskApi, permanentlyDeleteTaskApi} from "@/api/task.api";
 
-import {
-  moveProjectToRecycleBinApi,
-  restoreProjectApi,
-  permanentlyDeleteProjectApi,
-} from "@/api/project.api";
-
-import {
-  moveTaskToRecycleBinApi,
-  restoreTaskApi,
-  permanentlyDeleteTaskApi,
-} from "@/api/task.api";
+// --------------------------------------------------------------------------
+// Context Type
+// --------------------------------------------------------------------------
 
 interface RecycleBinContextType {
-  items: RecycleBinItem[];
+  projects: RecycleBinProject[];
+  tasks: RecycleBinTask[];
 
-  deletedProjectIds: string[];
-  deletedTaskIds: string[];
+  loading: boolean;
+  error: string | null;
 
-  moveProjectToRecycleBin: (
-    project: Project,
-    originalPosition: number
+  fetchRecycleBin: () => Promise<void>;
+  refreshRecycleBin: () => Promise<void>;
+
+  restoreProject: (
+    projectId: string
   ) => Promise<void>;
 
-  moveTaskToRecycleBin: (
-    task: Task,
-    projectId: string,
-    originalPosition: number
+  restoreTask: (
+    taskId: string
   ) => Promise<void>;
 
-  restoreItem: (
-    recycleId: string
-  ) => Promise<RecycleBinItem | null>;
+  permanentlyDeleteProject: (
+    projectId: string
+  ) => Promise<void>;
 
-  permanentlyDeleteItem: (
-    recycleId: string
+  permanentlyDeleteTask: (
+    taskId: string
   ) => Promise<void>;
 }
 
-const RecycleBinContext =
-  createContext<
-    RecycleBinContextType | undefined
-  >(undefined);
+// --------------------------------------------------------------------------
+// Context
+// --------------------------------------------------------------------------
 
-interface Props {
+const RecycleBinContext =
+  createContext<RecycleBinContextType | undefined>(
+    undefined
+  );
+
+// --------------------------------------------------------------------------
+// Provider Props
+// --------------------------------------------------------------------------
+
+interface RecycleBinProviderProps {
   children: ReactNode;
 }
 
-export function RecycleBinProvider({
+// --------------------------------------------------------------------------
+// Provider
+// --------------------------------------------------------------------------
+
+export const RecycleBinProvider = ({
   children,
-}: Props) {
-  const [items, setItems] =
-    useState<RecycleBinItem[]>([]);
+}: RecycleBinProviderProps) => {
+  const [projects, setProjects] = useState<
+    RecycleBinProject[]
+  >([]);
 
-  /**
-   * ------------------------------------------------------------
-   * Move Project To Recycle Bin
-   * ------------------------------------------------------------
-   */
-  const moveProjectToRecycleBin = async (
-    project: Project,
-    originalPosition: number
-  ) => {
-    await moveProjectToRecycleBinApi(
-      project.id
-    );
+  const [tasks, setTasks] = useState<
+    RecycleBinTask[]
+  >([]);
 
-    const recycleItem: RecycleBinItem = {
-      recycleId: `project:${project.id}`,
-      type: "project",
-      item: project,
-      originalPosition,
-      deletedAt:
-        new Date().toISOString(),
-    };
+  const [loading, setLoading] =
+    useState(false);
 
-    setItems((previous) => {
-      const withoutExisting =
-        previous.filter(
-          (item) =>
-            item.recycleId !==
-            recycleItem.recycleId
+  const [error, setError] =
+    useState<string | null>(null);
+
+  // ------------------------------------------------------------------------
+  // Fetch Recycle Bin
+  // ------------------------------------------------------------------------
+
+  const fetchRecycleBin = useCallback(
+    async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const data =
+          await getRecycleBinApi();
+
+        setProjects(data.projects);
+        setTasks(data.tasks);
+      } catch (error: unknown) {
+        console.error(
+          "Failed to fetch recycle bin:",
+          error
         );
 
-      return [
-        recycleItem,
-        ...withoutExisting,
-      ];
-    });
-  };
+        setError(
+          "Failed to load recycle bin."
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
-  /**
-   * ------------------------------------------------------------
-   * Move Task To Recycle Bin
-   * ------------------------------------------------------------
-   */
-  const moveTaskToRecycleBin = async (
-    task: Task,
-    projectId: string,
-    originalPosition: number
-  ) => {
-    await moveTaskToRecycleBinApi(
-      task.id
-    );
+  // ------------------------------------------------------------------------
+  // Refresh Recycle Bin
+  // ------------------------------------------------------------------------
 
-    const recycleItem: RecycleBinItem = {
-      recycleId: `task:${task.id}`,
-      type: "task",
-      item: task,
-      projectId,
-      originalPosition,
-      deletedAt:
-        new Date().toISOString(),
-    };
+  const refreshRecycleBin =
+    useCallback(async () => {
+      await fetchRecycleBin();
+    }, [fetchRecycleBin]);
 
-    setItems((previous) => {
-      const withoutExisting =
-        previous.filter(
-          (item) =>
-            item.recycleId !==
-            recycleItem.recycleId
+  // ------------------------------------------------------------------------
+  // Restore Project
+  // ------------------------------------------------------------------------
+
+  const restoreProject = useCallback(
+    async (projectId: string) => {
+      try {
+        setError(null);
+
+        await restoreProjectApi(
+          projectId
         );
 
-      return [
-        recycleItem,
-        ...withoutExisting,
-      ];
-    });
+        // Remove restored project from local recycle-bin state.
+        setProjects((currentProjects) =>
+          currentProjects.filter(
+            (project) =>
+              project.id !== projectId
+          )
+        );
+      } catch (error: unknown) {
+        console.error(
+          "Failed to restore project:",
+          error
+        );
+
+        setError(
+          "Failed to restore project."
+        );
+
+        throw error;
+      }
+    },
+    []
+  );
+
+  // ------------------------------------------------------------------------
+  // Restore Task
+  // ------------------------------------------------------------------------
+
+  const restoreTask = useCallback(
+    async (taskId: string) => {
+      try {
+        setError(null);
+
+        await restoreTaskApi(taskId);
+
+        // Remove restored task from standalone deleted tasks.
+        setTasks((currentTasks) =>
+          currentTasks.filter(
+            (task) => task.id !== taskId
+          )
+        );
+
+        // Also remove it from a deleted project's nested tasks
+        // in case the backend ever returns it there.
+        setProjects((currentProjects) =>
+          currentProjects.map((project) => ({
+            ...project,
+            tasks: project.tasks.filter(
+              (task) => task.id !== taskId
+            ),
+          }))
+        );
+      } catch (error: unknown) {
+        console.error(
+          "Failed to restore task:",
+          error
+        );
+
+        setError(
+          "Failed to restore task."
+        );
+
+        throw error;
+      }
+    },
+    []
+  );
+
+  // ------------------------------------------------------------------------
+  // Permanently Delete Project
+  // ------------------------------------------------------------------------
+
+  const permanentlyDeleteProject =
+    useCallback(
+      async (projectId: string) => {
+        try {
+          setError(null);
+
+          await permanentlyDeleteProjectApi(
+            projectId
+          );
+
+          setProjects(
+            (currentProjects) =>
+              currentProjects.filter(
+                (project) =>
+                  project.id !== projectId
+              )
+          );
+        } catch (error: unknown) {
+          console.error(
+            "Failed to permanently delete project:",
+            error
+          );
+
+          setError(
+            "Failed to permanently delete project."
+          );
+
+          throw error;
+        }
+      },
+      []
+    );
+
+  // ------------------------------------------------------------------------
+  // Permanently Delete Task
+  // ------------------------------------------------------------------------
+
+  const permanentlyDeleteTask =
+    useCallback(
+      async (taskId: string) => {
+        try {
+          setError(null);
+
+          await permanentlyDeleteTaskApi(
+            taskId
+          );
+
+          setTasks((currentTasks) =>
+            currentTasks.filter(
+              (task) => task.id !== taskId
+            )
+          );
+
+          setProjects((currentProjects) =>
+            currentProjects.map((project) => ({
+              ...project,
+              tasks: project.tasks.filter(
+                (task) => task.id !== taskId
+              ),
+            }))
+          );
+        } catch (error: unknown) {
+          console.error(
+            "Failed to permanently delete task:",
+            error
+          );
+
+          setError(
+            "Failed to permanently delete task."
+          );
+
+          throw error;
+        }
+      },
+      []
+    );
+
+  // ------------------------------------------------------------------------
+  // Initial Fetch
+  // ------------------------------------------------------------------------
+
+  useEffect(() => {
+    void fetchRecycleBin();
+  }, [fetchRecycleBin]);
+
+  // ------------------------------------------------------------------------
+  // Context Value
+  // ------------------------------------------------------------------------
+
+  const value: RecycleBinContextType = {
+    projects,
+    tasks,
+
+    loading,
+    error,
+
+    fetchRecycleBin,
+    refreshRecycleBin,
+
+    restoreProject,
+    restoreTask,
+
+    permanentlyDeleteProject,
+    permanentlyDeleteTask,
   };
-
-  /**
-   * ------------------------------------------------------------
-   * Restore Item
-   * ------------------------------------------------------------
-   */
-  const restoreItem = async (
-    recycleId: string
-  ): Promise<RecycleBinItem | null> => {
-    const item = items.find(
-      (entry) =>
-        entry.recycleId === recycleId
-    );
-
-    if (!item) {
-      return null;
-    }
-
-    if (item.type === "project") {
-      await restoreProjectApi(
-        item.item.id
-      );
-    } else {
-      await restoreTaskApi(
-        item.item.id
-      );
-    }
-
-    setItems((previous) =>
-      previous.filter(
-        (entry) =>
-          entry.recycleId !== recycleId
-      )
-    );
-
-    return item;
-  };
-
-  /**
-   * ------------------------------------------------------------
-   * Permanently Delete Item
-   * ------------------------------------------------------------
-   */
-  const permanentlyDeleteItem = async (
-    recycleId: string
-  ) => {
-    const item = items.find(
-      (entry) =>
-        entry.recycleId === recycleId
-    );
-
-    if (!item) {
-      return;
-    }
-
-    if (item.type === "project") {
-      await permanentlyDeleteProjectApi(
-        item.item.id
-      );
-    } else {
-      await permanentlyDeleteTaskApi(
-        item.item.id
-      );
-    }
-
-    setItems((previous) =>
-      previous.filter(
-        (entry) =>
-          entry.recycleId !== recycleId
-      )
-    );
-  };
-
-  /**
-   * ------------------------------------------------------------
-   * IDs currently hidden from normal views
-   * ------------------------------------------------------------
-   */
-  const deletedProjectIds = items
-    .filter(
-      (item) =>
-        item.type === "project"
-    )
-    .map(
-      (item) =>
-        item.item.id
-    );
-
-  const deletedTaskIds = items
-    .filter(
-      (item) =>
-        item.type === "task"
-    )
-    .map(
-      (item) =>
-        item.item.id
-    );
 
   return (
-    <RecycleBinContext.Provider
-      value={{
-        items,
-
-        deletedProjectIds,
-        deletedTaskIds,
-
-        moveProjectToRecycleBin,
-        moveTaskToRecycleBin,
-
-        restoreItem,
-        permanentlyDeleteItem,
-      }}
-    >
+    <RecycleBinContext.Provider value={value}>
       {children}
     </RecycleBinContext.Provider>
   );
-}
+};
 
-export function useRecycleBin() {
+// --------------------------------------------------------------------------
+// Hook
+// --------------------------------------------------------------------------
+
+export const useRecycleBin = () => {
   const context =
-    useContext(
-      RecycleBinContext
-    );
+    useContext(RecycleBinContext);
 
   if (!context) {
     throw new Error(
@@ -268,4 +325,4 @@ export function useRecycleBin() {
   }
 
   return context;
-}
+};
