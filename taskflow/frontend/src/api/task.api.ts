@@ -1,6 +1,11 @@
 import api from "./axios";
+
 import type { CreateTaskPayload, UpdateTaskPayload} from "@/interfaces/task.api";
-import { mapTask} from "@/mappers/task.mapper";
+import { mapTask } from "@/mappers/task.mapper";
+
+// --------------------------------------------------------------------------
+// Get all tasks of a project
+// --------------------------------------------------------------------------
 
 export const getProjectTasksApi = async (
   projectId: string
@@ -11,6 +16,10 @@ export const getProjectTasksApi = async (
 
   return response.data;
 };
+
+// --------------------------------------------------------------------------
+// Get single task
+// --------------------------------------------------------------------------
 
 export const getTaskApi = async (
   taskId: string
@@ -25,6 +34,10 @@ export const getTaskApi = async (
   };
 };
 
+// --------------------------------------------------------------------------
+// Backend status mapping
+// --------------------------------------------------------------------------
+
 const statusMap = {
   todo: "TODO",
   progress: "PROGRESS",
@@ -32,11 +45,19 @@ const statusMap = {
   completed: "COMPLETED",
 } as const;
 
+// --------------------------------------------------------------------------
+// Backend priority mapping
+// --------------------------------------------------------------------------
+
 const priorityMap = {
   High: "HIGH",
   Medium: "MEDIUM",
   Low: "LOW",
 } as const;
+
+// --------------------------------------------------------------------------
+// Create task
+// --------------------------------------------------------------------------
 
 export const createTaskApi = async (
   task: CreateTaskPayload & {
@@ -57,6 +78,10 @@ export const createTaskApi = async (
 
   return response.data;
 };
+
+// --------------------------------------------------------------------------
+// Update task
+// --------------------------------------------------------------------------
 
 export const updateTaskApi = async (
   taskId: string,
@@ -80,11 +105,11 @@ export const updateTaskApi = async (
   return response.data;
 };
 
-/**
- * Move task to recycle bin.
- *
- * SOFT DELETE.
- */
+// ==========================================================================
+// RECYCLE BIN
+// ==========================================================================
+
+
 export const moveTaskToRecycleBinApi = async (
   taskId: string
 ) => {
@@ -95,9 +120,10 @@ export const moveTaskToRecycleBinApi = async (
   return response.data;
 };
 
-/**
- * Restore task from recycle bin.
- */
+// --------------------------------------------------------------------------
+// Restore task from recycle bin
+// --------------------------------------------------------------------------
+
 export const restoreTaskApi = async (
   taskId: string
 ) => {
@@ -108,9 +134,7 @@ export const restoreTaskApi = async (
   return response.data;
 };
 
-/**
- * Permanently delete task.
- */
+
 export const permanentlyDeleteTaskApi = async (
   taskId: string
 ) => {
@@ -120,6 +144,14 @@ export const permanentlyDeleteTaskApi = async (
 
   return response.data;
 };
+
+// ==========================================================================
+// ATTACHMENTS
+// ==========================================================================
+
+// --------------------------------------------------------------------------
+// Upload task attachment
+// --------------------------------------------------------------------------
 
 export const uploadTaskAttachmentApi = async (
   taskId: string,
@@ -142,6 +174,10 @@ export const uploadTaskAttachmentApi = async (
   return response.data;
 };
 
+// --------------------------------------------------------------------------
+// Delete task attachment
+// --------------------------------------------------------------------------
+
 export const deleteTaskAttachmentApi = async (
   taskId: string,
   attachmentId: string
@@ -153,14 +189,24 @@ export const deleteTaskAttachmentApi = async (
   return response.data;
 };
 
-export const createTaskCommentApi = (
+// ==========================================================================
+// COMMENTS
+// ==========================================================================
+
+// --------------------------------------------------------------------------
+// Create task comment
+// --------------------------------------------------------------------------
+
+export const createTaskCommentApi = async (
   taskId: string,
   text: string
 ) => {
-  return api.post(
+  const response = await api.post(
     `/api/tasks/${taskId}/comments`,
     {
       text,
     }
   );
+
+  return response.data;
 };

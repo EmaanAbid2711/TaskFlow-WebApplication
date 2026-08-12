@@ -1,10 +1,18 @@
 import api from "./axios";
 
+// --------------------------------------------------------------------------
+// Get all projects
+// --------------------------------------------------------------------------
+
 export const getProjectsApi = async () => {
   const response = await api.get("/api/projects");
 
   return response.data;
 };
+
+// --------------------------------------------------------------------------
+// Get single project
+// --------------------------------------------------------------------------
 
 export const getProjectApi = async (
   projectId: string
@@ -15,6 +23,10 @@ export const getProjectApi = async (
 
   return response.data;
 };
+
+// --------------------------------------------------------------------------
+// Create project
+// --------------------------------------------------------------------------
 
 export const createProjectApi = async (
   data: {
@@ -29,6 +41,10 @@ export const createProjectApi = async (
 
   return response.data;
 };
+
+// --------------------------------------------------------------------------
+// Update project
+// --------------------------------------------------------------------------
 
 export const updateProjectApi = async (
   projectId: string,
@@ -45,12 +61,11 @@ export const updateProjectApi = async (
   return response.data;
 };
 
-/**
- * Move project to recycle bin.
- *
- * IMPORTANT:
- * This should be a SOFT DELETE.
- */
+// ==========================================================================
+// RECYCLE BIN
+// ==========================================================================
+
+
 export const moveProjectToRecycleBinApi = async (
   projectId: string
 ) => {
@@ -61,9 +76,10 @@ export const moveProjectToRecycleBinApi = async (
   return response.data;
 };
 
-/**
- * Restore project from recycle bin.
- */
+// --------------------------------------------------------------------------
+// Restore project from recycle bin
+// --------------------------------------------------------------------------
+
 export const restoreProjectApi = async (
   projectId: string
 ) => {
@@ -74,9 +90,8 @@ export const restoreProjectApi = async (
   return response.data;
 };
 
-/**
- * Permanently delete project.
- */
+// Permanently delete project
+
 export const permanentlyDeleteProjectApi = async (
   projectId: string
 ) => {
