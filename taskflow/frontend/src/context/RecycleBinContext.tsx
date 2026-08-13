@@ -1,7 +1,14 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode} from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
 import { getRecycleBinApi, type RecycleBinProject, type RecycleBinTask} from "@/api/recycle-bin.api";
-import { restoreProjectApi,  permanentlyDeleteProjectApi} from "@/api/project.api";
+import { restoreProjectApi, permanentlyDeleteProjectApi} from "@/api/project.api";
 import { restoreTaskApi, permanentlyDeleteTaskApi} from "@/api/task.api";
 import { useDashboard } from "@/context/DashboardContext";
 
@@ -74,7 +81,8 @@ export const RecycleBinProvider = ({
   const [error, setError] =
     useState<string | null>(null);
 
-  const { refreshDashboardStats } = useDashboard();
+  const { refreshDashboardStats } =
+    useDashboard();
 
   // ------------------------------------------------------------------------
   // Fetch Recycle Bin
@@ -132,7 +140,8 @@ export const RecycleBinProvider = ({
         // Refresh dashboard statistics.
         await refreshDashboardStats();
 
-        // Remove restored project from local recycle-bin state.
+        // Remove restored project from
+        // local recycle-bin state.
         setProjects((currentProjects) =>
           currentProjects.filter(
             (project) =>
@@ -152,7 +161,7 @@ export const RecycleBinProvider = ({
         throw error;
       }
     },
-    []
+    [refreshDashboardStats]
   );
 
   // ------------------------------------------------------------------------
@@ -169,20 +178,24 @@ export const RecycleBinProvider = ({
         // Refresh dashboard statistics.
         await refreshDashboardStats();
 
-        // Remove restored task from standalone deleted tasks.
+        // Remove restored task from
+        // standalone deleted tasks.
         setTasks((currentTasks) =>
           currentTasks.filter(
-            (task) => task.id !== taskId
+            (task) =>
+              task.id !== taskId
           )
         );
 
-        // Also remove it from a deleted project's nested tasks
-        // in case the backend ever returns it there.
+        // Also remove it from a deleted
+        // project's nested tasks in case
+        // the backend ever returns it there.
         setProjects((currentProjects) =>
           currentProjects.map((project) => ({
             ...project,
             tasks: project.tasks.filter(
-              (task) => task.id !== taskId
+              (task) =>
+                task.id !== taskId
             ),
           }))
         );
@@ -199,7 +212,7 @@ export const RecycleBinProvider = ({
         throw error;
       }
     },
-    []
+    [refreshDashboardStats]
   );
 
   // ------------------------------------------------------------------------
@@ -239,7 +252,7 @@ export const RecycleBinProvider = ({
           throw error;
         }
       },
-      []
+      [refreshDashboardStats]
     );
 
   // ------------------------------------------------------------------------
@@ -261,7 +274,8 @@ export const RecycleBinProvider = ({
 
           setTasks((currentTasks) =>
             currentTasks.filter(
-              (task) => task.id !== taskId
+              (task) =>
+                task.id !== taskId
             )
           );
 
@@ -269,7 +283,8 @@ export const RecycleBinProvider = ({
             currentProjects.map((project) => ({
               ...project,
               tasks: project.tasks.filter(
-                (task) => task.id !== taskId
+                (task) =>
+                  task.id !== taskId
               ),
             }))
           );
@@ -286,7 +301,7 @@ export const RecycleBinProvider = ({
           throw error;
         }
       },
-      []
+      [refreshDashboardStats]
     );
 
   // ------------------------------------------------------------------------
