@@ -11,6 +11,7 @@ import { createTaskApi, updateTaskApi, moveTaskToRecycleBinApi} from "@/api/task
 import { mapTask } from "@/mappers/task.mapper";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboard } from "@/context/DashboardContext";
+import { useRecycleBin } from "@/context/RecycleBinContext";
 
 function Projects() {
   const navigate = useNavigate();
@@ -39,6 +40,8 @@ function Projects() {
     deleteProject,
     removeTaskLocally,
   } = useProjects();
+
+  const { refreshRecycleBin } = useRecycleBin();
 
   const isOwner = selectedProject?.owner.id === user?.id;
 
@@ -206,9 +209,8 @@ function Projects() {
 
   try {
     await deleteProject(selectedProject.id);
-
+    await refreshRecycleBin();
     await refreshDashboardStats();
-
     setProjectDrawerOpen(false);
 
     toast.success(
@@ -396,6 +398,8 @@ function Projects() {
     await moveTaskToRecycleBinApi(
       selectedTask.id
     );
+
+    await refreshRecycleBin();
 
     removeTaskLocally(
       selectedTask.id,
