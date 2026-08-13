@@ -140,6 +140,8 @@ export const getDashboardStats = async (
   const projects =
   await prisma.project.findMany({
     where: {
+      deletedAt: null,
+
       OR: [
         {
           ownerId: userId,
