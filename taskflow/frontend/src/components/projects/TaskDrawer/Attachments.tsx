@@ -1,19 +1,7 @@
 import { useRef, useState } from "react";
-import {
-  FileImage,
-  FileText,
-  Upload,
-  Trash2,
-  ExternalLink,
-  Loader2,
-  X,
-} from "lucide-react";
+import { FileImage, FileText, Upload, Trash2, ExternalLink, Loader2, X} from "lucide-react";
 
-import {
-  uploadTaskAttachmentApi,
-  deleteTaskAttachmentApi,
-} from "@/api/task.api";
-
+import { uploadTaskAttachmentApi, deleteTaskAttachmentApi} from "@/api/task.api";
 import type { Task } from "@/interfaces/projects";
 import ConfirmModal from "@/components/common/ConfirmModal/confirmmodal";
 
@@ -37,6 +25,7 @@ function Attachments({
 
   const [uploading, setUploading] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   /*
    |--------------------------------------------------------------------------
@@ -148,24 +137,27 @@ function Attachments({
    */
 
   const handleDelete = async () => {
-    if (!deleteId) {
-      return;
-    }
+  if (!deleteId) {
+    return;
+  }
 
-    try {
-      await deleteTaskAttachmentApi(
-        task.id,
-        deleteId
-      );
+  try {
+    setDeleting(true);
 
-      await syncTask();
-    } catch (error) {
-      console.error(error);
-      alert("Failed to delete attachment");
-    } finally {
-      setDeleteId(null);
-    }
-  };
+    await deleteTaskAttachmentApi(
+      task.id,
+      deleteId
+    );
+
+    await syncTask();
+  } catch (error) {
+    console.error(error);
+    alert("Failed to delete attachment");
+  } finally {
+    setDeleting(false);
+    setDeleteId(null);
+  }
+};
 
   return (
     <div className="space-y-4">
@@ -331,14 +323,37 @@ function Attachments({
         )
       )}
 
-      <ConfirmModal
-        open={deleteId !== null}
-        title="Delete Attachment"
-        message="Are you sure you want to delete this attachment? This action cannot be undone."
-        confirmText="Delete"
-        onCancel={() => setDeleteId(null)}
-        onConfirm={handleDelete}
-      />
+      <div className="relative">
+  <ConfirmModal
+    open={deleteId !== null}
+    title="Delete Attachment"
+    message="Are you sure you want to delete this attachment? This action cannot be undone."
+    confirmText="Delete"
+    onCancel={() => {
+      if (!deleting) {
+        setDeleteId(null);
+      }
+    }}
+    onConfirm={handleDelete}
+  />
+
+  {deleting && (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center">
+      <div className="rounded-lg bg-white px-5 py-4 shadow-xl">
+        <div className="flex items-center gap-3">
+          <Loader2
+            size={18}
+            className="animate-spin text-[#0052cc]"
+          />
+
+          <span className="text-sm font-medium text-slate-700">
+            Deleting attachment...
+          </span>
+        </div>
+      </div>
+    </div>
+  )}
+</div>
     </div>
   );
 }
