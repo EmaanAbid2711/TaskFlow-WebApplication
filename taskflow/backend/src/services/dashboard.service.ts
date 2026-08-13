@@ -77,64 +77,11 @@ export const getDashboardStats = async (
   */
 
   const totalTasks =
-    await prisma.task.count({
-      where: {
-        project: {
-          OR: [
-            {
-              ownerId: userId,
-            },
-            {
-              members: {
-                some: {
-                  userId,
-                },
-              },
-            },
-          ],
-        },
-      },
-    });
+  await prisma.task.count({
+    where: {
+      deletedAt: null,
 
-  /*
-  |--------------------------------------------------------------------------
-  | Completed Tasks
-  |--------------------------------------------------------------------------
-  */
-
-  const completedTasks =
-    await prisma.task.count({
-      where: {
-        status: "COMPLETED",
-        project: {
-          OR: [
-            {
-              ownerId: userId,
-            },
-            {
-              members: {
-                some: {
-                  userId,
-                },
-              },
-            },
-          ],
-        },
-      },
-    });
-
-  const pendingTasks =
-    totalTasks - completedTasks;
-
-  /*
-  |--------------------------------------------------------------------------
-  | Project Progress
-  |--------------------------------------------------------------------------
-  */
-
-  const projects =
-    await prisma.project.findMany({
-      where: {
+      project: {
         OR: [
           {
             ownerId: userId,
@@ -148,15 +95,76 @@ export const getDashboardStats = async (
           },
         ],
       },
+    },
+  });
 
-      include: {
-        tasks: true,
-      },
+  /*
+  |--------------------------------------------------------------------------
+  | Completed Tasks
+  |--------------------------------------------------------------------------
+  */
 
-      orderBy: {
-        createdAt: "desc",
+  const completedTasks =
+  await prisma.task.count({
+    where: {
+      deletedAt: null,
+      status: "COMPLETED",
+
+      project: {
+        OR: [
+          {
+            ownerId: userId,
+          },
+          {
+            members: {
+              some: {
+                userId,
+              },
+            },
+          },
+        ],
       },
-    });
+    },
+  });
+
+  const pendingTasks =
+    totalTasks - completedTasks;
+
+  /*
+  |--------------------------------------------------------------------------
+  | Project Progress
+  |--------------------------------------------------------------------------
+  */
+
+  const projects =
+  await prisma.project.findMany({
+    where: {
+      OR: [
+        {
+          ownerId: userId,
+        },
+        {
+          members: {
+            some: {
+              userId,
+            },
+          },
+        },
+      ],
+    },
+
+    include: {
+      tasks: {
+        where: {
+          deletedAt: null,
+        },
+      },
+    },
+
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   const projectProgress =
     projects.map(project => {
@@ -250,6 +258,7 @@ export const getDashboardStats = async (
   const upcomingTasks =
     await prisma.task.findMany({
       where: {
+        deletedAt: null,
         dueDate: {
           not: null,
         },
@@ -370,6 +379,7 @@ export const getDashboardStats = async (
   const completedTasksTrend =
     await prisma.task.findMany({
       where: {
+        deletedAt: null,
         status: "COMPLETED",
 
         completedAt: {
