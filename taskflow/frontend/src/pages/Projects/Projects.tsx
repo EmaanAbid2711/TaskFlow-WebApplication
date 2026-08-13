@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { ProjectHeader, KanbanBoard, TaskDrawer, ProjectDrawer} from "@/components";
 import type { DrawerMode, Task, TaskType } from "@/interfaces/projects";
 import { useProjects } from "@/hooks/useProjects";
-import { createTaskApi, updateTaskApi, moveTaskToRecycleBinApi} from "@/api/task.api";
+import { createTaskApi, updateTaskApi, moveTaskToRecycleBinApi, uploadTaskAttachmentApi} from "@/api/task.api";
 import { mapTask } from "@/mappers/task.mapper";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboard } from "@/context/DashboardContext";
@@ -316,73 +316,158 @@ function Projects() {
    * Save Task
    * ------------------------------------------------------------
    */
-  const handleSaveTask = async () => {
-    if (!selectedTask || !selectedProject) {
-      return;
-    }
+  const handleSaveTask = async (
+    pendingAttachments: File[] = []
+) => {
+  if (!selectedTask || !selectedProject) {
+    return;
+  }
 
-    if (savingTask) {
-      return;
-    }
+  if (savingTask) {
+    return;
+  }
 
-    setSavingTask(true);
+  setSavingTask(true);
 
-    try {
-      /* CREATE TASK */
-      if (drawerMode === "create") {
-        if (selectedTask.title.trim().length < 3) {
-          alert("Task title must be at least 3 characters.");
-          return;
+  try {
+    /*
+     * ------------------------------------------------------------
+     * CREATE TASK
+     * ------------------------------------------------------------
+     */
+
+    if (drawerMode === "create") {
+      if (selectedTask.title.trim().length < 3) {
+        alert("Task title must be at least 3 characters.");
+        return;
+      }
+
+      const response = await createTaskApi({
+        title: selectedTask.title,
+        description: selectedTask.description,
+        status: selectedTask.status,
+        priority: selectedTask.priority,
+        dueDate: selectedTask.dueDate || undefined,
+        progress: selectedTask.progress,
+        reviewStatus: selectedTask.reviewStatus,
+        projectId: selectedProject.id,
+        assigneeId:
+          selectedTask.assignee.id || undefined,
+      });
+
+      /*
+       * The task now exists in the backend,
+       * so we finally have a real task ID.
+       */
+
+      const createdTask = mapTask(response.data);
+
+      /*
+       * Add the newly-created task to the board.
+       */
+
+      setTasks((previous) => [
+        ...previous,
+        createdTask,
+      ]);
+
+      /*
+       * ----------------------------------------------------------
+       * UPLOAD PENDING ATTACHMENTS
+       * ----------------------------------------------------------
+       */
+
+      if (pendingAttachments.length > 0) {
+        try {
+          for (const file of pendingAttachments) {
+            await uploadTaskAttachmentApi(
+              createdTask.id,
+              file
+            );
+          }
+        } catch (attachmentError) {
+          console.error(
+            "Task created but attachment upload failed:",
+            attachmentError
+          );
+
+          toast.error(
+            "Task was created, but one or more attachments failed to upload."
+          );
         }
 
-        const response = await createTaskApi({
-          title: selectedTask.title,
-          description: selectedTask.description,
-          status: selectedTask.status,
-          priority: selectedTask.priority,
-          dueDate: selectedTask.dueDate || undefined,
-          progress: selectedTask.progress,
-          reviewStatus: selectedTask.reviewStatus,
-          projectId: selectedProject.id,
-          assigneeId: selectedTask.assignee.id || undefined,
-        });
+        /*
+         * Refresh the task list so the newly-uploaded
+         * attachments are included in the task object.
+         */
 
-        setTasks((previous) => [...previous, mapTask(response.data)]);
-        await refreshProjectStats(selectedProject.id);
-        await refreshDashboardStats();
-      } 
-      /* UPDATE TASK */
-      else {
-        const response = await updateTaskApi(selectedTask.id, {
+        const updatedTasks =
+          await refreshCurrentProject();
+
+        setTasks(updatedTasks);
+      }
+
+      await refreshProjectStats(
+        selectedProject.id
+      );
+
+      await refreshDashboardStats();
+    }
+
+    /*
+     * ------------------------------------------------------------
+     * UPDATE TASK
+     * ------------------------------------------------------------
+     */
+
+    else {
+      const response = await updateTaskApi(
+        selectedTask.id,
+        {
           title: selectedTask.title,
-          description: selectedTask.description,
+          description:
+            selectedTask.description,
           status: selectedTask.status,
           priority: selectedTask.priority,
           dueDate: selectedTask.dueDate,
           progress: selectedTask.progress,
-          reviewStatus: selectedTask.reviewStatus,
-          assigneeId: selectedTask.assignee.id,
-        });
+          reviewStatus:
+            selectedTask.reviewStatus,
+          assigneeId:
+            selectedTask.assignee.id,
+        }
+      );
 
-        setTasks((previous) =>
-          previous.map((task) =>
-            task.id === selectedTask.id ? mapTask(response.data) : task
-          )
-        );
+      setTasks((previous) =>
+        previous.map((task) =>
+          task.id === selectedTask.id
+            ? mapTask(response.data)
+            : task
+        )
+      );
 
-        await refreshProjectStats(selectedProject.id);
-        await refreshDashboardStats();
-      }
+      await refreshProjectStats(
+        selectedProject.id
+      );
 
-      setDrawerOpen(false);
-      setSelectedTask(null);
-    } catch (error) {
-      console.error("Task save failed:", error);
-      toast.error("Failed to save task.");
-    } finally {
-      setSavingTask(false);
+      await refreshDashboardStats();
     }
-  };
+
+    setDrawerOpen(false);
+    setSelectedTask(null);
+  } catch (error) {
+    console.error(
+      "Task save failed:",
+      error
+    );
+
+    toast.error(
+      "Failed to save task."
+    );
+  } finally {
+    setSavingTask(false);
+  }
+};
 
   /*
    * ------------------------------------------------------------
