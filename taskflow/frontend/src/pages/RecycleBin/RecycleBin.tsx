@@ -1,74 +1,106 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import RecycleBinItem from "@/components/recycleBin/RecycleBinItem";
 import ConfirmModal from "@/components/common/ConfirmModal/confirmmodal";
+
 import { useRecycleBin } from "@/context/RecycleBinContext";
-import type { RecycleBinItem as RecycleBinItemType} from "@/interfaces/recycleBin";
+
+import type {
+  RecycleBinItem as RecycleBinItemType,
+} from "@/interfaces/recycleBin";
 
 function RecycleBin() {
   const navigate = useNavigate();
 
   const {
-    items,
-    restoreItem,
-    permanentlyDeleteItem,
+    projects,
+    tasks,
+    loading,
+    error,
+    restoreProject,
+    restoreTask,
+    permanentlyDeleteProject,
+    permanentlyDeleteTask,
+    refreshRecycleBin,
   } = useRecycleBin();
 
   const [
     itemToDelete,
     setItemToDelete,
-  ] =
-    useState<RecycleBinItemType | null>(
-      null
-    );
+  ] = useState<RecycleBinItemType | null>(
+    null
+  );
 
-  /**
-   * ------------------------------------------------------------
-   * Restore
-   * ------------------------------------------------------------
-   */
+  // --------------------------------------------------------------------------
+  // Combine Projects + Tasks
+  // --------------------------------------------------------------------------
+
+  const items = useMemo<RecycleBinItemType[]>(
+    () => [
+      ...projects.map((project) => ({
+        recycleId: project.id,
+        type: "project" as const,
+        item: project,
+        deletedAt: project.deletedAt,
+      })),
+
+      ...tasks.map((task) => ({
+        recycleId: task.id,
+        type: "task" as const,
+        item: task,
+        projectId: task.project.id,
+        deletedAt: task.deletedAt,
+      })),
+    ],
+    [projects, tasks]
+  );
+
+  // --------------------------------------------------------------------------
+  // Restore
+  // --------------------------------------------------------------------------
+
   const handleRestore = async (
     recycleId: string
   ) => {
+    const target = items.find(
+      (item) => item.recycleId === recycleId
+    );
+
+    if (!target) {
+      return;
+    }
+
     try {
-      const item =
-        await restoreItem(recycleId);
+      if (target.type === "project") {
+        await restoreProject(target.item.id);
 
-      if (!item) {
-        return;
-      }
-
-      toast.success(
-        `${
-          item.type === "project"
-            ? "Project"
-            : "Task"
-        } restored successfully.`
-      );
-
-      if (
-        item.type === "project"
-      ) {
-        navigate(
-          "/projects",
-          {
-            state: {
-              restoredItem: item,
-            },
-          }
+        toast.success(
+          "Project restored successfully."
         );
 
+        navigate("/projects", {
+          state: {
+            restoredItem: target,
+          },
+        });
+
         return;
       }
 
+      await restoreTask(target.item.id);
+
+      toast.success(
+        "Task restored successfully."
+      );
+
       navigate(
-        `/projects?projectId=${item.projectId}`,
+        `/projects?projectId=${target.projectId}`,
         {
           state: {
-            restoredItem: item,
+            restoredItem: target,
           },
         }
       );
@@ -84,43 +116,201 @@ function RecycleBin() {
     }
   };
 
-  /**
-   * ------------------------------------------------------------
-   * Permanent Delete
-   * ------------------------------------------------------------
-   */
-  const handlePermanentDelete =
-    async () => {
-      if (!itemToDelete) {
-        return;
-      }
+  // --------------------------------------------------------------------------
+  // Permanent Delete
+  // --------------------------------------------------------------------------
 
-      try {
-        await permanentlyDeleteItem(
-          itemToDelete.recycleId
+  const handlePermanentDelete = async () => {
+    if (!itemToDelete) {
+      return;
+    }
+
+    try {
+      if (
+        itemToDelete.type === "project"
+      ) {
+        await permanentlyDeleteProject(
+          itemToDelete.item.id
         );
 
         toast.success(
-          `${
-            itemToDelete.type ===
-            "project"
-              ? "Project"
-              : "Task"
-          } permanently deleted.`
+          "Project permanently deleted."
+        );
+      } else {
+        await permanentlyDeleteTask(
+          itemToDelete.item.id
         );
 
-        setItemToDelete(null);
-      } catch (error) {
-        console.error(
-          "Failed to permanently delete item:",
-          error
-        );
-
-        toast.error(
-          "Failed to permanently delete item."
+        toast.success(
+          "Task permanently deleted."
         );
       }
-    };
+
+      setItemToDelete(null);
+    } catch (error) {
+      console.error(
+        "Failed to permanently delete item:",
+        error
+      );
+
+      toast.error(
+        "Failed to permanently delete item."
+      );
+    }
+  };
+
+  // --------------------------------------------------------------------------
+  // Loading State
+  // --------------------------------------------------------------------------
+
+  if (loading) {
+    return (
+      <div
+        className="
+          min-h-screen
+          flex-1
+          bg-slate-50
+          p-5
+          md:p-8
+        "
+      >
+        <div
+          className="
+            flex
+            min-h-[420px]
+            items-center
+            justify-center
+            rounded-xl
+            border
+            border-slate-200
+            bg-white
+          "
+        >
+          <div className="text-center">
+            <div
+              className="
+                mx-auto
+                h-8
+                w-8
+                animate-spin
+                rounded-full
+                border-4
+                border-slate-200
+                border-t-slate-700
+              "
+            />
+
+            <p
+              className="
+                mt-4
+                text-sm
+                text-slate-500
+              "
+            >
+              Loading recycle bin...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // Error State
+  // --------------------------------------------------------------------------
+
+  if (error && items.length === 0) {
+    return (
+      <div
+        className="
+          min-h-screen
+          flex-1
+          bg-slate-50
+          p-5
+          md:p-8
+        "
+      >
+        <div
+          className="
+            flex
+            min-h-[420px]
+            flex-col
+            items-center
+            justify-center
+            rounded-xl
+            border
+            border-red-200
+            bg-white
+            px-6
+            text-center
+          "
+        >
+          <div
+            className="
+              flex
+              h-16
+              w-16
+              items-center
+              justify-center
+              rounded-full
+              bg-red-50
+              text-red-500
+            "
+          >
+            <Trash2 size={28} />
+          </div>
+
+          <h2
+            className="
+              mt-5
+              text-lg
+              font-semibold
+              text-slate-900
+            "
+          >
+            Failed to load Recycle Bin
+          </h2>
+
+          <p
+            className="
+              mt-2
+              max-w-md
+              text-sm
+              leading-6
+              text-slate-500
+            "
+          >
+            {error}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => {
+              void refreshRecycleBin();
+            }}
+            className="
+              mt-5
+              rounded-lg
+              bg-slate-900
+              px-4
+              py-2
+              text-sm
+              font-medium
+              text-white
+              transition
+              hover:bg-slate-800
+            "
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // Main UI
+  // --------------------------------------------------------------------------
 
   return (
     <div
@@ -193,6 +383,8 @@ function RecycleBin() {
             </div>
           </div>
         </div>
+
+        {/* Item Count */}
 
         <div
           className="
@@ -276,23 +468,26 @@ function RecycleBin() {
           </p>
         </div>
       ) : (
+        /* Recycle Bin Items */
+
         <div className="space-y-4">
           {items.map((item) => (
             <RecycleBinItem
               key={item.recycleId}
               item={item}
-              onRestore={
-                handleRestore
-              }
+              onRestore={(recycleId) => {
+                void handleRestore(
+                  recycleId
+                );
+              }}
               onPermanentDelete={(
                 recycleId
               ) => {
-                const target =
-                  items.find(
-                    (entry) =>
-                      entry.recycleId ===
-                      recycleId
-                  );
+                const target = items.find(
+                  (entry) =>
+                    entry.recycleId ===
+                    recycleId
+                );
 
                 if (target) {
                   setItemToDelete(
@@ -308,9 +503,7 @@ function RecycleBin() {
       {/* Permanent Delete Confirmation */}
 
       <ConfirmModal
-        open={
-          itemToDelete !== null
-        }
+        open={itemToDelete !== null}
         title="Delete Permanently?"
         message={
           itemToDelete
@@ -327,9 +520,9 @@ function RecycleBin() {
         onCancel={() =>
           setItemToDelete(null)
         }
-        onConfirm={
-          handlePermanentDelete
-        }
+        onConfirm={() => {
+          void handlePermanentDelete();
+        }}
       />
     </div>
   );

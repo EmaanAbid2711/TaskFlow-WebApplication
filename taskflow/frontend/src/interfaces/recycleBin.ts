@@ -1,20 +1,20 @@
-import type { Project } from "@/interfaces/project";
-import type { Task } from "@/interfaces/projects";
+import type {
+  RecycleBinProject,
+  RecycleBinTask,
+} from "@/api/recycle-bin.api";
 
 export type RecycleBinItem =
   | {
       recycleId: string;
       type: "project";
-      item: Project;
-      originalPosition: number;
+      item: RecycleBinProject;
       deletedAt: string;
     }
   | {
       recycleId: string;
       type: "task";
-      item: Task;
+      item: RecycleBinTask;
       projectId: string;
-      originalPosition: number;
       deletedAt: string;
     };
 

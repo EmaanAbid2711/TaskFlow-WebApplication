@@ -1,17 +1,13 @@
 import { FolderKanban, CheckSquare, RotateCcw, Trash2, Clock} from "lucide-react";
 
-import type { RecycleBinItem as RecycleBinItemType} from "@/interfaces/recycleBin";
+import type { RecycleBinItem as RecycleBinItemType } from "@/interfaces/recycleBin";
 
 interface Props {
   item: RecycleBinItemType;
 
-  onRestore: (
-    recycleId: string
-  ) => void;
+  onRestore: (recycleId: string) => void;
 
-  onPermanentDelete: (
-    recycleId: string
-  ) => void;
+  onPermanentDelete: (recycleId: string) => void;
 }
 
 function RecycleBinItem({
@@ -19,18 +15,15 @@ function RecycleBinItem({
   onRestore,
   onPermanentDelete,
 }: Props) {
-  const isProject =
-    item.type === "project";
+  const isProject = item.type === "project";
 
-  const name =
-    item.type === "project"
-      ? item.item.name
-      : item.item.title;
+  const name = isProject
+    ? item.item.name
+    : item.item.title;
 
-  const deletedDate =
-    new Date(
-      item.deletedAt
-    ).toLocaleString();
+  const deletedDate = new Date(
+    item.deletedAt
+  ).toLocaleString();
 
   return (
     <div
@@ -65,6 +58,8 @@ function RecycleBinItem({
             gap-4
           "
         >
+          {/* Icon */}
+
           <div
             className="
               flex
@@ -79,15 +74,13 @@ function RecycleBinItem({
             "
           >
             {isProject ? (
-              <FolderKanban
-                size={21}
-              />
+              <FolderKanban size={21} />
             ) : (
-              <CheckSquare
-                size={21}
-              />
+              <CheckSquare size={21} />
             )}
           </div>
+
+          {/* Details */}
 
           <div className="min-w-0">
             <div
@@ -120,11 +113,11 @@ function RecycleBinItem({
                   text-slate-600
                 "
               >
-                {isProject
-                  ? "Project"
-                  : "Task"}
+                {isProject ? "Project" : "Task"}
               </span>
             </div>
+
+            {/* Project ID for tasks */}
 
             {!isProject && (
               <p
@@ -133,10 +126,11 @@ function RecycleBinItem({
                   text-slate-500
                 "
               >
-                Project ID:{" "}
-                {item.projectId}
+                Project ID: {item.projectId}
               </p>
             )}
+
+            {/* Deleted date */}
 
             <div
               className="
@@ -150,8 +144,7 @@ function RecycleBinItem({
             >
               <Clock size={13} />
 
-              Deleted{" "}
-              {deletedDate}
+              Deleted {deletedDate}
             </div>
           </div>
         </div>
@@ -168,9 +161,7 @@ function RecycleBinItem({
           <button
             type="button"
             onClick={() =>
-              onRestore(
-                item.recycleId
-              )
+              onRestore(item.recycleId)
             }
             className="
               flex
@@ -196,9 +187,7 @@ function RecycleBinItem({
           <button
             type="button"
             onClick={() =>
-              onPermanentDelete(
-                item.recycleId
-              )
+              onPermanentDelete(item.recycleId)
             }
             className="
               flex
