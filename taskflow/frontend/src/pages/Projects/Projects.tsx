@@ -7,12 +7,10 @@ import { toast } from "sonner";
 import { ProjectHeader, KanbanBoard, TaskDrawer, ProjectDrawer} from "@/components";
 import type { DrawerMode, Task, TaskType } from "@/interfaces/projects";
 import { useProjects } from "@/hooks/useProjects";
-import { createTaskApi, updateTaskApi } from "@/api/task.api";
+import { createTaskApi, updateTaskApi, moveTaskToRecycleBinApi} from "@/api/task.api";
 import { mapTask } from "@/mappers/task.mapper";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboard } from "@/context/DashboardContext";
-import { useRecycleBin } from "@/context/RecycleBinContext";
-import type { RecycleBinNavigationState } from "@/interfaces/recycleBin";
 
 function Projects() {
   const navigate = useNavigate();
@@ -30,12 +28,10 @@ function Projects() {
 
   const {
     projects,
-    setProjects,
     selectedProject,
     setSelectedProject,
     tasks,
     setTasks,
-    tasksLoading,
     refreshProjectStats,
     refreshCurrentProject,
     createProject,
@@ -44,8 +40,6 @@ function Projects() {
     removeTaskLocally,
   } = useProjects();
 
-  
-  const { moveTaskToRecycleBin } = useRecycleBin();
   const isOwner = selectedProject?.owner.id === user?.id;
 
   const canOpenTask = (task: Task) => {
@@ -55,99 +49,6 @@ function Projects() {
     return task.assignee.id === user?.id;
   };
 
-  useEffect(() => {
-    const navigationState = location.state as RecycleBinNavigationState | null;
-    const restoredItem = navigationState?.restoredItem;
-
-    if (!restoredItem) {
-      return;
-    }
-
-    /* Restore Project */
-    if (restoredItem.type === "project") {
-      const restoredProject = projects.find(
-        (project) => project.id === restoredItem.item.id
-      );
-
-      if (!restoredProject) {
-        return;
-      }
-
-      setProjects((previous) => {
-        const withoutProject = previous.filter(
-          (project) => project.id !== restoredProject.id
-        );
-
-        const position = Math.min(
-          restoredItem.originalPosition,
-          withoutProject.length
-        );
-
-        return [
-          ...withoutProject.slice(0, position),
-          restoredProject,
-          ...withoutProject.slice(position),
-        ];
-      });
-
-      setSelectedProject(restoredProject);
-      navigate("/projects", { replace: true, state: null });
-      return;
-    }
-
-    /* Restore Task */
-    if (restoredItem.type !== "task") {
-      return;
-    }
-
-    if (selectedProject?.id !== restoredItem.projectId) {
-      return;
-    }
-
-    if (tasksLoading) {
-      return;
-    }
-
-    const restoreTaskPosition = async () => {
-      const refreshedTasks = await refreshCurrentProject();
-
-      const restoredIndex = refreshedTasks.findIndex(
-        (task) => task.id === restoredItem.item.id
-      );
-
-      if (restoredIndex === -1) {
-        return;
-      }
-
-      const targetPosition = Math.min(
-        restoredItem.originalPosition,
-        refreshedTasks.length - 1
-      );
-
-      if (restoredIndex !== targetPosition) {
-        setTasks((previous) => {
-          const copy = [...previous];
-          const [restoredTask] = copy.splice(restoredIndex, 1);
-          copy.splice(targetPosition, 0, restoredTask);
-          return copy;
-        });
-      }
-
-      navigate("/projects", { replace: true, state: null });
-    };
-
-    restoreTaskPosition();
-  }, [
-    location.state,
-    projects,
-    tasksLoading,
-    selectedProject,
-    navigate,
-    setProjects,
-    setSelectedProject,
-    setTasks,
-    refreshCurrentProject,
-  ]);
 
   /*
    * ------------------------------------------------------------
@@ -299,15 +200,31 @@ function Projects() {
    * ------------------------------------------------------------
    */
   const handleDeleteProject = async () => {
-    if (!selectedProject) {
-      return;
-    }
+  if (!selectedProject) {
+    return;
+  }
 
-    deleteProject(selectedProject.id);
+  try {
+    await deleteProject(selectedProject.id);
+
     await refreshDashboardStats();
+
     setProjectDrawerOpen(false);
-    toast.success("Project moved to the Recycle Bin.");
-  };
+
+    toast.success(
+      "Project moved to the Recycle Bin."
+    );
+  } catch (error) {
+    console.error(
+      "Failed to move project to recycle bin:",
+      error
+    );
+
+    toast.error(
+      "Failed to move project to the Recycle Bin."
+    );
+  }
+};
 
   /*
    * ------------------------------------------------------------
@@ -471,37 +388,43 @@ function Projects() {
    * ------------------------------------------------------------
    */
   const handleDeleteTask = async () => {
-    if (!selectedTask || !selectedProject) {
-      return;
-    }
+  if (!selectedTask || !selectedProject) {
+    return;
+  }
 
-    const originalPosition = tasks.findIndex(
-      (task) => task.id === selectedTask.id
+  try {
+    await moveTaskToRecycleBinApi(
+      selectedTask.id
     );
 
-    if (originalPosition === -1) {
-      return;
-    }
+    removeTaskLocally(
+      selectedTask.id,
+      selectedProject.id
+    );
 
-    try {
-      moveTaskToRecycleBin(
-        selectedTask,
-        selectedProject.id,
-        originalPosition
-      );
+    await refreshProjectStats(
+      selectedProject.id
+    );
 
-      removeTaskLocally(selectedTask.id, selectedProject.id);
-      await refreshProjectStats(selectedProject.id);
-      await refreshDashboardStats();
+    await refreshDashboardStats();
 
-      setDrawerOpen(false);
-      setSelectedTask(null);
-      toast.success("Task moved to the Recycle Bin.");
-    } catch (error) {
-      console.error("Failed to move task to recycle bin:", error);
-      toast.error("Failed to delete task.");
-    }
-  };
+    setDrawerOpen(false);
+    setSelectedTask(null);
+
+    toast.success(
+      "Task moved to the Recycle Bin."
+    );
+  } catch (error) {
+    console.error(
+      "Failed to move task to recycle bin:",
+      error
+    );
+
+    toast.error(
+      "Failed to delete task."
+    );
+  }
+};
 
   /*
    * ------------------------------------------------------------

@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { getProjectsApi, getProjectApi, createProjectApi, updateProjectApi} from "@/api/project.api";
+import { getProjectsApi, getProjectApi, createProjectApi, updateProjectApi, moveProjectToRecycleBinApi} from "@/api/project.api";
 import { getProjectTasksApi } from "@/api/task.api";
 import type { Project } from "@/interfaces/project";
 import type { Task } from "@/interfaces/projects";
 import { mapTasks } from "@/mappers/task.mapper";
-import { useRecycleBin } from "@/context/RecycleBinContext";
 
 export function useProjects() {
   /*
@@ -19,58 +18,33 @@ export function useProjects() {
   const [loading, setLoading] = useState(true);
   const [tasksLoading, setTasksLoading] = useState(false);
 
-  /*
-   * ------------------------------------------------------------
-   * Recycle Bin
-   * ------------------------------------------------------------
-   */
-  const {
-    deletedProjectIds,
-    deletedTaskIds,
-    moveProjectToRecycleBin,
-  } = useRecycleBin();
 
-  /*
-   * ------------------------------------------------------------
-   * Load Projects
-   * ------------------------------------------------------------
-   */
   const loadProjects = useCallback(async () => {
-    try {
-      const response = await getProjectsApi();
-      const data = response.data as Project[];
+  try {
+    const response = await getProjectsApi();
+    const data = response.data as Project[];
 
-      /*
-       * Hide projects that are currently
-       * inside the recycle bin.
-       */
-      const visibleProjects = data.filter(
-        (project) => !deletedProjectIds.includes(project.id)
-      );
+    setProjects(data);
 
-      setProjects(visibleProjects);
+    setSelectedProject((previous) => {
+      if (previous) {
+        const exists = data.find(
+          (project) => project.id === previous.id
+        );
 
-      /*
-       * Keep the current selected project if it still exists.
-       * Otherwise select the first project.
-       */
-      setSelectedProject((previous) => {
-        if (previous) {
-          const exists = visibleProjects.find(
-            (project) => project.id === previous.id
-          );
-          if (exists) {
-            return exists;
-          }
+        if (exists) {
+          return exists;
         }
-        return visibleProjects.length > 0 ? visibleProjects[0] : null;
-      });
-    } catch (error) {
-      console.error("Failed to load projects:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [deletedProjectIds]);
+      }
+
+      return data.length > 0 ? data[0] : null;
+    });
+  } catch (error) {
+    console.error("Failed to load projects:", error);
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
   /*
    * ------------------------------------------------------------
@@ -125,34 +99,43 @@ export function useProjects() {
    * No backend DELETE request.
    * ------------------------------------------------------------
    */
-  const deleteProject = (projectId: string) => {
-    const project = projects.find((entry) => entry.id === projectId);
-    if (!project) {
-      return;
-    }
+  const deleteProject = async (projectId: string) => {
+  const project = projects.find(
+    (entry) => entry.id === projectId
+  );
 
-    const originalPosition = projects.findIndex(
-      (entry) => entry.id === projectId
+  if (!project) {
+    return;
+  }
+
+  try {
+    await moveProjectToRecycleBinApi(projectId);
+
+    const remaining = projects.filter(
+      (entry) => entry.id !== projectId
     );
 
-    moveProjectToRecycleBin(project, originalPosition);
-
-    const remaining = projects.filter((entry) => entry.id !== projectId);
     setProjects(remaining);
 
-    /*
-     * If the deleted project was selected,
-     * select the next available project.
-     */
     if (selectedProject?.id === projectId) {
-      const nextProject = remaining.length > 0 ? remaining[0] : null;
+      const nextProject =
+        remaining.length > 0 ? remaining[0] : null;
+
       setSelectedProject(nextProject);
 
       if (!nextProject) {
         setTasks([]);
       }
     }
-  };
+  } catch (error) {
+    console.error(
+      "Failed to move project to recycle bin:",
+      error
+    );
+
+    throw error;
+  }
+};
 
   /*
    * ------------------------------------------------------------
@@ -266,29 +249,24 @@ export function useProjects() {
    * ------------------------------------------------------------
    */
   const loadTasks = useCallback(
-    async (projectId: string): Promise<Task[]> => {
-      try {
-        setTasksLoading(true);
+  async (projectId: string): Promise<Task[]> => {
+    try {
+      setTasksLoading(true);
 
-        const response = await getProjectTasksApi(projectId);
-        const mappedTasks = mapTasks(response.data);
+      const response = await getProjectTasksApi(projectId);
+      const mappedTasks = mapTasks(response.data);
 
-        /* Hide tasks currently inside the recycle bin. */
-        const visibleTasks = mappedTasks.filter(
-          (task) => !deletedTaskIds.includes(task.id)
-        );
-
-        setTasks(visibleTasks);
-        return visibleTasks;
-      } catch (error) {
-        console.error("Failed to load tasks:", error);
-        return [];
-      } finally {
-        setTasksLoading(false);
-      }
-    },
-    [deletedTaskIds]
-  );
+      setTasks(mappedTasks);
+      return mappedTasks;
+    } catch (error) {
+      console.error("Failed to load tasks:", error);
+      return [];
+    } finally {
+      setTasksLoading(false);
+    }
+  },
+  []
+);
 
   /*
    * ------------------------------------------------------------
