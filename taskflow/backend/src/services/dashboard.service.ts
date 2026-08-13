@@ -55,6 +55,7 @@ export const getDashboardStats = async (
   const totalProjects =
     await prisma.project.count({
       where: {
+        deletedAt: null,
         OR: [
           {
             ownerId: userId,
