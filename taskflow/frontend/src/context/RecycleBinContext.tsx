@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import { getRecycleBinApi, type RecycleBinProject, type RecycleBinTask} from "@/api/recycle-bin.api";
 import { restoreProjectApi,  permanentlyDeleteProjectApi} from "@/api/project.api";
 import { restoreTaskApi, permanentlyDeleteTaskApi} from "@/api/task.api";
+import { useDashboard } from "@/context/DashboardContext";
 
 // --------------------------------------------------------------------------
 // Context Type
@@ -73,6 +74,8 @@ export const RecycleBinProvider = ({
   const [error, setError] =
     useState<string | null>(null);
 
+  const { refreshDashboardStats } = useDashboard();
+
   // ------------------------------------------------------------------------
   // Fetch Recycle Bin
   // ------------------------------------------------------------------------
@@ -126,6 +129,9 @@ export const RecycleBinProvider = ({
           projectId
         );
 
+        // Refresh dashboard statistics.
+        await refreshDashboardStats();
+
         // Remove restored project from local recycle-bin state.
         setProjects((currentProjects) =>
           currentProjects.filter(
@@ -159,6 +165,9 @@ export const RecycleBinProvider = ({
         setError(null);
 
         await restoreTaskApi(taskId);
+
+        // Refresh dashboard statistics.
+        await refreshDashboardStats();
 
         // Remove restored task from standalone deleted tasks.
         setTasks((currentTasks) =>
@@ -207,6 +216,9 @@ export const RecycleBinProvider = ({
             projectId
           );
 
+          // Refresh dashboard statistics.
+          await refreshDashboardStats();
+
           setProjects(
             (currentProjects) =>
               currentProjects.filter(
@@ -243,6 +255,9 @@ export const RecycleBinProvider = ({
           await permanentlyDeleteTaskApi(
             taskId
           );
+
+          // Refresh dashboard statistics.
+          await refreshDashboardStats();
 
           setTasks((currentTasks) =>
             currentTasks.filter(

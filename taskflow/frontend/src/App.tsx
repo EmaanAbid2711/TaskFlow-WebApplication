@@ -14,8 +14,8 @@ function App() {
   return ( 
     <AuthProvider>
       <NotificationBarProvider>
-      <RecycleBinProvider>
       <DashboardProvider>
+      <RecycleBinProvider>
       <BrowserRouter>
         <Toaster richColors />
         <Routes>
@@ -159,8 +159,8 @@ function App() {
 
         </Routes>
       </BrowserRouter>
-      </DashboardProvider>
       </RecycleBinProvider>
+      </DashboardProvider>
       </NotificationBarProvider>
     </AuthProvider>
   );
