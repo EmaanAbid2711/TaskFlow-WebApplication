@@ -1,8 +1,17 @@
+import type { PricingPlan } from "../../../interfaces/landing";
 import PricingCard from "./PricingCard";
 
 import { pricingPlans } from "../../../data/landingdata";
 
-function PricingSection() {
+interface PricingSectionProps {
+  onSelectPlan?: (plan: PricingPlan) => void;
+  currentPlan?: string;
+}
+
+function PricingSection({
+  onSelectPlan,
+  currentPlan,
+}: PricingSectionProps) {
   return (
     <section
       id="pricing"
@@ -24,6 +33,8 @@ function PricingSection() {
             <PricingCard
               key={plan.name}
               plan={plan}
+              onSelect={onSelectPlan}
+              currentPlan={currentPlan}
             />
           ))}
         </div>

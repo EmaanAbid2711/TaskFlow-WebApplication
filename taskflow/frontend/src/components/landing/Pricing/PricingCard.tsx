@@ -2,11 +2,23 @@ import type { PricingPlan } from "../../../interfaces/landing";
 
 interface PricingCardProps {
   plan: PricingPlan;
+  onSelect?: (plan: PricingPlan) => void;
+  currentPlan?: string;
 }
 
 function PricingCard({
   plan,
+  onSelect,
+  currentPlan,
 }: PricingCardProps) {
+  const isCurrentPlan =
+    currentPlan?.toLowerCase() ===
+    plan.name.toLowerCase();
+
+  const handleClick = () => {
+    onSelect?.(plan);
+  };
+
   return (
     <div
       className={`relative flex flex-col justify-between rounded-2xl border bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-lg
@@ -66,14 +78,21 @@ function PricingCard({
       </div>
 
       <button
+        type="button"
+        onClick={handleClick}
+        disabled={isCurrentPlan}
         className={`mt-8 rounded-lg py-3 text-sm font-semibold transition
         ${
-          plan.popular
-            ? "bg-[#0052CC] text-white hover:bg-[#0043A4]"
-            : "bg-slate-100 hover:bg-slate-200"
+          isCurrentPlan
+            ? "cursor-not-allowed bg-slate-200 text-slate-500"
+            : plan.popular
+              ? "bg-[#0052CC] text-white hover:bg-[#0043A4]"
+              : "bg-slate-100 hover:bg-slate-200"
         }`}
       >
-        {plan.button}
+        {isCurrentPlan
+          ? "Current Plan"
+          : plan.button}
       </button>
     </div>
   );

@@ -3,6 +3,7 @@ interface Props {
   price: number;
   billingCycle: string;
   renewDate: string;
+  onManagePlan?: () => void;
 }
 
 function CurrentPlanCard({
@@ -10,6 +11,7 @@ function CurrentPlanCard({
   price,
   billingCycle,
   renewDate,
+  onManagePlan,
 }: Props) {
   return (
     <div
@@ -76,6 +78,7 @@ function CurrentPlanCard({
           transition
           hover:bg-slate-50
         "
+        onClick={onManagePlan}
       >
         Manage Plan
       </button>
