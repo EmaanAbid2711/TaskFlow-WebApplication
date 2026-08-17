@@ -6,12 +6,30 @@ export const getBillingApi = async () => {
   return response.data;
 };
 
-export const updatePaymentMethodApi =
-  async () => {
-    const response =
-      await api.patch(
-        "/api/billing/payment-method"
-      );
+export const updateBillingPlanApi = async (
+  plan: "FREE" | "PRO" | "ENTERPRISE"
+) => {
+  const response = await api.patch(
+    "/api/billing/plan",
+    {
+      plan,
+    }
+  );
 
-    return response.data;
-  };
+  return response.data;
+};
+
+export const updatePaymentMethodApi = async (
+  data: {
+    cardBrand: string;
+    cardLast4: string;
+    cardExpiry: string;
+  }
+) => {
+  const response = await api.patch(
+    "/api/billing/payment",
+    data
+  );
+
+  return response.data;
+};

@@ -1,24 +1,10 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import type { BillingInfo } from "@/interfaces/billing";
+import { getBilling, updateBillingPlan, updatePaymentMethod} from "@/services/billing.service";
+import type { Billing as BillingData, BillingPlan} from "@/interfaces/billing";
 import type { PricingPlan } from "@/interfaces/landing";
-
-import {
-  CurrentPlanCard,
-  PaymentMethodCard,
-  InvoiceList,
-} from "@/components";
-
-import {
-  getBillingService,
-  updatePaymentMethodService,
-} from "@/services/billing.service";
-
+import { CurrentPlanCard, PaymentMethodCard, InvoiceList} from "@/components";
 import PlanSelectionDialog from "@/components/billing/PlanSelectionDialog";
 import PaymentDialog from "@/components/billing/PaymentDialog";
 
@@ -29,11 +15,23 @@ interface RecentPlan {
 }
 
 function Billing() {
+  /*
+   * ------------------------------------------------------------
+   * Billing State
+   * ------------------------------------------------------------
+   */
+
   const [billing, setBilling] =
-    useState<BillingInfo | null>(null);
+    useState<BillingData | null>(null);
 
   const [loading, setLoading] =
     useState(true);
+
+  const [savingPlan, setSavingPlan] =
+    useState(false);
+
+  //const [savingPayment, setSavingPayment] =
+  //  useState(false);
 
   const [recentPlan, setRecentPlan] =
     useState<RecentPlan | null>(null);
@@ -47,15 +45,28 @@ function Billing() {
   const [selectedPlan, setSelectedPlan] =
     useState<PricingPlan | null>(null);
 
+  /*
+   * ------------------------------------------------------------
+   * Load Billing
+   * ------------------------------------------------------------
+   *
+   * Billing is now loaded from the backend/database.
+   * ------------------------------------------------------------
+   */
+
   const loadBilling = async () => {
     try {
       setLoading(true);
 
-      const response =
-        await getBillingService();
+      const data = await getBilling();
 
-      setBilling(response.data);
+      setBilling(data);
     } catch (error: any) {
+      console.error(
+        "Failed to load billing:",
+        error
+      );
+
       toast.error(
         error.response?.data?.message ??
           "Failed to load billing information."
@@ -65,21 +76,20 @@ function Billing() {
     }
   };
 
+  /*
+   * ------------------------------------------------------------
+   * Initial Billing Load
+   * ------------------------------------------------------------
+   */
+
   useEffect(() => {
     loadBilling();
   }, []);
 
-  // ------------------------------------------------------------------
-  // Manage Plan
-  // ------------------------------------------------------------------
 
   const handleManagePlan = () => {
     setPlanDialogOpen(true);
   };
-
-  // ------------------------------------------------------------------
-  // Select Plan
-  // ------------------------------------------------------------------
 
   const handleSelectPlan = (
     plan: PricingPlan
@@ -88,27 +98,22 @@ function Billing() {
       return;
     }
 
+    const selectedPlanName =
+      plan.name.toUpperCase() as BillingPlan;
+
     const isCurrentPlan =
-      billing.plan.toLowerCase() ===
-      plan.name.toLowerCase();
+      billing.plan === selectedPlanName;
 
     if (isCurrentPlan) {
       return;
     }
 
-    /*
-     * Free plan does not require payment.
-     */
-    if (
-      plan.name.toLowerCase() === "free"
-    ) {
-      handleFrontendPlanChange(plan);
+    if (selectedPlanName === "FREE") {
+      handlePlanChange(plan);
       return;
     }
 
-    /*
-     * Paid plans open payment dialog.
-     */
+
     setSelectedPlan(plan);
 
     setPlanDialogOpen(false);
@@ -116,21 +121,16 @@ function Billing() {
     setPaymentDialogOpen(true);
   };
 
-  // ------------------------------------------------------------------
-  // Frontend-only Plan Change
-  // ------------------------------------------------------------------
-
-  const handleFrontendPlanChange = (
+  const handlePlanChange = async (
     plan: PricingPlan
   ) => {
-    if (!billing) {
+    if (!billing || savingPlan) {
       return;
     }
 
-    /*
-     * Save current plan as recent plan
-     * before changing it.
-     */
+    const selectedPlanName =
+      plan.name.toUpperCase() as BillingPlan;
+
     setRecentPlan({
       name: billing.plan,
       price: billing.price,
@@ -138,83 +138,98 @@ function Billing() {
         billing.billingCycle,
     });
 
-    const newPrice = Number(
-      plan.price.replace("$", "")
-    );
+    try {
+      setSavingPlan(true);
 
-    setBilling({
-      ...billing,
-      plan: plan.name,
-      price: newPrice,
-      billingCycle: "Monthly",
-      renewDate:
-        newPrice === 0
-          ? ""
-          : getNextRenewalDate(),
+      const updatedBilling =
+        await updateBillingPlan(
+          selectedPlanName
+        );
+
+      setBilling(updatedBilling);
+
+      setPlanDialogOpen(false);
+
+      toast.success(
+        `${plan.name} plan updated successfully.`
+      );
+    } catch (error: any) {
+      console.error(
+        "Failed to update billing plan:",
+        error
+      );
+
+      toast.error(
+        error.response?.data?.message ??
+          "Failed to update billing plan."
+      );
+    } finally {
+      setSavingPlan(false);
+    }
+  };
+
+  const handlePaymentSuccess = async (
+  plan: PricingPlan,
+  cardBrand: string,
+  cardLast4: string,
+  cardExpiry: string
+) => {
+  if (!billing || savingPlan) {
+    return;
+  }
+
+  const selectedPlanName =
+    plan.name.toUpperCase() as BillingPlan;
+
+  try {
+    setSavingPlan(true);
+
+    setRecentPlan({
+      name: billing.plan,
+      price: billing.price,
+      billingCycle: billing.billingCycle,
     });
 
-    setPlanDialogOpen(false);
-
-    toast.success(
-      `${plan.name} plan selected successfully.`
+    await updatePaymentMethod(
+      cardBrand,
+      cardLast4,
+      cardExpiry
     );
-  };
 
-  // ------------------------------------------------------------------
-  // Payment Success
-  // ------------------------------------------------------------------
+    const updatedBilling =
+      await updateBillingPlan(
+        selectedPlanName
+      );
 
-  const handlePaymentSuccess = (
-    plan: PricingPlan
-  ) => {
-    handleFrontendPlanChange(plan);
+    setBilling(updatedBilling);
 
     setPaymentDialogOpen(false);
-
     setSelectedPlan(null);
-  };
 
-  // ------------------------------------------------------------------
-  // Renewal Date
-  // ------------------------------------------------------------------
-
-  const getNextRenewalDate = () => {
-    const date = new Date();
-
-    date.setMonth(
-      date.getMonth() + 1
+    toast.success(
+      `${plan.name} plan activated successfully.`
+    );
+  } catch (error: any) {
+    console.error(
+      "Failed to process payment:",
+      error
     );
 
-    return date.toISOString();
-  };
+    toast.error(
+      error.response?.data?.message ??
+        "Failed to process payment."
+    );
+  } finally {
+    setSavingPlan(false);
+  }
+};
 
-  // ------------------------------------------------------------------
-  // Update Payment Method
-  // ------------------------------------------------------------------
 
-  const handleUpdatePayment =
-    async () => {
-      try {
-        const response =
-          await updatePaymentMethodService();
-
-        toast.success(
-          response.message ??
-            "Payment method updated."
-        );
-
-        await loadBilling();
-      } catch (error: any) {
-        toast.error(
-          error.response?.data?.message ??
-            "Failed to update payment method."
-        );
-      }
-    };
-
-  // ------------------------------------------------------------------
-  // Loading
-  // ------------------------------------------------------------------
+  /*
+   * ------------------------------------------------------------
+   * Loading
+   * ------------------------------------------------------------
+   */
 
   if (loading) {
     return (
@@ -230,10 +245,6 @@ function Billing() {
     );
   }
 
-  // ------------------------------------------------------------------
-  // Error
-  // ------------------------------------------------------------------
-
   if (!billing) {
     return (
       <div className="flex-1 overflow-y-auto p-6 md:p-10">
@@ -248,9 +259,7 @@ function Billing() {
     );
   }
 
-  // ------------------------------------------------------------------
-  // Page
-  // ------------------------------------------------------------------
+
 
   return (
     <>
@@ -280,6 +289,7 @@ function Billing() {
 
             <div className="mt-8 space-y-8">
 
+
               <CurrentPlanCard
                 plan={billing.plan}
                 price={billing.price}
@@ -294,7 +304,6 @@ function Billing() {
                 }
               />
 
-              {/* Recent Plan */}
               {recentPlan && (
                 <section
                   className="
@@ -328,18 +337,14 @@ function Billing() {
               )}
 
               <PaymentMethodCard
-                brand={
-                  billing.paymentMethod.brand
-                }
-                last4={
-                  billing.paymentMethod.last4
-                }
-                expiry={
-                  billing.paymentMethod.expiry
-                }
-                onUpdate={
-                  handleUpdatePayment
-                }
+                brand={billing.paymentMethod.brand}
+                last4={billing.paymentMethod.last4}
+                expiry={billing.paymentMethod.expiry}
+                onUpdate={() => {
+                  toast.info(
+                    "Payment method update will be connected next."
+                  );
+                }}
               />
 
               <InvoiceList
@@ -354,7 +359,6 @@ function Billing() {
         </div>
       </div>
 
-      {/* Plan Selection */}
       <PlanSelectionDialog
         open={planDialogOpen}
         currentPlan={billing.plan}
@@ -366,7 +370,6 @@ function Billing() {
         }
       />
 
-      {/* Payment */}
       <PaymentDialog
         open={paymentDialogOpen}
         plan={selectedPlan}

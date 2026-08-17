@@ -7,7 +7,12 @@ interface PaymentDialogProps {
   open: boolean;
   plan: PricingPlan | null;
   onClose: () => void;
-  onSuccess: (plan: PricingPlan) => void;
+  onSuccess: (
+    plan: PricingPlan,
+    cardBrand: string,
+    cardLast4: string,
+    cardExpiry: string
+  ) => Promise<void> | void;
 }
 
 function PaymentDialog({
@@ -31,19 +36,151 @@ function PaymentDialog({
   const [processing, setProcessing] =
     useState(false);
 
+  /*
+   * ------------------------------------------------------------
+   * Don't render the dialog when it is closed
+   * or when no plan has been selected.
+   * ------------------------------------------------------------
+   */
+
   if (!open || !plan) {
     return null;
   }
 
-  const numericPrice =
-    Number(
-      plan.price.replace("$", "")
-    );
+  const numericPrice = Number(
+    plan.price.replace("$", "")
+  );
+
+  /*
+   * ------------------------------------------------------------
+   * Card Number Formatting
+   * ------------------------------------------------------------
+   *
+   * Keeps only numeric characters and limits the input
+   * to 16 digits.
+   *
+   * Example:
+   * 4242 4242 4242 4242
+   * ------------------------------------------------------------
+   */
+
+  const handleCardNumberChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const numericValue =
+      event.target.value
+        .replace(/\D/g, "")
+        .slice(0, 16);
+
+    const formattedValue =
+      numericValue.match(/.{1,4}/g)?.join(" ") ??
+      "";
+
+    setCardNumber(formattedValue);
+  };
+
+  /*
+   * ------------------------------------------------------------
+   * Expiry Formatting
+   * ------------------------------------------------------------
+   *
+   * Example:
+   * 1228 -> 12/28
+   * ------------------------------------------------------------
+   */
+
+  const handleExpiryChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const numericValue =
+      event.target.value
+        .replace(/\D/g, "")
+        .slice(0, 4);
+
+    let formattedValue = numericValue;
+
+    if (numericValue.length > 2) {
+      formattedValue =
+        `${numericValue.slice(0, 2)}/${numericValue.slice(2)}`;
+    }
+
+    setExpiry(formattedValue);
+  };
+
+  /*
+   * ------------------------------------------------------------
+   * CVV Formatting
+   * ------------------------------------------------------------
+   */
+
+  const handleCvvChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const numericValue =
+      event.target.value
+        .replace(/\D/g, "")
+        .slice(0, 4);
+
+    setCvv(numericValue);
+  };
+
+  /*
+   * ------------------------------------------------------------
+   * Detect Card Brand
+   * ------------------------------------------------------------
+   *
+   * This is only used to store the card brand.
+   *
+   * It is NOT a payment processor and does not perform
+   * any real card verification.
+   * ------------------------------------------------------------
+   */
+
+  const detectCardBrand = (
+    cardNumberValue: string
+  ): string => {
+    const number =
+      cardNumberValue.replace(/\D/g, "");
+
+    if (/^4/.test(number)) {
+      return "Visa";
+    }
+
+    if (
+      /^(5[1-5]|2[2-7])/.test(number)
+    ) {
+      return "Mastercard";
+    }
+
+    if (
+      /^(34|37)/.test(number)
+    ) {
+      return "American Express";
+    }
+
+    if (
+      /^6(?:011|5)/.test(number)
+    ) {
+      return "Discover";
+    }
+
+    return "Card";
+  };
+
+  /*
+   * ------------------------------------------------------------
+   * Submit Payment
+   * ------------------------------------------------------------
+   */
 
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
+
+    /*
+     * Basic validation.
+     */
 
     if (
       !cardholderName.trim() ||
@@ -54,33 +191,108 @@ function PaymentDialog({
       return;
     }
 
-    setProcessing(true);
+    const cleanCardNumber =
+      cardNumber.replace(/\D/g, "");
 
     /*
-     * Phase 1:
-     * This is only a frontend payment simulation.
-     *
-     * We will connect this to the backend
-     * in Phase 3.
+     * Validate card number.
      */
-    await new Promise((resolve) =>
-      setTimeout(resolve, 1000)
-    );
 
-    setProcessing(false);
+    if (cleanCardNumber.length < 13) {
+      return;
+    }
 
-    onSuccess(plan);
+    /*
+     * Validate expiry format.
+     */
 
-    setCardholderName("");
-    setCardNumber("");
-    setExpiry("");
-    setCvv("");
+    if (
+      !/^(0[1-9]|1[0-2])\/\d{2}$/.test(
+        expiry
+      )
+    ) {
+      return;
+    }
+
+    /*
+     * Validate CVV.
+     */
+
+    if (!/^\d{3,4}$/.test(cvv)) {
+      return;
+    }
+
+    /*
+     * Extract ONLY the last four digits.
+     *
+     * The full card number will NOT be sent
+     * to the backend.
+     */
+
+    const cardLast4 =
+      cleanCardNumber.slice(-4);
+
+    /*
+     * Detect the card brand.
+     */
+
+    const cardBrand =
+      detectCardBrand(
+        cleanCardNumber
+      );
+
+    try {
+      setProcessing(true);
+
+      /*
+       * Pass only safe billing information
+       * to the parent component.
+       *
+       * We do NOT send:
+       *
+       * - full card number
+       * - CVV
+       * - cardholder name
+       */
+
+      await onSuccess(
+        plan,
+        cardBrand,
+        cardLast4,
+        expiry
+      );
+
+      /*
+       * Clear sensitive information immediately
+       * after successful submission.
+       */
+
+      setCardholderName("");
+      setCardNumber("");
+      setExpiry("");
+      setCvv("");
+    } catch (error) {
+      /*
+       * The parent handles the actual error toast.
+       */
+
+      console.error(
+        "Payment submission failed:",
+        error
+      );
+    } finally {
+      setProcessing(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
       <div className="w-full max-w-lg rounded-3xl bg-white shadow-2xl">
-        {/* Header */}
+
+        {/* ----------------------------------------------------
+            Header
+            ---------------------------------------------------- */}
+
         <div className="flex items-start justify-between border-b border-slate-100 p-6">
           <div>
             <h2 className="text-xl font-bold text-slate-900">
@@ -88,7 +300,8 @@ function PaymentDialog({
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              Subscribe to the {plan.name} plan.
+              Subscribe to the{" "}
+              {plan.name} plan.
             </p>
           </div>
 
@@ -102,7 +315,10 @@ function PaymentDialog({
           </button>
         </div>
 
-        {/* Selected Plan */}
+        {/* ----------------------------------------------------
+            Selected Plan
+            ---------------------------------------------------- */}
+
         <div className="mx-6 mt-6 flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50 p-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[#0052CC]">
@@ -125,11 +341,17 @@ function PaymentDialog({
           </div>
         </div>
 
-        {/* Form */}
+        {/* ----------------------------------------------------
+            Form
+            ---------------------------------------------------- */}
+
         <form
           onSubmit={handleSubmit}
           className="space-y-5 p-6"
         >
+
+          {/* Cardholder Name */}
+
           <div>
             <label
               htmlFor="cardholder-name"
@@ -153,6 +375,8 @@ function PaymentDialog({
             />
           </div>
 
+          {/* Card Number */}
+
           <div>
             <label
               htmlFor="card-number"
@@ -171,11 +395,10 @@ function PaymentDialog({
                 id="card-number"
                 type="text"
                 inputMode="numeric"
+                autoComplete="cc-number"
                 value={cardNumber}
-                onChange={(event) =>
-                  setCardNumber(
-                    event.target.value
-                  )
+                onChange={
+                  handleCardNumberChange
                 }
                 placeholder="4242 4242 4242 4242"
                 maxLength={19}
@@ -185,7 +408,12 @@ function PaymentDialog({
             </div>
           </div>
 
+          {/* Expiry + CVV */}
+
           <div className="grid grid-cols-2 gap-4">
+
+            {/* Expiry */}
+
             <div>
               <label
                 htmlFor="card-expiry"
@@ -198,11 +426,10 @@ function PaymentDialog({
                 id="card-expiry"
                 type="text"
                 inputMode="numeric"
+                autoComplete="cc-exp"
                 value={expiry}
-                onChange={(event) =>
-                  setExpiry(
-                    event.target.value
-                  )
+                onChange={
+                  handleExpiryChange
                 }
                 placeholder="MM/YY"
                 maxLength={5}
@@ -210,6 +437,8 @@ function PaymentDialog({
                 required
               />
             </div>
+
+            {/* CVV */}
 
             <div>
               <label
@@ -223,9 +452,10 @@ function PaymentDialog({
                 id="card-cvv"
                 type="password"
                 inputMode="numeric"
+                autoComplete="cc-csc"
                 value={cvv}
-                onChange={(event) =>
-                  setCvv(event.target.value)
+                onChange={
+                  handleCvvChange
                 }
                 placeholder="123"
                 maxLength={4}
@@ -234,6 +464,8 @@ function PaymentDialog({
               />
             </div>
           </div>
+
+          {/* Security Message */}
 
           <div className="flex items-center gap-2 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
             <Lock size={14} />
@@ -244,7 +476,10 @@ function PaymentDialog({
             </span>
           </div>
 
+          {/* Buttons */}
+
           <div className="flex gap-3 pt-2">
+
             <button
               type="button"
               onClick={onClose}
@@ -263,6 +498,7 @@ function PaymentDialog({
                 ? "Processing..."
                 : `Pay $${numericPrice}`}
             </button>
+
           </div>
         </form>
       </div>
