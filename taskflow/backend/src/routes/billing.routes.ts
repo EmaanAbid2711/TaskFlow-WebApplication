@@ -1,5 +1,7 @@
 import { Router } from "express";
+
 import authMiddleware from "../middleware/auth.middleware";
+
 import {
   getBillingController,
   updatePlanController,
@@ -22,10 +24,7 @@ router.use(authMiddleware);
  * /api/billing:
  *   get:
  *     summary: Get billing information
- *     description: |
- *       Retrieves the billing details of the currently authenticated user.
- *       This includes the current subscription plan, billing cycle,
- *       payment information, and invoices.
+ *     description: Retrieves billing information for the authenticated user.
  *     tags:
  *       - Billing
  *     security:
@@ -33,43 +32,22 @@ router.use(authMiddleware);
  *     responses:
  *       200:
  *         description: Billing information fetched successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   example:
- *                     plan: FREE
- *                     monthlyPrice: 0
- *                     billingCycle: Monthly
- *                     renewalDate: null
- *                     cardBrand: Visa
- *                     cardLast4: "4242"
- *                     cardExpiry: "12/28"
  *       401:
- *         description: Unauthorized. JWT token missing or invalid.
- *       404:
- *         description: Billing information not found.
+ *         description: Unauthorized.
  *       500:
  *         description: Internal server error.
  */
-router.get("/", getBillingController);
+router.get(
+  "/",
+  getBillingController
+);
 
 /**
  * @swagger
  * /api/billing/plan:
  *   patch:
  *     summary: Update subscription plan
- *     description: |
- *       Updates the current user's billing subscription plan.
- *       Available plans:
- *       - FREE
- *       - PRO
+ *     description: Updates the subscription plan of the authenticated user. Paid plan changes create an invoice.
  *     tags:
  *       - Billing
  *     security:
@@ -88,39 +66,29 @@ router.get("/", getBillingController);
  *                 enum:
  *                   - FREE
  *                   - PRO
+ *                   - ENTERPRISE
  *                 example: PRO
  *     responses:
  *       200:
  *         description: Billing plan updated successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   example:
- *                     plan: PRO
- *                     monthlyPrice: 10
- *                     billingCycle: Monthly
  *       400:
  *         description: Invalid plan value.
  *       401:
- *         description: Unauthorized. JWT token missing or invalid.
+ *         description: Unauthorized.
  *       500:
  *         description: Internal server error.
  */
-router.patch("/plan", updatePlanController);
+router.patch(
+  "/plan",
+  updatePlanController
+);
 
 /**
  * @swagger
  * /api/billing/payment:
  *   patch:
  *     summary: Update payment method
- *     description: Updates the payment card information associated with the user's billing account.
+ *     description: Updates safe payment-card metadata. Full card numbers and CVV are never stored.
  *     tags:
  *       - Billing
  *     security:
@@ -131,6 +99,10 @@ router.patch("/plan", updatePlanController);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - cardBrand
+ *               - cardLast4
+ *               - cardExpiry
  *             properties:
  *               cardBrand:
  *                 type: string
@@ -144,24 +116,16 @@ router.patch("/plan", updatePlanController);
  *     responses:
  *       200:
  *         description: Payment method updated successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Payment method updated successfully
  *       400:
  *         description: Invalid payment information.
  *       401:
- *         description: Unauthorized. JWT token missing or invalid.
+ *         description: Unauthorized.
  *       500:
  *         description: Internal server error.
  */
-router.patch("/payment", updatePaymentController);
+router.patch(
+  "/payment",
+  updatePaymentController
+);
 
 export default router;

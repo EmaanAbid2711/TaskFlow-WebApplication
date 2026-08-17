@@ -101,6 +101,7 @@ model NotificationSettings {
 enum PlanType {
   FREE
   PRO
+  ENTERPRISE
 }
 
 enum InvoiceStatus {
@@ -135,6 +136,7 @@ model Invoice {
   billingId String
   billing   Billing @relation(fields: [billingId], references: [id], onDelete: Cascade)
 
+  plan        PlanType
   amount      Float
   status      InvoiceStatus @default(PAID)
   invoiceDate DateTime

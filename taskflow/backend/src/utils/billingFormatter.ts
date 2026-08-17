@@ -1,73 +1,103 @@
-import { Billing, InvoiceStatus, PlanType, Invoice } from "@prisma/client";
+const PLAN_FEATURES: Record<
+  string,
+  string[]
+> = {
+  FREE: [
+    "Up to 3 Projects",
+    "Basic Kanban",
+    "1GB Storage",
+  ],
 
-type BillingWithInvoices = Billing & {
-  invoices: Invoice[];
+  PRO: [
+    "Unlimited Projects",
+    "Advanced Analytics",
+    "10GB Storage",
+    "Priority Support",
+  ],
+
+  ENTERPRISE: [
+    "SSO & SAML",
+    "Custom Security",
+    "Unlimited Storage",
+  ],
 };
 
-const formatDate = (
-  date: Date | null
-): string | null => {
-  if (!date) return null;
+const formatInvoice = (
+  invoice: any
+) => {
+  return {
+    id: invoice.id,
 
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+    date: invoice.invoiceDate,
+
+    plan: invoice.billing?.plan ?? "UNKNOWN",
+
+    amount: invoice.amount,
+
+    status:
+      invoice.status === "PENDING"
+        ? "Pending"
+        : "Paid",
+
+    downloadUrl:
+      invoice.downloadUrl ?? "",
+  };
 };
 
 export const formatBilling = (
-  billing: BillingWithInvoices
+  billing: any
 ) => {
   return {
-    plan:
-      billing.plan === PlanType.PRO
-        ? "TaskFlow Pro"
-        : "TaskFlow Free",
+    plan: billing.plan,
 
     price: billing.monthlyPrice,
 
-    billingCycle: `Billed ${billing.billingCycle.toLowerCase()}`,
+    billingCycle:
+      billing.billingCycle,
 
-    renewDate: formatDate(
+    renewDate:
       billing.renewalDate
-    ),
+        ? billing.renewalDate.toISOString()
+        : "",
 
     paymentMethod: {
       brand:
-        billing.cardBrand ?? "VISA",
+        billing.cardBrand ?? "",
 
       last4:
-        billing.cardLast4 ?? "4242",
+        billing.cardLast4 ?? "",
 
       expiry:
-        billing.cardExpiry ?? "12/2027",
+        billing.cardExpiry ?? "",
     },
 
-    invoices: billing.invoices.map(
-      (invoice) => ({
-        id: invoice.id,
+    features:
+      PLAN_FEATURES[billing.plan] ??
+      [],
 
-        date: formatDate(
-          invoice.invoiceDate
-        ),
+    invoices:
+      billing.invoices.map(
+        (invoice: any) => ({
+          id: invoice.id,
 
-        plan:
-          billing.plan === PlanType.PRO
-            ? "TaskFlow Pro"
-            : "TaskFlow Free",
+          date:
+            invoice.invoiceDate,
 
-        amount: invoice.amount,
+          plan:
+            billing.plan,
 
-        status:
-          invoice.status ===
-          InvoiceStatus.PAID
-            ? "Paid"
-            : "Pending",
+          amount:
+            invoice.amount,
 
-        downloadUrl:
-          invoice.downloadUrl ?? "#",
-      })
-    ),
+          status:
+            invoice.status === "PENDING"
+              ? "Pending"
+              : "Paid",
+
+          downloadUrl:
+            invoice.downloadUrl ??
+            "",
+        })
+      ),
   };
 };
