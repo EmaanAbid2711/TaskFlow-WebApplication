@@ -1,12 +1,28 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { getBilling, updateBillingPlan, updatePaymentMethod} from "@/services/billing.service";
-import type { Billing as BillingData, BillingPlan} from "@/interfaces/billing";
+import {
+  getBilling,
+  updateBillingPlan,
+  updatePaymentMethod,
+} from "@/services/billing.service";
+
+import type {
+  Billing as BillingData,
+  BillingPlan,
+} from "@/interfaces/billing";
+
 import type { PricingPlan } from "@/interfaces/landing";
-import { CurrentPlanCard, PaymentMethodCard, InvoiceList} from "@/components";
+
+import {
+  CurrentPlanCard,
+  PaymentMethodCard,
+  InvoiceList,
+} from "@/components";
+
 import PlanSelectionDialog from "@/components/billing/PlanSelectionDialog";
 import PaymentDialog from "@/components/billing/PaymentDialog";
+import UpdatePaymentMethodDialog from "@/components/billing/UpdatePaymentMethodDialog";
 
 interface RecentPlan {
   name: string;
@@ -16,9 +32,9 @@ interface RecentPlan {
 
 function Billing() {
   /*
-   * ------------------------------------------------------------
+   * ============================================================
    * Billing State
-   * ------------------------------------------------------------
+   * ============================================================
    */
 
   const [billing, setBilling] =
@@ -30,8 +46,14 @@ function Billing() {
   const [savingPlan, setSavingPlan] =
     useState(false);
 
-  //const [savingPayment, setSavingPayment] =
-  //  useState(false);
+  const [savingPayment, setSavingPayment] =
+    useState(false);
+
+  /*
+   * ============================================================
+   * UI State
+   * ============================================================
+   */
 
   const [recentPlan, setRecentPlan] =
     useState<RecentPlan | null>(null);
@@ -42,16 +64,21 @@ function Billing() {
   const [paymentDialogOpen, setPaymentDialogOpen] =
     useState(false);
 
+  const [
+    updatePaymentDialogOpen,
+    setUpdatePaymentDialogOpen,
+  ] = useState(false);
+
   const [selectedPlan, setSelectedPlan] =
     useState<PricingPlan | null>(null);
 
   /*
-   * ------------------------------------------------------------
+   * ============================================================
    * Load Billing
-   * ------------------------------------------------------------
+   * ============================================================
    *
-   * Billing is now loaded from the backend/database.
-   * ------------------------------------------------------------
+   * Gets the user's billing information from the backend.
+   * ============================================================
    */
 
   const loadBilling = async () => {
@@ -77,29 +104,45 @@ function Billing() {
   };
 
   /*
-   * ------------------------------------------------------------
-   * Initial Billing Load
-   * ------------------------------------------------------------
+   * ============================================================
+   * Initial Load
+   * ============================================================
    */
 
   useEffect(() => {
     loadBilling();
   }, []);
 
+  /*
+   * ============================================================
+   * Manage Plan
+   * ============================================================
+   */
 
   const handleManagePlan = () => {
     setPlanDialogOpen(true);
   };
 
+  /*
+   * ============================================================
+   * Select Plan
+   * ============================================================
+   */
+
   const handleSelectPlan = (
     plan: PricingPlan
   ) => {
-    if (!billing) {
+    if (!billing || savingPlan) {
       return;
     }
 
     const selectedPlanName =
       plan.name.toUpperCase() as BillingPlan;
+
+    /*
+     * Don't do anything if the user selected
+     * their current plan.
+     */
 
     const isCurrentPlan =
       billing.plan === selectedPlanName;
@@ -108,11 +151,30 @@ function Billing() {
       return;
     }
 
+    /*
+     * ----------------------------------------------------------
+     * FREE PLAN
+     * ----------------------------------------------------------
+     *
+     * FREE does not require payment.
+     * Update the backend immediately.
+     * ----------------------------------------------------------
+     */
+
     if (selectedPlanName === "FREE") {
       handlePlanChange(plan);
       return;
     }
 
+    /*
+     * ----------------------------------------------------------
+     * PAID PLAN
+     * ----------------------------------------------------------
+     *
+     * PRO / ENTERPRISE require payment information.
+     * Open PaymentDialog first.
+     * ----------------------------------------------------------
+     */
 
     setSelectedPlan(plan);
 
@@ -120,6 +182,18 @@ function Billing() {
 
     setPaymentDialogOpen(true);
   };
+
+  /*
+   * ============================================================
+   * Change Plan
+   * ============================================================
+   *
+   * Used for FREE plan changes.
+   *
+   * For paid plans, this is called after PaymentDialog
+   * successfully collects the payment information.
+   * ============================================================
+   */
 
   const handlePlanChange = async (
     plan: PricingPlan
@@ -131,6 +205,10 @@ function Billing() {
     const selectedPlanName =
       plan.name.toUpperCase() as BillingPlan;
 
+    /*
+     * Save the current plan as the recent/previous plan.
+     */
+
     setRecentPlan({
       name: billing.plan,
       price: billing.price,
@@ -141,10 +219,18 @@ function Billing() {
     try {
       setSavingPlan(true);
 
+      /*
+       * Update plan in backend.
+       */
+
       const updatedBilling =
         await updateBillingPlan(
           selectedPlanName
         );
+
+      /*
+       * Replace local state with backend response.
+       */
 
       setBilling(updatedBilling);
 
@@ -159,6 +245,13 @@ function Billing() {
         error
       );
 
+      /*
+       * If the request failed, remove the
+       * recent-plan entry we just created.
+       */
+
+      setRecentPlan(null);
+
       toast.error(
         error.response?.data?.message ??
           "Failed to update billing plan."
@@ -168,67 +261,194 @@ function Billing() {
     }
   };
 
+  /*
+   * ============================================================
+   * Payment Success
+   * ============================================================
+   *
+   * Called by PaymentDialog.
+   *
+   * The dialog gives us only:
+   *
+   * - cardBrand
+   * - cardLast4
+   * - cardExpiry
+   *
+   * The full card number and CVV are never sent
+   * to our backend.
+   * ============================================================
+   */
+
   const handlePaymentSuccess = async (
-  plan: PricingPlan,
-  cardBrand: string,
-  cardLast4: string,
-  cardExpiry: string
-) => {
-  if (!billing || savingPlan) {
-    return;
-  }
+    plan: PricingPlan,
+    cardBrand: string,
+    cardLast4: string,
+    cardExpiry: string
+  ) => {
+    if (!billing || savingPlan) {
+      return;
+    }
 
-  const selectedPlanName =
-    plan.name.toUpperCase() as BillingPlan;
+    const selectedPlanName =
+      plan.name.toUpperCase() as BillingPlan;
 
-  try {
-    setSavingPlan(true);
+    try {
+      setSavingPlan(true);
 
-    setRecentPlan({
-      name: billing.plan,
-      price: billing.price,
-      billingCycle: billing.billingCycle,
-    });
+      /*
+       * Save the current plan as the previous plan.
+       */
 
-    await updatePaymentMethod(
-      cardBrand,
-      cardLast4,
-      cardExpiry
-    );
+      setRecentPlan({
+        name: billing.plan,
+        price: billing.price,
+        billingCycle:
+          billing.billingCycle,
+      });
 
-    const updatedBilling =
-      await updateBillingPlan(
-        selectedPlanName
+      /*
+       * --------------------------------------------------------
+       * Step 1: Save Payment Method
+       * --------------------------------------------------------
+       *
+       * Only safe card information is sent.
+       */
+
+      await updatePaymentMethod(
+        cardBrand,
+        cardLast4,
+        cardExpiry
       );
 
-    setBilling(updatedBilling);
+      /*
+       * --------------------------------------------------------
+       * Step 2: Activate Selected Plan
+       * --------------------------------------------------------
+       *
+       * The backend will create the invoice for
+       * paid plans.
+       */
 
-    setPaymentDialogOpen(false);
-    setSelectedPlan(null);
+      const updatedBilling =
+        await updateBillingPlan(
+          selectedPlanName
+        );
 
-    toast.success(
-      `${plan.name} plan activated successfully.`
-    );
-  } catch (error: any) {
-    console.error(
-      "Failed to process payment:",
-      error
-    );
+      /*
+       * Update UI with backend response.
+       */
 
-    toast.error(
-      error.response?.data?.message ??
-        "Failed to process payment."
-    );
-  } finally {
-    setSavingPlan(false);
-  }
-};
+      setBilling(updatedBilling);
 
+      /*
+       * Close payment dialog.
+       */
+
+      setPaymentDialogOpen(false);
+
+      setSelectedPlan(null);
+
+      toast.success(
+        `${plan.name} plan activated successfully.`
+      );
+    } catch (error: any) {
+      console.error(
+        "Failed to process payment:",
+        error
+      );
+
+      /*
+       * Don't leave a fake recent-plan entry
+       * when the operation failed.
+       */
+
+      setRecentPlan(null);
+
+      toast.error(
+        error.response?.data?.message ??
+          "Failed to process payment."
+      );
+    } finally {
+      setSavingPlan(false);
+    }
+  };
 
   /*
-   * ------------------------------------------------------------
-   * Loading
-   * ------------------------------------------------------------
+   * ============================================================
+   * Update Existing Payment Method
+   * ============================================================
+   *
+   * Called by UpdatePaymentMethodDialog.
+   *
+   * Only cardBrand, cardLast4 and cardExpiry
+   * are sent to the backend.
+   * ============================================================
+   */
+
+  const handleUpdatePayment = async (
+    cardBrand: string,
+    cardLast4: string,
+    cardExpiry: string
+  ) => {
+    if (savingPayment) {
+      return;
+    }
+
+    try {
+      setSavingPayment(true);
+
+      /*
+       * Update payment method in backend.
+       */
+
+      const updatedBilling =
+        await updatePaymentMethod(
+          cardBrand,
+          cardLast4,
+          cardExpiry
+        );
+
+      /*
+       * Update local UI.
+       */
+
+      setBilling(updatedBilling);
+
+      /*
+       * Close dialog after successful update.
+       */
+
+      setUpdatePaymentDialogOpen(false);
+
+      toast.success(
+        "Payment method updated successfully."
+      );
+    } catch (error: any) {
+      console.error(
+        "Failed to update payment method:",
+        error
+      );
+
+      toast.error(
+        error.response?.data?.message ??
+          "Failed to update payment method."
+      );
+
+      /*
+       * Re-throw so the dialog knows that
+       * the operation failed.
+       */
+
+      throw error;
+    } finally {
+      setSavingPayment(false);
+    }
+  };
+
+  /*
+   * ============================================================
+   * Loading State
+   * ============================================================
    */
 
   if (loading) {
@@ -245,6 +465,12 @@ function Billing() {
     );
   }
 
+  /*
+   * ============================================================
+   * Error State
+   * ============================================================
+   */
+
   if (!billing) {
     return (
       <div className="flex-1 overflow-y-auto p-6 md:p-10">
@@ -259,7 +485,11 @@ function Billing() {
     );
   }
 
-
+  /*
+   * ============================================================
+   * Page
+   * ============================================================
+   */
 
   return (
     <>
@@ -275,6 +505,10 @@ function Billing() {
               shadow-sm
             "
           >
+            {/* --------------------------------------------------
+                Header
+                -------------------------------------------------- */}
+
             <div className="border-b border-slate-100 pb-6">
               <h1 className="text-2xl font-bold text-slate-900">
                 Billing
@@ -289,6 +523,9 @@ function Billing() {
 
             <div className="mt-8 space-y-8">
 
+              {/* ------------------------------------------------
+                  Current Plan
+                  ------------------------------------------------ */}
 
               <CurrentPlanCard
                 plan={billing.plan}
@@ -303,6 +540,10 @@ function Billing() {
                   handleManagePlan
                 }
               />
+
+              {/* ------------------------------------------------
+                  Recent Plan
+                  ------------------------------------------------ */}
 
               {recentPlan && (
                 <section
@@ -336,16 +577,30 @@ function Billing() {
                 </section>
               )}
 
+              {/* ------------------------------------------------
+                  Payment Method
+                  ------------------------------------------------ */}
+
               <PaymentMethodCard
-                brand={billing.paymentMethod.brand}
-                last4={billing.paymentMethod.last4}
-                expiry={billing.paymentMethod.expiry}
-                onUpdate={() => {
-                  toast.info(
-                    "Payment method update will be connected next."
-                  );
-                }}
+                brand={
+                  billing.paymentMethod.brand
+                }
+                last4={
+                  billing.paymentMethod.last4
+                }
+                expiry={
+                  billing.paymentMethod.expiry
+                }
+                onUpdate={() =>
+                  setUpdatePaymentDialogOpen(
+                    true
+                  )
+                }
               />
+
+              {/* ------------------------------------------------
+                  Invoices
+                  ------------------------------------------------ */}
 
               <InvoiceList
                 invoices={
@@ -355,9 +610,12 @@ function Billing() {
 
             </div>
           </section>
-
         </div>
       </div>
+
+      {/* ========================================================
+          Plan Selection Dialog
+          ======================================================== */}
 
       <PlanSelectionDialog
         open={planDialogOpen}
@@ -370,15 +628,61 @@ function Billing() {
         }
       />
 
+      {/* ========================================================
+          Payment Dialog
+          ========================================================
+          
+          Used when subscribing to a paid plan.
+          ======================================================== */}
+
       <PaymentDialog
         open={paymentDialogOpen}
         plan={selectedPlan}
         onClose={() => {
+          if (savingPlan) {
+            return;
+          }
+
           setPaymentDialogOpen(false);
           setSelectedPlan(null);
         }}
         onSuccess={
           handlePaymentSuccess
+        }
+      />
+
+      {/* ========================================================
+          Update Payment Method Dialog
+          ========================================================
+          
+          Used when the user clicks "Update" on the existing
+          payment method.
+          ======================================================== */}
+
+      <UpdatePaymentMethodDialog
+        open={
+          updatePaymentDialogOpen
+        }
+        currentBrand={
+          billing.paymentMethod.brand
+        }
+        currentLast4={
+          billing.paymentMethod.last4
+        }
+        currentExpiry={
+          billing.paymentMethod.expiry
+        }
+        onClose={() => {
+          if (savingPayment) {
+            return;
+          }
+
+          setUpdatePaymentDialogOpen(
+            false
+          );
+        }}
+        onUpdate={
+          handleUpdatePayment
         }
       />
     </>
