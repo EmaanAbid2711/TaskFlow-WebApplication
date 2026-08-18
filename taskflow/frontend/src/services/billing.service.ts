@@ -1,24 +1,38 @@
-import { getBillingApi, updateBillingPlanApi, updatePaymentMethodApi,} from "@/api/billing.api";
+import { getBillingApi, updateBillingPlanApi, updatePaymentMethodApi} from "@/api/billing.api";
 import type { Billing, BillingPlan} from "@/interfaces/billing";
 
-export const getBilling = (): Promise<Billing> => {
-  return getBillingApi();
+interface BillingApiResponse {
+  success: boolean;
+  data: Billing;
+}
+
+export const getBilling = async (): Promise<Billing> => {
+  const response =
+    (await getBillingApi()) as BillingApiResponse;
+
+  return response.data;
 };
 
-export const updateBillingPlan = (
+export const updateBillingPlan = async (
   plan: BillingPlan
 ): Promise<Billing> => {
-  return updateBillingPlanApi(plan);
+  const response =
+    (await updateBillingPlanApi(plan)) as BillingApiResponse;
+
+  return response.data;
 };
 
-export const updatePaymentMethod = (
+export const updatePaymentMethod = async (
   cardBrand: string,
   cardLast4: string,
   cardExpiry: string
 ): Promise<Billing> => {
-  return updatePaymentMethodApi({
-    cardBrand,
-    cardLast4,
-    cardExpiry,
-  });
+  const response =
+    (await updatePaymentMethodApi({
+      cardBrand,
+      cardLast4,
+      cardExpiry,
+    })) as BillingApiResponse;
+
+  return response.data;
 };

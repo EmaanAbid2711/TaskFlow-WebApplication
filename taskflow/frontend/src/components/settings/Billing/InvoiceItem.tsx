@@ -51,18 +51,6 @@ function InvoiceItem({
           {invoice.status}
         </Badge>
 
-        <button
-          className="
-            text-xs
-            font-medium
-            text-slate-500
-            underline
-            transition
-            hover:text-slate-700
-          "
-        >
-          Download
-        </button>
       </div>
     </div>
   );

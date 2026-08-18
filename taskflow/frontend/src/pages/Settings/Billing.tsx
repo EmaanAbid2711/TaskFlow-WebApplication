@@ -630,7 +630,6 @@ function Billing() {
 
       {/* ========================================================
           Payment Dialog
-          ========================================================
           
           Used when subscribing to a paid plan.
           ======================================================== */}
@@ -653,7 +652,6 @@ function Billing() {
 
       {/* ========================================================
           Update Payment Method Dialog
-          ========================================================
           
           Used when the user clicks "Update" on the existing
           payment method.
