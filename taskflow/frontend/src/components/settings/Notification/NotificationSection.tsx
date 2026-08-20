@@ -34,31 +34,30 @@ function NotificationSection() {
     loadNotifications();
   }, []);
 
-  const loadNotifications =
-    async () => {
-      try {
-        setLoading(true);
+  const loadNotifications = async () => {
+  try {
+    setLoading(true);
 
-        const response =
-          await getNotificationsService();
+    const response =
+      await getNotificationsService();
 
-        setNotifications(
-          response.data
-        );
+    setNotifications(
+      response.data.data
+    );
 
-        setInitialNotifications(
-          response.data
-        );
-      } catch (error) {
-        console.error(error);
+    setInitialNotifications(
+      response.data.data
+    );
+  } catch (error) {
+    console.error(error);
 
-        toast.error(
-          "Failed to load notification settings."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+    toast.error(
+      "Failed to load notification settings."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleToggle = (
     key: keyof NotificationSettings
@@ -74,41 +73,40 @@ function NotificationSection() {
     });
   };
 
-  const handleSave =
-    async () => {
-      if (!notifications) {
-        return;
-      }
+  const handleSave = async () => {
+  if (!notifications) {
+    return;
+  }
 
-      try {
-        setSaving(true);
+  try {
+    setSaving(true);
 
-        const response =
-          await updateNotificationsService(
-            notifications
-          );
+    const response =
+      await updateNotificationsService(
+        notifications
+      );
 
-        setNotifications(
-          response.data.data
-        );
+    setNotifications(
+      response.data.data
+    );
 
-        setInitialNotifications(
-          response.data.data
-        );
+    setInitialNotifications(
+      response.data.data
+    );
 
-        toast.success(
-          "Notification settings updated."
-        );
-      } catch (error) {
-        console.error(error);
+    toast.success(
+      "Notification settings updated."
+    );
+  } catch (error) {
+    console.error(error);
 
-        toast.error(
-          "Failed to update notification settings."
-        );
-      } finally {
-        setSaving(false);
-      }
-    };
+    toast.error(
+      "Failed to update notification settings."
+    );
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleDiscard =
     () => {
