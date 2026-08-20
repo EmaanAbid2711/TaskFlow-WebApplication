@@ -162,16 +162,6 @@ cd TaskFlow-Frontend
 
 ---
 
-# Project structure:
-
-TaskFlow-Frontend
-│
-└── taskflow
-    ├── frontend
-    └── backend
-
----
-
 # Backend Setup
 Navigate to the backend folder:
 
