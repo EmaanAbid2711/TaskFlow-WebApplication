@@ -1,17 +1,20 @@
-import { Bell, CheckCheck, Trash2, Loader2, CheckCircle2, XCircle} from "lucide-react";
+import {Bell, CheckCheck, Trash2, Loader2, CheckCircle2, XCircle} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { useNavigate, } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 import { useNotificationBar } from "@/context/NotificationBarContext";
-import {acceptInvitationService, rejectInvitationService} from "@/services/notificationBar.service";
+import { acceptInvitationService, rejectInvitationService} from "@/services/notificationBar.service";
 
 interface Props {
   closeDropdown: () => void;
 }
 
-function NotificationBarDropdown({ closeDropdown }: Props) {
+function NotificationBarDropdown({
+  closeDropdown,
+}: Props) {
   const navigate = useNavigate();
+
   const {
     notifications,
     loading,
@@ -22,85 +25,145 @@ function NotificationBarDropdown({ closeDropdown }: Props) {
   } = useNotificationBar();
 
   const [processingInvitation, setProcessingInvitation] =
-  useState<string | null>(null);
+    useState<string | null>(null);
 
   const acceptInvitation = async (
-  notification: any
-) => {
-  if (!notification.invitationId) return;
-  try {
-    setProcessingInvitation(notification.id);
-    await acceptInvitationService(
-      notification.invitationId
-    );
-    await markAsRead(notification.id);
-    await refreshNotifications();
-  } finally {
-    setProcessingInvitation(null);
-  }
-};
+    notification: any
+  ) => {
+    if (!notification.invitationId) return;
 
-const rejectInvitation = async (
-  notification: any
-) => {
-  if (!notification.invitationId) return;
-  try {
-    setProcessingInvitation(notification.id);
-    await rejectInvitationService(
-      notification.invitationId
-    );
-    await markAsRead(notification.id);
-    await refreshNotifications();
-  } finally {
-    setProcessingInvitation(null);
-  }
-};
+    try {
+      setProcessingInvitation(notification.id);
 
-  //----------------------------------------------------
-  // Open Notification
-  //----------------------------------------------------
+      await acceptInvitationService(
+        notification.invitationId
+      );
+
+      await markAsRead(notification.id);
+      await refreshNotifications();
+    } finally {
+      setProcessingInvitation(null);
+    }
+  };
+
+  const rejectInvitation = async (
+    notification: any
+  ) => {
+    if (!notification.invitationId) return;
+
+    try {
+      setProcessingInvitation(notification.id);
+
+      await rejectInvitationService(
+        notification.invitationId
+      );
+
+      await markAsRead(notification.id);
+      await refreshNotifications();
+    } finally {
+      setProcessingInvitation(null);
+    }
+  };
+
   const openNotification = async (
-  notification: any
-) => {
-  await markAsRead(notification.id);
+    notification: any
+  ) => {
+    await markAsRead(notification.id);
 
-  closeDropdown();
+    closeDropdown();
 
-  if (
-    notification.type === "TEAM_INVITATION" ||
-    notification.type === "TEAM_INVITATION_ACCEPTED" ||
-    notification.type === "TEAM_INVITATION_REJECTED"
-  ) {
-    navigate("/team");
-    return;
-  }
+    if (
+      notification.type === "TEAM_INVITATION" ||
+      notification.type === "TEAM_INVITATION_ACCEPTED" ||
+      notification.type === "TEAM_INVITATION_REJECTED"
+    ) {
+      navigate("/team");
+      return;
+    }
 
-  if (notification.projectId && notification.taskId) {
-    navigate(
-      `/projects?project=${notification.projectId}&task=${notification.taskId}`
-    );
-  }
-};
+    if (
+      notification.projectId &&
+      notification.taskId
+    ) {
+      navigate(
+        `/projects?project=${notification.projectId}&task=${notification.taskId}`
+      );
+    }
+  };
 
-  //----------------------------------------------------
   return (
-    <div className="absolute right-0 z-50 mt-3 w-[380px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+    <div
+      className="
+        absolute
+        right-0
+        z-50
+        mt-3
+
+        w-[calc(100vw-1.5rem)]
+        max-w-[380px]
+
+        overflow-hidden
+        rounded-2xl
+        border
+        border-slate-200
+        bg-white
+        shadow-2xl
+
+        sm:w-[380px]
+      "
+    >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-        <div>
+      <div
+        className="
+          flex
+          items-center
+          justify-between
+          gap-3
+          border-b
+          border-slate-200
+          px-4
+          py-4
+          sm:px-5
+        "
+      >
+        <div className="min-w-0">
           <h3 className="text-base font-semibold text-slate-800">
             Notifications
           </h3>
-          <p className="text-xs text-slate-500">Recent activity</p>
+
+          <p className="text-xs text-slate-500">
+            Recent activity
+          </p>
         </div>
 
         {notifications.length > 0 && (
           <button
+            type="button"
             onClick={markAllAsRead}
-            className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[#0052cc] transition hover:bg-blue-50"
+            className="
+              flex
+              shrink-0
+              items-center
+              gap-1
+              rounded-lg
+              px-2
+              py-1
+              text-xs
+              font-medium
+              text-[#0052cc]
+              transition
+              hover:bg-blue-50
+            "
           >
             <CheckCheck size={15} />
-            Mark all
+
+            <span className="hidden sm:inline">
+              Mark all
+            </span>
+
+            <span className="sm:hidden">
+              Read all
+            </span>
           </button>
         )}
       </div>
@@ -113,157 +176,353 @@ const rejectInvitation = async (
       )}
 
       {/* Empty */}
-      {!loading && notifications.length === 0 && (
-        <div className="flex flex-col items-center gap-3 p-10">
-          <Bell size={40} className="text-slate-300" />
-          <p className="text-sm text-slate-500">You're all caught up.</p>
-        </div>
-      )}
+      {!loading &&
+        notifications.length === 0 && (
+          <div className="flex flex-col items-center gap-3 p-8 sm:p-10">
+            <Bell
+              size={40}
+              className="text-slate-300"
+            />
 
-      {/* List */}
-      {!loading && notifications.length > 0 && (
-        <div className="max-h-[420px] overflow-y-auto">
-          {notifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={`group flex gap-3 border-b border-slate-100 px-5 py-4 transition ${
-                notification.isRead ? "bg-white" : "bg-blue-50"
-              } hover:bg-slate-50`}
-            >
-              {/* Blue Dot */}
-              <div className="pt-2">
-                {!notification.isRead && (
-                  <div className="h-2 w-2 rounded-full bg-blue-600" />
-                )}
-              </div>
+            <p className="text-center text-sm text-slate-500">
+              You're all caught up.
+            </p>
+          </div>
+        )}
 
-              {/* Content */}
-              <div className="flex-1">
-                <div className="flex items-center gap-3">
-                  {notification.sender?.avatar ? (
-                    <img
-                      src={`${import.meta.env.VITE_API_URL}${notification.sender.avatar}`}
-                      className="h-10 w-10 rounded-full object-cover"
-                    />
-                  ) : (
-                  
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0052cc] font-semibold text-white">
-                    
-                      {notification.sender?.name
-                        ?.split(" ")
-                        .map((word: string) => word[0])
-                        .join("")
-                        .slice(0,2)
-                        .toUpperCase()}
-                    </div>
-                  )}
-              
-                  <div>
-                    <p className="font-medium">
-                      {notification.title}
-                    </p>
-                
-                    <p className="text-sm text-slate-500">
-                      {notification.message}
-                    </p>
-                    <p className="text-xs text-slate-400 mt-1">
-                      {formatDistanceToNow(
-                        new Date(notification.createdAt),
-                        {
-                          addSuffix:true,
-                        }
-                      )}
-                    </p>
-                  </div>
-                </div>
-                    
-                {/* Invitation buttons */}
-                {notification.type === "TEAM_INVITATION" &&
-                  notification.invitation?.id && (
-                  
-                    <>
-                      {notification.invitation.status === "PENDING" ? (
-                      
-                        <div className="mt-4 flex gap-2">
-                        
-                          <button
-                            disabled={
-                              processingInvitation === notification.id
-                            }
-                            onClick={() =>
-                              acceptInvitation(notification)
-                            }
-                            className="flex items-center gap-2 rounded-lg bg-[#0052cc] px-4 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            {processingInvitation === notification.id && (
-                              <Loader2
-                                size={15}
-                                className="animate-spin"
-                              />
-                            )}
-
-                            Accept
-                          </button>
-                          
-                          <button
-                            disabled={
-                              processingInvitation === notification.id
-                            }
-                            onClick={() =>
-                              rejectInvitation(notification)
-                            }
-                            className="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            Reject
-                          </button>
-                          
-                        </div>
-
-                      ) : notification.invitation.status === "ACCEPTED" ? (
-                      
-                        <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
-                          <CheckCircle2 size={16} />
-                          Invitation Accepted
-                        </div>
-
-                      ) : (
-                      
-                        <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-700">
-                          <XCircle size={16} />
-                          Invitation Rejected
-                        </div>
-
-                      )}
-                    </>
-                )}
-              
-                {notification.type !== "TEAM_INVITATION" && (
-                
-                  <button
-                    onClick={() =>
-                      openNotification(notification)
+      {/* Notification List */}
+      {!loading &&
+        notifications.length > 0 && (
+          <div className="max-h-[60vh] overflow-y-auto sm:max-h-[420px]">
+            {notifications.map(
+              (notification) => (
+                <div
+                  key={notification.id}
+                  className={`
+                    group
+                    flex
+                    gap-3
+                    border-b
+                    border-slate-100
+                    px-4
+                    py-4
+                    transition
+                    sm:px-5
+                    sm:py-4
+                    ${
+                      notification.isRead
+                        ? "bg-white"
+                        : "bg-blue-50"
                     }
-                    className="mt-3 text-sm font-medium text-[#0052cc]"
-                  >
-                    Open
-                  </button>
-                )}
-              </div>
+                    hover:bg-slate-50
+                  `}
+                >
+                  {/* Blue Dot */}
+                  <div className="shrink-0 pt-2">
+                    {!notification.isRead && (
+                      <div className="h-2 w-2 rounded-full bg-blue-600" />
+                    )}
+                  </div>
 
-              {/* Delete */}
-              <button
-                onClick={() => deleteNotification(notification.id)}
-                className="opacity-0 transition group-hover:opacity-100"
-              >
-                <Trash2
-                  size={16}
-                  className="text-slate-400 hover:text-red-500"
-                />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+                  {/* Content */}
+                  <div className="min-w-0 flex-1">
+                    {/* User + Notification Information */}
+                    <div className="flex min-w-0 items-start gap-3">
+                      {/* Avatar */}
+                      {notification.sender?.avatar ? (
+                        <img
+                          src={`${import.meta.env.VITE_API_URL}${notification.sender.avatar}`}
+                          alt={
+                            notification.sender?.name ??
+                            "User"
+                          }
+                          className="
+                            h-9
+                            w-9
+                            shrink-0
+                            rounded-full
+                            object-cover
+                            sm:h-10
+                            sm:w-10
+                          "
+                        />
+                      ) : (
+                        <div
+                          className="
+                            flex
+                            h-9
+                            w-9
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-full
+                            bg-[#0052cc]
+                            text-xs
+                            font-semibold
+                            text-white
+                            sm:h-10
+                            sm:w-10
+                            sm:text-sm
+                          "
+                        >
+                          {notification.sender?.name
+                            ?.split(" ")
+                            .map(
+                              (
+                                word: string
+                              ) => word[0]
+                            )
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase()}
+                        </div>
+                      )}
+
+                      {/* Text */}
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className="
+                            break-words
+                            text-sm
+                            font-medium
+                            text-slate-800
+                          "
+                        >
+                          {notification.title}
+                        </p>
+
+                        <p
+                          className="
+                            mt-1
+                            break-words
+                            text-sm
+                            leading-5
+                            text-slate-500
+                          "
+                        >
+                          {notification.message}
+                        </p>
+
+                        <p
+                          className="
+                            mt-1
+                            text-xs
+                            text-slate-400
+                          "
+                        >
+                          {formatDistanceToNow(
+                            new Date(
+                              notification.createdAt
+                            ),
+                            {
+                              addSuffix: true,
+                            }
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Invitation Buttons */}
+                    {notification.type ===
+                      "TEAM_INVITATION" &&
+                      notification.invitation?.id && (
+                        <>
+                          {notification.invitation
+                            .status === "PENDING" ? (
+                            <div
+                              className="
+                                mt-4
+                                flex
+                                flex-wrap
+                                gap-2
+                              "
+                            >
+                              <button
+                                type="button"
+                                disabled={
+                                  processingInvitation ===
+                                  notification.id
+                                }
+                                onClick={() =>
+                                  acceptInvitation(
+                                    notification
+                                  )
+                                }
+                                className="
+                                  flex
+                                  min-w-[90px]
+                                  items-center
+                                  justify-center
+                                  gap-2
+                                  rounded-lg
+                                  bg-[#0052cc]
+                                  px-4
+                                  py-2
+                                  text-sm
+                                  text-white
+                                  transition
+                                  hover:bg-[#0047b3]
+                                  disabled:cursor-not-allowed
+                                  disabled:opacity-60
+                                "
+                              >
+                                {processingInvitation ===
+                                  notification.id && (
+                                  <Loader2
+                                    size={15}
+                                    className="animate-spin"
+                                  />
+                                )}
+
+                                Accept
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={
+                                  processingInvitation ===
+                                  notification.id
+                                }
+                                onClick={() =>
+                                  rejectInvitation(
+                                    notification
+                                  )
+                                }
+                                className="
+                                  min-w-[90px]
+                                  rounded-lg
+                                  border
+                                  border-slate-300
+                                  px-4
+                                  py-2
+                                  text-sm
+                                  transition
+                                  hover:bg-slate-100
+                                  disabled:cursor-not-allowed
+                                  disabled:opacity-60
+                                "
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          ) : notification.invitation
+                              .status === "ACCEPTED" ? (
+                            <div
+                              className="
+                                mt-4
+                                inline-flex
+                                max-w-full
+                                items-center
+                                gap-2
+                                rounded-full
+                                bg-green-100
+                                px-3
+                                py-1
+                                text-xs
+                                font-medium
+                                text-green-700
+                                sm:text-sm
+                              "
+                            >
+                              <CheckCircle2
+                                size={16}
+                                className="shrink-0"
+                              />
+
+                              <span className="truncate">
+                                Invitation Accepted
+                              </span>
+                            </div>
+                          ) : (
+                            <div
+                              className="
+                                mt-4
+                                inline-flex
+                                max-w-full
+                                items-center
+                                gap-2
+                                rounded-full
+                                bg-red-100
+                                px-3
+                                py-1
+                                text-xs
+                                font-medium
+                                text-red-700
+                                sm:text-sm
+                              "
+                            >
+                              <XCircle
+                                size={16}
+                                className="shrink-0"
+                              />
+
+                              <span className="truncate">
+                                Invitation Rejected
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                    {/* Open Button */}
+                    {notification.type !==
+                      "TEAM_INVITATION" && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openNotification(
+                            notification
+                          )
+                        }
+                        className="
+                          mt-3
+                          text-sm
+                          font-medium
+                          text-[#0052cc]
+                          transition
+                          hover:text-[#0047b3]
+                        "
+                      >
+                        Open
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Delete */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      deleteNotification(
+                        notification.id
+                      )
+                    }
+                    aria-label="Delete notification"
+                    className="
+                      shrink-0
+                      self-start
+                      rounded-lg
+                      p-1
+                      opacity-100
+                      transition
+                      hover:bg-red-50
+                      sm:opacity-0
+                      sm:group-hover:opacity-100
+                    "
+                  >
+                    <Trash2
+                      size={16}
+                      className="
+                        text-slate-400
+                        transition
+                        hover:text-red-500
+                      "
+                    />
+                  </button>
+                </div>
+              )
+            )}
+          </div>
+        )}
     </div>
   );
 }
