@@ -1,10 +1,22 @@
-import {Bell, CheckCheck, Trash2, Loader2, CheckCircle2, XCircle} from "lucide-react";
+import {
+  Bell,
+  CheckCheck,
+  Trash2,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
+
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 import { useNotificationBar } from "@/context/NotificationBarContext";
-import { acceptInvitationService, rejectInvitationService} from "@/services/notificationBar.service";
+
+import {
+  acceptInvitationService,
+  rejectInvitationService,
+} from "@/services/notificationBar.service";
 
 interface Props {
   closeDropdown: () => void;
@@ -27,6 +39,10 @@ function NotificationBarDropdown({
   const [processingInvitation, setProcessingInvitation] =
     useState<string | null>(null);
 
+  //----------------------------------------------------
+  // Accept invitation
+  //----------------------------------------------------
+
   const acceptInvitation = async (
     notification: any
   ) => {
@@ -40,11 +56,16 @@ function NotificationBarDropdown({
       );
 
       await markAsRead(notification.id);
+
       await refreshNotifications();
     } finally {
       setProcessingInvitation(null);
     }
   };
+
+  //----------------------------------------------------
+  // Reject invitation
+  //----------------------------------------------------
 
   const rejectInvitation = async (
     notification: any
@@ -59,11 +80,16 @@ function NotificationBarDropdown({
       );
 
       await markAsRead(notification.id);
+
       await refreshNotifications();
     } finally {
       setProcessingInvitation(null);
     }
   };
+
+  //----------------------------------------------------
+  // Open notification
+  //----------------------------------------------------
 
   const openNotification = async (
     notification: any
@@ -74,8 +100,10 @@ function NotificationBarDropdown({
 
     if (
       notification.type === "TEAM_INVITATION" ||
-      notification.type === "TEAM_INVITATION_ACCEPTED" ||
-      notification.type === "TEAM_INVITATION_REJECTED"
+      notification.type ===
+        "TEAM_INVITATION_ACCEPTED" ||
+      notification.type ===
+        "TEAM_INVITATION_REJECTED"
     ) {
       navigate("/team");
       return;
@@ -91,11 +119,16 @@ function NotificationBarDropdown({
     }
   };
 
+  //----------------------------------------------------
+  // Render
+  //----------------------------------------------------
+
   return (
     <div
       className="
         absolute
         right-0
+        top-full
         z-50
         mt-3
 
@@ -126,6 +159,7 @@ function NotificationBarDropdown({
           sm:px-5
         "
       >
+        {/* Title */}
         <div className="min-w-0">
           <h3 className="text-base font-semibold text-slate-800">
             Notifications
@@ -136,6 +170,7 @@ function NotificationBarDropdown({
           </p>
         </div>
 
+        {/* Mark all */}
         {notifications.length > 0 && (
           <button
             type="button"
@@ -157,12 +192,8 @@ function NotificationBarDropdown({
           >
             <CheckCheck size={15} />
 
-            <span className="hidden sm:inline">
+            <span className="hidden xs:inline sm:inline">
               Mark all
-            </span>
-
-            <span className="sm:hidden">
-              Read all
             </span>
           </button>
         )}
@@ -178,7 +209,7 @@ function NotificationBarDropdown({
       {/* Empty */}
       {!loading &&
         notifications.length === 0 && (
-          <div className="flex flex-col items-center gap-3 p-8 sm:p-10">
+          <div className="flex flex-col items-center gap-3 p-10">
             <Bell
               size={40}
               className="text-slate-300"
@@ -193,7 +224,13 @@ function NotificationBarDropdown({
       {/* Notification List */}
       {!loading &&
         notifications.length > 0 && (
-          <div className="max-h-[60vh] overflow-y-auto sm:max-h-[420px]">
+          <div
+            className="
+              max-h-[min(70vh,420px)]
+              overflow-x-hidden
+              overflow-y-auto
+            "
+          >
             {notifications.map(
               (notification) => (
                 <div
@@ -201,24 +238,28 @@ function NotificationBarDropdown({
                   className={`
                     group
                     flex
-                    gap-3
+                    min-w-0
+                    gap-2
                     border-b
                     border-slate-100
-                    px-4
+                    px-3
                     py-4
                     transition
+
+                    sm:gap-3
                     sm:px-5
-                    sm:py-4
+
                     ${
                       notification.isRead
                         ? "bg-white"
                         : "bg-blue-50"
                     }
+
                     hover:bg-slate-50
                   `}
                 >
                   {/* Blue Dot */}
-                  <div className="shrink-0 pt-2">
+                  <div className="w-2 shrink-0 pt-2">
                     {!notification.isRead && (
                       <div className="h-2 w-2 rounded-full bg-blue-600" />
                     )}
@@ -226,57 +267,80 @@ function NotificationBarDropdown({
 
                   {/* Content */}
                   <div className="min-w-0 flex-1">
-                    {/* User + Notification Information */}
-                    <div className="flex min-w-0 items-start gap-3">
+                    {/* Sender + notification text */}
+                    <div
+                      className="
+                        flex
+                        min-w-0
+                        items-start
+                        gap-2
+                        sm:gap-3
+                      "
+                    >
                       {/* Avatar */}
-                      {notification.sender?.avatar ? (
-                        <img
-                          src={`${import.meta.env.VITE_API_URL}${notification.sender.avatar}`}
-                          alt={
-                            notification.sender?.name ??
-                            "User"
-                          }
-                          className="
-                            h-9
-                            w-9
-                            shrink-0
-                            rounded-full
-                            object-cover
-                            sm:h-10
-                            sm:w-10
-                          "
-                        />
-                      ) : (
-                        <div
-                          className="
-                            flex
-                            h-9
-                            w-9
-                            shrink-0
-                            items-center
-                            justify-center
-                            rounded-full
-                            bg-[#0052cc]
-                            text-xs
-                            font-semibold
-                            text-white
-                            sm:h-10
-                            sm:w-10
-                            sm:text-sm
-                          "
-                        >
-                          {notification.sender?.name
-                            ?.split(" ")
-                            .map(
-                              (
-                                word: string
-                              ) => word[0]
-                            )
-                            .join("")
-                            .slice(0, 2)
-                            .toUpperCase()}
-                        </div>
-                      )}
+                      <div className="shrink-0">
+                        {notification.sender
+                          ?.avatar ? (
+                          <img
+                            src={`${
+                              import.meta
+                                .env
+                                .VITE_API_URL
+                            }${
+                              notification
+                                .sender
+                                .avatar
+                            }`}
+                            alt={
+                              notification
+                                .sender
+                                ?.name ??
+                              "User"
+                            }
+                            className="
+                              h-9
+                              w-9
+                              rounded-full
+                              object-cover
+                              sm:h-10
+                              sm:w-10
+                            "
+                          />
+                        ) : (
+                          <div
+                            className="
+                              flex
+                              h-9
+                              w-9
+                              items-center
+                              justify-center
+                              rounded-full
+                              bg-[#0052cc]
+                              text-xs
+                              font-semibold
+                              text-white
+                              sm:h-10
+                              sm:w-10
+                              sm:text-sm
+                            "
+                          >
+                            {notification.sender?.name
+                              ?.split(" ")
+                              .map(
+                                (
+                                  word: string
+                                ) =>
+                                  word[0]
+                              )
+                              .join("")
+                              .slice(
+                                0,
+                                2
+                              )
+                              .toUpperCase()}
+                          </div>
+                        )}
+                      </div>
 
                       {/* Text */}
                       <div className="min-w-0 flex-1">
@@ -288,19 +352,23 @@ function NotificationBarDropdown({
                             text-slate-800
                           "
                         >
-                          {notification.title}
+                          {
+                            notification.title
+                          }
                         </p>
 
                         <p
                           className="
-                            mt-1
+                            mt-0.5
                             break-words
                             text-sm
                             leading-5
                             text-slate-500
                           "
                         >
-                          {notification.message}
+                          {
+                            notification.message
+                          }
                         </p>
 
                         <p
@@ -315,7 +383,8 @@ function NotificationBarDropdown({
                               notification.createdAt
                             ),
                             {
-                              addSuffix: true,
+                              addSuffix:
+                                true,
                             }
                           )}
                         </p>
@@ -325,10 +394,13 @@ function NotificationBarDropdown({
                     {/* Invitation Buttons */}
                     {notification.type ===
                       "TEAM_INVITATION" &&
-                      notification.invitation?.id && (
+                      notification.invitation
+                        ?.id && (
                         <>
-                          {notification.invitation
-                            .status === "PENDING" ? (
+                          {notification
+                            .invitation
+                            .status ===
+                          "PENDING" ? (
                             <div
                               className="
                                 mt-4
@@ -337,6 +409,7 @@ function NotificationBarDropdown({
                                 gap-2
                               "
                             >
+                              {/* Accept */}
                               <button
                                 type="button"
                                 disabled={
@@ -351,12 +424,13 @@ function NotificationBarDropdown({
                                 className="
                                   flex
                                   min-w-[90px]
+                                  flex-1
                                   items-center
                                   justify-center
                                   gap-2
                                   rounded-lg
                                   bg-[#0052cc]
-                                  px-4
+                                  px-3
                                   py-2
                                   text-sm
                                   text-white
@@ -364,6 +438,8 @@ function NotificationBarDropdown({
                                   hover:bg-[#0047b3]
                                   disabled:cursor-not-allowed
                                   disabled:opacity-60
+                                  sm:flex-none
+                                  sm:px-4
                                 "
                               >
                                 {processingInvitation ===
@@ -377,6 +453,7 @@ function NotificationBarDropdown({
                                 Accept
                               </button>
 
+                              {/* Reject */}
                               <button
                                 type="button"
                                 disabled={
@@ -390,23 +467,28 @@ function NotificationBarDropdown({
                                 }
                                 className="
                                   min-w-[90px]
+                                  flex-1
                                   rounded-lg
                                   border
                                   border-slate-300
-                                  px-4
+                                  px-3
                                   py-2
                                   text-sm
                                   transition
                                   hover:bg-slate-100
                                   disabled:cursor-not-allowed
                                   disabled:opacity-60
+                                  sm:flex-none
+                                  sm:px-4
                                 "
                               >
                                 Reject
                               </button>
                             </div>
-                          ) : notification.invitation
-                              .status === "ACCEPTED" ? (
+                          ) : notification
+                              .invitation
+                              .status ===
+                            "ACCEPTED" ? (
                             <div
                               className="
                                 mt-4
@@ -430,7 +512,8 @@ function NotificationBarDropdown({
                               />
 
                               <span className="truncate">
-                                Invitation Accepted
+                                Invitation
+                                Accepted
                               </span>
                             </div>
                           ) : (
@@ -457,7 +540,8 @@ function NotificationBarDropdown({
                               />
 
                               <span className="truncate">
-                                Invitation Rejected
+                                Invitation
+                                Rejected
                               </span>
                             </div>
                           )}
@@ -479,8 +563,7 @@ function NotificationBarDropdown({
                           text-sm
                           font-medium
                           text-[#0052cc]
-                          transition
-                          hover:text-[#0047b3]
+                          hover:underline
                         "
                       >
                         Open

@@ -1,77 +1,53 @@
 import { Bell, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState} from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
 import { useNotificationBar } from "@/context/NotificationBarContext";
+
 import NotificationBarDropdown from "./NotifyBarDropdown";
 import SearchDropdown from "./SearchDropdown";
+
 import { useSearch } from "@/context/SearchContext";
 
 function Header() {
   const navigate = useNavigate();
 
-  const { unreadCount } =
-    useNotificationBar();
-
+  const { unreadCount } = useNotificationBar();
   const { user } = useAuth();
 
-  const [open, setOpen] =
-    useState(false);
+  const [open, setOpen] = useState(false);
 
-  const dropdownRef =
-    useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { search } = useSearch();
+  const [searchText, setSearchText] = useState("");
 
-  const [
-    searchText,
-    setSearchText,
-  ] = useState("");
+  const searchResults = search(searchText);
 
-  const searchResults =
-    search(searchText);
-
-  //----------------------------------------------------
-  // Open Search Result
-  //----------------------------------------------------
-
-  const openSearchResult = (
-    item: any
-  ) => {
+  const openSearchResult = (item: any) => {
     navigate(item.route);
     setSearchText("");
   };
 
   //----------------------------------------------------
-  // Close Notification Dropdown
-  // When clicking outside
+  // Close notification dropdown when clicking outside
   //----------------------------------------------------
 
   useEffect(() => {
-    function handleClickOutside(
-      event: MouseEvent
-    ) {
+    function handleClickOutside(event: MouseEvent) {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(
-          event.target as Node
-        )
+        !dropdownRef.current.contains(event.target as Node)
       ) {
         setOpen(false);
       }
     }
 
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    );
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -86,9 +62,7 @@ function Header() {
   const initials =
     user?.name
       ?.split(" ")
-      .map(
-        (word) => word[0]
-      )
+      .map((word) => word[0])
       .join("")
       .toUpperCase()
       .slice(0, 2) ?? "?";
@@ -100,60 +74,32 @@ function Header() {
   return (
     <header
       className="
+        relative
         flex
-        min-w-0
+        min-h-20
         items-center
         justify-between
         border-b
         border-slate-200
         bg-white
         px-4
-        py-3
-        sm:h-20
         sm:px-6
         md:px-8
       "
     >
       {/* Left */}
-      <div className="min-w-0 pr-3">
-        <h1
-          className="
-            truncate
-            text-lg
-            font-bold
-            text-slate-900
-            sm:text-xl
-            md:text-2xl
-          "
-        >
+      <div className="min-w-0">
+        <h1 className="truncate text-lg font-bold text-slate-900 sm:text-2xl">
           Dashboard Overview
         </h1>
 
-        <p
-          className="
-            mt-1
-            hidden
-            text-xs
-            text-slate-500
-            sm:block
-            sm:text-sm
-          "
-        >
+        <p className="mt-1 hidden text-xs text-slate-500 sm:block sm:text-sm">
           Welcome back, check your team's latest progress.
         </p>
       </div>
 
       {/* Right */}
-      <div
-        className="
-          flex
-          shrink-0
-          items-center
-          gap-2
-          sm:gap-3
-          md:gap-4
-        "
-      >
+      <div className="ml-4 flex shrink-0 items-center gap-2 sm:gap-4">
         {/* Search */}
         <div className="relative hidden md:block">
           <Search
@@ -169,11 +115,7 @@ function Header() {
 
           <input
             value={searchText}
-            onChange={(e) =>
-              setSearchText(
-                e.target.value
-              )
-            }
+            onChange={(e) => setSearchText(e.target.value)}
             placeholder="Search..."
             className="
               w-64
@@ -192,43 +134,33 @@ function Header() {
           {searchText && (
             <SearchDropdown
               results={searchResults}
-              onSelect={
-                openSearchResult
-              }
+              onSelect={openSearchResult}
             />
           )}
         </div>
 
         {/* Notification */}
         <div
-          className="relative"
           ref={dropdownRef}
+          className="relative"
         >
           <button
             type="button"
+            onClick={() => setOpen((previous) => !previous)}
             aria-label="Notifications"
             aria-expanded={open}
-            onClick={() =>
-              setOpen(
-                (previous) =>
-                  !previous
-              )
-            }
             className="
+              relative
               rounded-xl
               border
               border-slate-200
               p-2
               transition
               hover:bg-slate-100
-              sm:p-2.5
             "
           >
             <div className="relative">
-              <Bell
-                size={20}
-                className="sm:h-[22px] sm:w-[22px]"
-              />
+              <Bell size={22} />
 
               {unreadCount > 0 && (
                 <span
@@ -249,9 +181,7 @@ function Header() {
                     text-white
                   "
                 >
-                  {unreadCount > 99
-                    ? "99+"
-                    : unreadCount}
+                  {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}
             </div>
@@ -259,9 +189,7 @@ function Header() {
 
           {open && (
             <NotificationBarDropdown
-              closeDropdown={() =>
-                setOpen(false)
-              }
+              closeDropdown={() => setOpen(false)}
             />
           )}
         </div>
@@ -269,12 +197,8 @@ function Header() {
         {/* Avatar */}
         <button
           type="button"
+          onClick={() => navigate("/settings/profile")}
           aria-label="Open profile"
-          onClick={() =>
-            navigate(
-              "/settings/profile"
-            )
-          }
           className="
             flex
             h-9
@@ -294,10 +218,7 @@ function Header() {
           {avatarUrl ? (
             <img
               src={avatarUrl}
-              alt={
-                user?.name ??
-                "User"
-              }
+              alt={user?.name ?? "User"}
               className="
                 h-9
                 w-9
@@ -319,12 +240,11 @@ function Header() {
                 justify-center
                 rounded-xl
                 bg-[#0052cc]
-                text-xs
+                text-sm
                 font-semibold
                 text-white
                 sm:h-10
                 sm:w-10
-                sm:text-sm
               "
             >
               {initials}
