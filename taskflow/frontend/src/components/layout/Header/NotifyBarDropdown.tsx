@@ -126,23 +126,28 @@ function NotificationBarDropdown({
   return (
     <div
       className="
-        absolute
-        right-0
-        top-full
-        z-50
-        mt-3
-
-        w-[calc(100vw-1.5rem)]
-        max-w-[380px]
-
+        fixed
+        left-2
+        right-2
+        top-[76px]
+        z-[100]
+        w-auto
+        max-w-none
+      
         overflow-hidden
         rounded-2xl
         border
         border-slate-200
         bg-white
         shadow-2xl
-
+      
+        sm:absolute
+        sm:left-auto
+        sm:right-0
+        sm:top-full
+        sm:mt-3
         sm:w-[380px]
+        sm:max-w-[380px]
       "
     >
       {/* Header */}
